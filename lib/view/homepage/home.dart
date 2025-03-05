@@ -4,6 +4,7 @@ import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/artikel.dart';
 import 'package:rfc_apps/service/artikel.dart';
 import 'package:rfc_apps/widget/carousel_artikel.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
   final VoidCallback onSeeMoreArticles;
@@ -44,7 +45,49 @@ class _HomeState extends State<Home> {
               future: fetchArtikel(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: context.getWidth(300),
+                                height: context.getHeight(163),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14.0),
+                                ),
+                              ),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: context.getWidth(10))),
+                              Container(
+                                width: context.getWidth(300),
+                                height: context.getHeight(163),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: context.getHeight(13)),
+                          Container(
+                            height: context.getHeight(10),
+                            width: context.getWidth(110),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14.0),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

@@ -34,7 +34,7 @@ class _HomepageState extends State<Homepage> {
       onSeeMoreArticles: _onSeeMoreArticles,
       onSeeMoreProducts: _onSeeMoreProducts,
     ),
-    Artikel(),
+    ArtikelScreen(),
     Produk(),
     Histori(),
     Profil(),

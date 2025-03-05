@@ -104,7 +104,6 @@ class _AuthWidgetState extends State<AuthWidget> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               backgroundColor: Theme.of(context).primaryColor,
             ),
             child: Text(
@@ -134,7 +133,6 @@ class _AuthWidgetState extends State<AuthWidget> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               backgroundColor: Colors.white,
             ),
             child: Text(

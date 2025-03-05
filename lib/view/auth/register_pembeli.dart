@@ -1,6 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/service/auth_service.dart';
+import 'package:rfc_apps/service/otp_service.dart';
+import 'package:rfc_apps/view/auth/otp.dart';
+import 'package:rfc_apps/widget/radio_button.dart';
 
 class RegisterPembeliWidget extends StatefulWidget {
   final PageController pageController;
@@ -19,27 +23,85 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
   bool _showPasswordError = false;
+  String _selectedRole = '';
+  final AuthService _authService = AuthService();
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _validateAndSubmit() async {
+    String nomer = _phoneNumberController.text;
+    if (_emailController.text.isEmpty) {
+      _showSnackBar('Masukkan email anda');
+      return;
+    }
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(_emailController.text)) {
+      _showSnackBar('Masukkan email yang valid');
+      return;
+    }
+    if (_phoneNumberController.text.isEmpty) {
+      _showSnackBar('Masukkan nomor telepon anda');
+      return;
+    }
+    final phoneRegex = RegExp(r'^08\d+$');
+    if (!phoneRegex.hasMatch(_phoneNumberController.text)) {
+      _showSnackBar('Nomor telepon harus diawali dengan 08');
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      _showSnackBar('Masukkan password anda');
+      return;
+    }
+    if (_passwordController.text.length < 8) {
+      _showSnackBar('Password minimal 8 karakter');
+      return;
+    }
+    if (_confirmPasswordController.text.isEmpty) {
+      _showSnackBar('Masukkan konfirmasi password anda');
+      return;
+    }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showSnackBar('Password tidak sama');
+      return;
+    }
+    if (_selectedRole.isEmpty) {
+      _showSnackBar('Pilih role anda');
+      return;
+    } else {
+      final checkmail = await _authService.checkEmail(_emailController.text);
+      print(checkmail);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
-          height: context.getHeight(59),
+          height: context.getHeight(40),
           width: double.infinity,
           child: Text(
             "Buat Akun Baru",
             style: TextStyle(
                 color: Theme.of(context).primaryColor,
-                fontSize: 36,
+                fontSize: 28,
                 fontFamily: "poppins",
                 fontWeight: FontWeight.w700),
             textAlign: TextAlign.start,
           ),
         ),
         Container(
+          padding: EdgeInsets.only(top: context.getHeight(7)),
           child: Text(
             "email",
             style: TextStyle(
@@ -53,8 +115,57 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
             margin: EdgeInsets.only(top: context.getHeight(7)),
             height: context.getHeight(46),
             child: TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 hintText: "yourmail@mail.com",
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontFamily: "poppins",
+                  fontWeight: FontWeight.w500,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+            )),
+        Container(
+          margin: EdgeInsets.only(top: context.getHeight(7)),
+          child: Text(
+            "nomor telepon",
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontFamily: "poppins",
+                fontWeight: FontWeight.w500),
+          ),
+        ),
+        Container(
+            margin: EdgeInsets.only(top: context.getHeight(7)),
+            height: context.getHeight(46),
+            child: TextField(
+              controller: _phoneNumberController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: "08**********",
                 hintStyle: TextStyle(
                   color: Colors.grey,
                   fontSize: 14,
@@ -212,39 +323,40 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
             ),
           ),
         ),
-        if (_showPasswordError)
-          Container(
-            margin: EdgeInsets.only(top: context.getHeight(3)),
-            child: Text(
-              "Password dan Confirm Password tidak sama",
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 12,
+        Container(
+          margin: EdgeInsets.only(top: context.getHeight(7)),
+          child: Text(
+            "daftar sebagai",
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 14,
                 fontFamily: "poppins",
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+                fontWeight: FontWeight.w500),
           ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: context.getHeight(7)),
+          width: double.infinity,
+          child: CustomRadioGroup(
+            options: const ['PEMBELI', 'PENJUAL'],
+            selectedValue: _selectedRole,
+            onChanged: (value) => setState(() => _selectedRole = value),
+            activeColor: Theme.of(context).primaryColor,
+            animationDuration: Duration(milliseconds: 500), // Custom duration
+          ),
+        ),
         Container(
           width: double.infinity,
-          height: context.getHeight(54),
-          margin: EdgeInsets.only(top: context.getHeight(22)),
+          height: context.getHeight(45),
+          margin: EdgeInsets.only(top: context.getHeight(7)),
           child: TextButton(
             onPressed: () {
-              if (_passwordController.text == _confirmPasswordController.text) {
-                // Proses registrasi
-                print("Registrasi berhasil");
-              } else {
-                setState(() {
-                  _showPasswordError = true;
-                });
-              }
+              _validateAndSubmit();
             },
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               backgroundColor: Theme.of(context).primaryColor,
             ),
             child: Text(
@@ -255,50 +367,6 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
                 fontFamily: "poppins",
                 fontWeight: FontWeight.w500,
               ),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            print("anjai");
-          },
-          child: Container(
-            margin: EdgeInsets.only(
-                top: context.getHeight(9), bottom: context.getHeight(4)),
-            width: double.infinity,
-            height: context.getHeight(38),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.grey,
-                width: 2,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  height: context.getHeight(24),
-                  padding: EdgeInsets.only(
-                    left: 20,
-                  ),
-                  child: Image(
-                    image: AssetImage("assets/images/google.png"),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                Text("Register dengan Google",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0XFF333333),
-                      fontFamily: "poppins",
-                      fontWeight: FontWeight.w400,
-                    )),
-                SizedBox(
-                  width: context.getWidth(24),
-                  height: context.getHeight(24),
-                ),
-              ],
             ),
           ),
         ),
@@ -323,34 +391,6 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         widget.pageController.jumpToPage(1);
-                      },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Center(
-          child: Container(
-            child: RichText(
-              text: TextSpan(
-                text: "Register sebagai penjual? ",
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 12,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w300,
-                ),
-                children: [
-                  TextSpan(
-                    text: "Disini",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        print("Pindah ke halaman register penjual");
                       },
                   ),
                 ],
