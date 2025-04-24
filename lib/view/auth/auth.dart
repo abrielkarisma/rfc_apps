@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rfc_apps/view/auth/login_pembeli.dart';
-import 'package:rfc_apps/view/auth/register_pembeli.dart';
+import 'package:rfc_apps/view/auth/login.dart';
+import 'package:rfc_apps/view/auth/register.dart';
 import 'package:rfc_apps/widget/RFCLogo.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 
@@ -45,7 +45,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         top: 20,
                         bottom: context.getHeight(20)),
                     child: PageView(
-                      // physics: NeverScrollableScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       controller: _pageController,
                       children: [
                         AuthWidget(pageController: _pageController),
@@ -173,7 +173,7 @@ class _AuthWidgetState extends State<AuthWidget> {
         Padding(padding: EdgeInsets.only(top: context.getHeight(34.5))),
         GestureDetector(
           onTap: () {
-            print("anjai");
+            
           },
           child: Container(
             width: double.infinity,

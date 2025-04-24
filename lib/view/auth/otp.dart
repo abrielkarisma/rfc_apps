@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/service/otp_service.dart';
+import 'package:rfc_apps/model/user.dart';
+import 'package:rfc_apps/service/auth.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
+import 'package:rfc_apps/view/auth/auth.dart';
 
 class OTPVerificationPage extends StatefulWidget {
   final String phoneNumber;
@@ -17,43 +21,133 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
-  final TextEditingController _phoneNumberController = TextEditingController();
 
-  final WhatsAppService whatsAppService =
-      WhatsAppService(apiKey: "zP19yXtcXNPntw34Gagx");
+  bool _isResendButtonEnabled = true;
+  int _resendCooldown = 60;
+  Timer? _timer;
 
-  void _sendOtp() async {
-    String otpCode = whatsAppService.generateOtp();
-    await whatsAppService.sendOtpViaWhatsApp(widget.phoneNumber, otpCode);
-  }
-
-  void _verifyOtp() {
-    bool isValid = whatsAppService
-        .verifyOtp(_controllers.map((controller) => controller.text).join());
-
-    if (isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("OTP Valid!")),
+  void _resendOTP() async {
+    try {
+      final resendOtp = await AuthService().resendOtp(
+        widget.phoneNumber,
       );
-      Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("OTP Tidak Valid atau Sudah Kedaluwarsa!")),
-      );
+      if (resendOtp.message == "OTP Berhasil dikirim") {
+        ToastHelper.showSuccessToast(context, resendOtp.message);
+        _startResendCooldown();
+      } else {
+        ToastHelper.showErrorToast(context, resendOtp.message);
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Terjadi kesalahan: $e");
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    for (int i = 0; i < _controllers.length; i++) {
-      _controllers[i].addListener(() {
-        if (_controllers[i].text.length == 1 && i < _controllers.length - 1) {
-          _focusNodes[i + 1].requestFocus();
+  void _verifyOtp() async {
+    try {
+      final whatsappOtp = await AuthService().verifyOtp(
+        otp: _controllers.map((controller) => controller.text).join(),
+        phone_number: widget.phoneNumber,
+      );
+
+      if (whatsappOtp.status == true) {
+        dialogSuccess();
+      } else if (whatsappOtp.status == false &&
+          whatsappOtp.message == "Phone number already activated") {
+        ToastHelper.showInfoToast(
+            context, "Akun anda sudah aktif, silahkan login");
+      } else if (whatsappOtp.status == false) {
+        ToastHelper.showErrorToast(context, whatsappOtp.message);
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Terjadi kesalahan: $e");
+    }
+  }
+
+  void _startResendCooldown() {
+    setState(() {
+      _isResendButtonEnabled = false;
+      _resendCooldown = 60;
+    });
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_resendCooldown > 0) {
+          _resendCooldown--;
+        } else {
+          _isResendButtonEnabled = true;
+          _timer?.cancel();
         }
       });
-    }
-    _sendOtp();
+    });
+  }
+
+  Future<dynamic> dialogSuccess() {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Column(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 60,
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Registrasi Berhasil!",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "poppins",
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          content: Text(
+            "Akun Anda telah aktif. Silakan login untuk melanjutkan.",
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: "poppins",
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => AuthScreen(),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  "Login",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -64,6 +158,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     for (var controller in _controllers) {
       controller.dispose();
     }
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -83,13 +178,27 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Masukkan Kode OTP yang dikirim ke ${widget.phoneNumber}',
-              style: TextStyle(
-                  fontSize: 18,
+            RichText(
+              text: TextSpan(
+                text: 'Masukkan Kode OTP yang Dikirim ke Nomor Whatsapp ',
+                style: TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  fontFamily: "poppins"),
+                  fontFamily: "poppins",
+                  color: Colors.black,
+                ),
+                children: [
+                  TextSpan(
+                    text: widget.phoneNumber,
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 50),
             Column(
@@ -128,33 +237,53 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ],
             ),
             SizedBox(height: 50),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(6, (index) {
-                return SizedBox(
-                  width: 50,
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    decoration: InputDecoration(
-                      counterText: '',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).primaryColor,
-                              width: 1.0)),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (index) {
+                    return SizedBox(
+                      width: 50,
+                      child: TextField(
+                        controller: _controllers[index],
+                        focusNode: _focusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                  color: Theme.of(context).primaryColor,
+                                  width: 1.0)),
+                        ),
+                        onChanged: (value) {
+                          if (value.length == 1 && index < 5) {
+                            _focusNodes[index + 1].requestFocus();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: _isResendButtonEnabled ? _resendOTP : null,
+                  child: Text(
+                    _isResendButtonEnabled
+                        ? "Tidak menerima kode? Kirim ulang kode"
+                        : "Tunggu $_resendCooldown detik untuk kirim ulang",
+                    style: TextStyle(
+                      color: _isResendButtonEnabled
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: "poppins",
                     ),
-                    onChanged: (value) {
-                      if (value.length == 1 && index < 5) {
-                        _focusNodes[index + 1].requestFocus();
-                      }
-                    },
                   ),
-                );
-              }),
+                ),
+              ],
             ),
             SizedBox(height: 20),
             Container(
@@ -162,9 +291,6 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               height: context.getHeight(54),
               child: TextButton(
                 onPressed: () {
-                  String otp =
-                      _controllers.map((controller) => controller.text).join();
-                  print('OTP Entered: $otp');
                   _verifyOtp();
                 },
                 style: TextButton.styleFrom(
