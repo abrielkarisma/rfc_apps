@@ -105,7 +105,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         await authService.resetPassword(email, password, confirmPassword, otp);
     if (result.status == true) {
       ToastHelper.showSuccessToast(context, 'Password berhasil diubah');
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/auth');
     } else {
       ToastHelper.showErrorToast(context, result.message);
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/view/auth/auth.dart';
+import 'package:rfc_apps/view/auth/login.dart';
 import 'package:rfc_apps/view/auth/login_admin.dart';
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
@@ -34,12 +35,14 @@ class MyApp extends StatelessWidget {
         '/': (context) => Homepage(),
         '/auth': (context) => AuthScreen(),
         '/onboarding': (context) => OnboardingScreen(),
+        '/login': (context) =>
+            LoginPembeliWidget(pageController: PageController()),
         '/login_admin': (context) => LoginAdmin(),
         '/homepage': (context) => Homepage(),
         '/profil': (context) => Profil(),
         '/account_setting': (context) => accountSetting(),
         '/change_password': (context) => changePassword(),
-        '/privacy_policy': (context) => privacyP(), 
+        '/privacy_policy': (context) => privacyP(),
         '/tnc': (context) => termsAndConditions(),
         '/home_seller': (context) => homeSeller(),
         '/profil_seller': (context) => profileSeller(),

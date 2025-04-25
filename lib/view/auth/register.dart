@@ -105,22 +105,8 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
           ),
         );
       } else if (verifRegist.message ==
-          'Email already registered, please check your email to activate your account') {
-        try {
-          final result =
-              await _authService.getPhonebyEmail(_emailController.text);
-          print(result.status);
-          if (result.status == true) {
-            final phoneNumber = result.data!.phoneNumber;
-            print('Phone number retrieved: $phoneNumber');
-            ModalAktivate(phoneNumber);
-          } else {
-            ToastHelper.showErrorToast(context, result.message);
-          }
-        } catch (e) {
-          print('Error in getPhonebyEmail: $e');
-          ToastHelper.showErrorToast(context, 'Terjadi kesalahan: $e');
-        }
+          'Email sudah terdaftar namun belum diaktifkan, silahkan melakukan login untuk mengaktifkan akun') {
+        _modalLogin();
       } else {
         ToastHelper.showErrorToast(context,
             verifRegist.message ?? 'Terjadi kesalahan, silahkan coba lagi');
@@ -133,8 +119,6 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
   Future<void> _verifyUserInput(String phoneNumber) async {
     String userInput = _verifPhoneController.text.trim();
     if (userInput == phoneNumber) {
-      // ToastHelper.showSuccessToast(
-      //     context, 'Nomor telepon berhasil diverifikasi!');
       final resultResend = await AuthService().resendOTP(userInput);
       if (resultResend.status == true) {
         Navigator.push(
@@ -162,103 +146,69 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
     }
   }
 
-  Future<dynamic> ModalAktivate(String phoneNumber) {
-    return showDialog(
+  Future<void> _modalLogin() async {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Container(
-            padding: EdgeInsets.all(20),
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Akun Anda Sudah Pernah Dibuat, Namun Belum Diaktivasi",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "poppins",
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  textAlign: TextAlign.center,
+          title: Column(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).primaryColor,
+                size: 50,
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Pemberitahuan",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "poppins",
+                  color: Theme.of(context).primaryColor,
                 ),
-                SizedBox(height: 10),
-                Text(
-                  "Lakukan verifikasi dengan memasukkan nomor yang telah Anda daftarkan: ${phoneNumber.replaceRange(3, phoneNumber.length - 3, '*' * (phoneNumber.length - 6))}",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: "poppins",
-                    color: Colors.black54,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                TextField(
-                  controller: _verifPhoneController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: "Masukkan nomor telepon",
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                      fontFamily: "poppins",
-                      fontWeight: FontWeight.w500,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).primaryColor,
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _verifyUserInput(phoneNumber);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      "Verifikasi",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "poppins",
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
+          content: Text(
+            "Email sudah terdaftar namun belum diaktifkan. Silahkan login untuk mengaktifkan akun Anda.",
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: "poppins",
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.pageController.jumpToPage(1);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                ),
+                child: Text(
+                  "Login",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: "poppins",
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

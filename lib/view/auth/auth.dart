@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rfc_apps/service/oAuth.dart';
 import 'package:rfc_apps/view/auth/login.dart';
 import 'package:rfc_apps/view/auth/register.dart';
 import 'package:rfc_apps/widget/RFCLogo.dart';
@@ -173,7 +174,7 @@ class _AuthWidgetState extends State<AuthWidget> {
         Padding(padding: EdgeInsets.only(top: context.getHeight(34.5))),
         GestureDetector(
           onTap: () {
-            
+            _googleHandler();
           },
           child: Container(
             width: double.infinity,
@@ -215,5 +216,9 @@ class _AuthWidgetState extends State<AuthWidget> {
         ),
       ],
     );
+  }
+
+  Future<void> _googleHandler() async {
+    await OAuthService().googleLogin();
   }
 }

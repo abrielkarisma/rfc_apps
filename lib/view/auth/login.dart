@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/auth.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
@@ -51,6 +52,10 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
       final login = await AuthService().loginUser(email, password);
       if (login.status == true) {
         ToastHelper.showSuccessToast(context, 'Login berhasil');
+        final tokenStorage = FlutterSecureStorage();
+        await tokenStorage.write(key: 'token', value: login.token);
+        String tokens = await tokenStorage.read(key: 'token') ?? '';
+        print(tokens);
         final role = login.data?.role;
         if (role == 'user') {
           Navigator.pushNamedAndRemoveUntil(
@@ -96,8 +101,6 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
   Future<void> _verifyUserInput(String phoneNumber) async {
     String userInput = _verifPhoneController.text.trim();
     if (userInput == phoneNumber) {
-      // ToastHelper.showSuccessToast(
-      //     context, 'Nomor telepon berhasil diverifikasi!');
       final resultResend = await AuthService().resendOTP(userInput);
       if (resultResend.status == true) {
         Navigator.push(
