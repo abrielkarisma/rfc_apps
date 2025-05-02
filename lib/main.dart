@@ -3,10 +3,15 @@ import 'package:rfc_apps/view/auth/auth.dart';
 import 'package:rfc_apps/view/auth/login.dart';
 import 'package:rfc_apps/view/auth/login_admin.dart';
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
+import 'package:rfc_apps/view/penjual/produk/detail_produk.dart';
+import 'package:rfc_apps/view/penjual/produk/kelola_produk.dart';
+import 'package:rfc_apps/view/penjual/produk/tambah_produk.dart';
+import 'package:rfc_apps/view/penjual/sellerStoreReg.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
 import 'package:rfc_apps/view/onboarding.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profil.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/changePassword.dart';
+import 'package:rfc_apps/view/pembeli/homepage/profileMenu/editProfile.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/privacy.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/setting.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/tnc.dart';
@@ -39,15 +44,32 @@ class MyApp extends StatelessWidget {
             LoginPembeliWidget(pageController: PageController()),
         '/login_admin': (context) => LoginAdmin(),
         '/homepage': (context) => Homepage(),
-        '/profil': (context) => Profil(),
-        '/account_setting': (context) => accountSetting(),
+        '/profil': (context) => Homepage(initialIndex: 4),
         '/change_password': (context) => changePassword(),
         '/privacy_policy': (context) => privacyP(),
         '/tnc': (context) => termsAndConditions(),
         '/home_seller': (context) => homeSeller(),
+        '/toko_register': (context) => Sellerstorereg(),
         '/profil_seller': (context) => profileSeller(),
         '/daftar_pesanan': (context) => DaftarPesanan(),
+        '/kelola_produk': (context) => KelolaProduk(),
+        '/tambah_produk': (context) => TambahProduk(),
         '/lupa_password': (context) => LupaPasswordPage(),
+        '/detail_produk': (context) {
+          final idProduk = ModalRoute.of(context)!.settings.arguments as String;
+          return DetailProdukPage(id_produk: idProduk);
+        },
+        '/edit_profile': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+          return EditProfile(
+            name: args['name'] ?? '',
+            email: args['email'] ?? '',
+            phone: args['phone'] ?? '',
+            userId: args['userId'] ?? '',
+            avatarUrl: args['avatarUrl'] ?? '',
+          );
+        }
       },
     );
   }

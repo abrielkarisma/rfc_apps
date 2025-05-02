@@ -1,0 +1,83 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:rfc_apps/response/rekening.dart';
+import 'package:rfc_apps/service/token.dart';
+
+class rekeningService {
+  final String baseUrl = 'http://10.0.2.2:4000/api/store';
+
+  Future<RekeningResponse> getRekeningByUserId() async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.get(
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/rekening/user'),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getRekeningByUserId();
+    }
+    if (response.statusCode == 200) {
+      print(response.body);
+      return RekeningResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load Rekening data');
+    }
+  }
+
+  Future<RekeningResponse> CreateRekening(
+      String namaPenerima, String namaBank, String nomorRekening) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.post(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/rekening'),
+      body: jsonEncode({
+        'nomorRekening': nomorRekening,
+        'namaBank': namaBank,
+        'namaPenerima': namaPenerima,
+      }),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getRekeningByUserId();
+    }
+    if (response.statusCode == 200) {
+      print(response.body);
+      return RekeningResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create rekening data');
+    }
+  }
+
+  Future<RekeningResponse> updateRekening(
+      String id, String namaPenerima, String namaBank, String noRek) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.put(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/rekening/$id'),
+      body: jsonEncode({
+        'nomorRekening': noRek,
+        'namaBank': namaBank,
+        'namaPenerima': namaPenerima,
+      }),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getRekeningByUserId();
+    }
+    if (response.statusCode == 200) {
+      print(response.body);
+      return RekeningResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to update rekening data');
+    }
+  }
+}

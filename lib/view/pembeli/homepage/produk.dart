@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-class Produk extends StatefulWidget {
-  const Produk({super.key});
+class ProdukPage extends StatefulWidget {
+  const ProdukPage({super.key});
 
   @override
-  State<Produk> createState() => _ProdukState();
+  State<ProdukPage> createState() => _ProdukPageState();
+
 }
 
-class _ProdukState extends State<Produk> {
+class _ProdukPageState extends State<ProdukPage> {
   @override
   Widget build(BuildContext context) {
     return Center(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/service/tokenDecoder.dart';
+import 'package:rfc_apps/service/token.dart';
+import 'package:rfc_apps/service/user.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -11,26 +13,39 @@ class Profil extends StatefulWidget {
 }
 
 String userId = "";
+String $name = "";
+String $email = "";
+String $phone = "";
+String $avatarUrl = "";
 
 class _ProfilState extends State<Profil> {
   @override
   void initState() {
     super.initState();
-    _getUserId();
+    _getUserDatabyId();
   }
 
-  void _getUserId() async {
+  void _getUserDatabyId() async {
     try {
-      final getId = await getUserId();
-      print('User ID: $getId');
+      final getId = await tokenService().getUserId();
+      final user = await UserService().getUserById(getId!);
+      final name = user.data?['name'] ?? '';
+      final email = user.data?['email'] ?? '';
+      final phone = user.data?['phone'] ?? '';
+      final avatarUrl = user.data?['avatarUrl'] ?? '';
+      print(avatarUrl);
+
       setState(() {
-        userId = getId!;
+        $name = name;
+        $email = email;
+        $phone = phone;
+        userId = getId;
+        $avatarUrl = avatarUrl;
       });
     } catch (e) {
       print('Error: $e');
     }
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +74,8 @@ class _ProfilState extends State<Profil> {
                   Column(
                     children: [
                       Container(
+                        width: context.getWidth(100),
+                        height: context.getHeight(100),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           boxShadow: [
@@ -73,16 +90,25 @@ class _ProfilState extends State<Profil> {
                             width: 2,
                           ),
                         ),
-                        child: const CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.pinkAccent,
-                          child:
-                              Icon(Icons.person, size: 60, color: Colors.white),
-                        ),
+                        child: ClipOval(
+                            child: $avatarUrl.endsWith('.svg')
+                                ? SvgPicture.network(
+                                    $avatarUrl,
+                                    fit: BoxFit.cover,
+                                    placeholderBuilder:
+                                        (BuildContext context) => Container(
+                                      padding: const EdgeInsets.all(20),
+                                      child: const CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : Image.network(
+                                    $avatarUrl,
+                                    fit: BoxFit.cover,
+                                  )),
                       ),
                       SizedBox(height: context.getHeight(7)),
-                      const Text(
-                        'Abriel Karisma',
+                      Text(
+                        $name,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -90,8 +116,8 @@ class _ProfilState extends State<Profil> {
                         ),
                       ),
                       SizedBox(height: context.getHeight(1)),
-                      const Text(
-                        'abrielcha.ac@gmail.com',
+                      Text(
+                        $email,
                         style: TextStyle(
                           color: Color(0xFF979797),
                           fontFamily: "Poppins",
@@ -101,8 +127,21 @@ class _ProfilState extends State<Profil> {
                       ),
                       SizedBox(height: context.getHeight(22)),
                       ElevatedButton(
-                        onPressed: () {
-                          print(userId);
+                        onPressed: () async {
+                          final result = await Navigator.pushNamed(
+                            context,
+                            '/edit_profile',
+                            arguments: {
+                              'name': $name,
+                              'email': $email,
+                              'phone': $phone,
+                              'userId': userId,
+                              'avatarUrl': $avatarUrl,
+                            },
+                          );
+                          if (result == 'refresh') {
+                            _getUserDatabyId();
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,

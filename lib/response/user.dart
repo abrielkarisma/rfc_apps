@@ -1,33 +1,36 @@
 class UserResponse {
+  String? message;
   String? id;
   String? name;
   String? email;
   String? phoneNumber;
   String? role;
-  String? iat;
-  String? exp;
+  String? avatarUrl;
+  Map<String, dynamic>? data;
 
-  UserResponse({this.id, this.name, this.email, this.phoneNumber, this.role, this.iat, this.exp});
+  UserResponse(
+      {this.message,
+      this.id,
+      this.name,
+      this.email,
+      this.phoneNumber,
+      this.role,
+      this.avatarUrl,
+      this.data});
 
   UserResponse.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    email = json['email'];
-    phoneNumber = json['phone'];
-    role = json['role'];
-    iat = json['iat'];
-    exp = json['exp'];
-  }
+    message = json['message'];
+    data = json['data'] != null ? json['data'] : null;
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['name'] = name;
-    data['email'] = email;
-    data['phone'] = phoneNumber;
-    data['role'] = role;
-    data['iat'] = iat;
-    data['exp'] = exp;
-    return data;
+    Map<String, dynamic> toJson() {
+      final Map<String, dynamic> data = <String, dynamic>{};
+      data['id'] = id;
+      data['name'] = name;
+      data['email'] = email;
+      data['phone'] = phoneNumber;
+      data['role'] = role;
+      data['avatarUrl'] = avatarUrl;
+      return data;
+    }
   }
 }

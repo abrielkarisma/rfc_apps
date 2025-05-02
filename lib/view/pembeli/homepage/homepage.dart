@@ -8,14 +8,14 @@ import 'package:rfc_apps/view/pembeli/homepage/produk.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profil.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
-
+  const Homepage({super.key, this.initialIndex = 0});
+  final int initialIndex;
   @override
   State<Homepage> createState() => _HomepageState();
 }
 
 class _HomepageState extends State<Homepage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   void _onSeeMoreArticles() {
     setState(() {
@@ -29,13 +29,19 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
+
   late final List<Widget> _widgetOptions = <Widget>[
     Home(
       onSeeMoreArticles: _onSeeMoreArticles,
       onSeeMoreProducts: _onSeeMoreProducts,
     ),
     ArtikelScreen(),
-    Produk(),
+    ProdukPage(),
     Histori(),
     Profil(),
   ];

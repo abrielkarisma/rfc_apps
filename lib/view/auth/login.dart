@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/auth.dart';
+import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/auth/otp.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
@@ -54,9 +55,10 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
         ToastHelper.showSuccessToast(context, 'Login berhasil');
         final tokenStorage = FlutterSecureStorage();
         await tokenStorage.write(key: 'token', value: login.token);
-        String tokens = await tokenStorage.read(key: 'token') ?? '';
-        print(tokens);
+        await tokenStorage.write(
+            key: 'refreshToken', value: login.refreshToken);
         final role = login.data?.role;
+        print("ini role $role");
         if (role == 'user') {
           Navigator.pushNamedAndRemoveUntil(
             context,
