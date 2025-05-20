@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/view/penjual/produk/edit_produk.dart';
 
 class DetailProdukPage extends StatefulWidget {
   const DetailProdukPage({super.key, required this.id_produk});
@@ -100,13 +101,15 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
               SizedBox(
                 height: context.getHeight(60),
               ),
-              Container(
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.35,
-                  alignment: Alignment.center,
-                  child: $gambar.isNotEmpty
-                      ? Image(image: NetworkImage($gambar))
-                      : CircularProgressIndicator()),
+              Center(
+                child: Container(
+                    width: context.getWidth(400),
+                    height: context.getHeight(400),
+                    alignment: Alignment.center,
+                    child: $gambar.isNotEmpty
+                        ? Image(image: NetworkImage($gambar))
+                        : CircularProgressIndicator()),
+              ),
 
               SizedBox(
                 height: context.getHeight(20),
@@ -154,7 +157,25 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditProduk(
+                                        id: $id_produk,
+                                        nama: $nama,
+                                        harga: $harga,
+                                        stok: $stok,
+                                        satuan: $satuan,
+                                        deskripsi: $deskripsi,
+                                        gambar: $gambar,
+                                      ),
+                                    ),
+                                  );
+                                  if (result == 'refresh') {
+                                    await _getDataProduk();
+                                  }
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Color(0xFF4CAD73),
                                   foregroundColor: Colors.white,

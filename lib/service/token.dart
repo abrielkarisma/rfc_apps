@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,7 +7,7 @@ import 'package:rfc_apps/response/user.dart';
 
 class tokenService {
   final _storage = FlutterSecureStorage();
-  final String baseUrl = 'http://10.0.2.2:4000/api/auth';
+  final String baseUrl = '${dotenv.env["BASE_URL"]}auth';
 
   Future<Map<String, dynamic>> decodeToken() async {
     final token = await _storage.read(key: 'token');

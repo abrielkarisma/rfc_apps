@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 
 class TambahProduk extends StatefulWidget {
@@ -37,12 +38,14 @@ class _TambahProdukState extends State<TambahProduk> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _produkPhoto = image.path;
-      });
-    }
+    ImagePickerHelper.showImageSourceOptions(
+      context,
+      onImageSelected: (File selectedImage) {
+        setState(() {
+          _produkPhoto = selectedImage.path;
+        });
+      },
+    );
   }
 
   Future<void> _createProduk() async {
@@ -55,8 +58,8 @@ class _TambahProdukState extends State<TambahProduk> {
         deskripsiProduk.isEmpty ||
         stokProduk.isEmpty ||
         hargaProduk.isEmpty ||
-        _selectedSatuan == "" ||
-        _produkPhoto == "") {
+        _selectedSatuan == null ||
+        _produkPhoto == null) {
       ToastHelper.showErrorToast(context, "Semua field harus diisi!");
       return;
     }
@@ -75,14 +78,14 @@ class _TambahProdukState extends State<TambahProduk> {
         deskripsiProduk,
         _produkgambar!,
       );
-
-      print(response.message);
-      if (response.message == "Berhasil menambahkan produk") {
+      print("$response akay");
+      print(response);
+      if (response['message'] == "Berhasil menambahkan produk") {
         ToastHelper.showSuccessToast(context, "Produk berhasil disimpan!");
         Navigator.pop(context, "refresh");
       } else {
         ToastHelper.showErrorToast(
-            context, response.message ?? "Gagal menyimpan produk");
+            context, response['message'] ?? "Gagal menyimpan produk");
       }
     } catch (e) {
       ToastHelper.showErrorToast(

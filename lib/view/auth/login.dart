@@ -57,6 +57,7 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
         await tokenStorage.write(key: 'token', value: login.token);
         await tokenStorage.write(
             key: 'refreshToken', value: login.refreshToken);
+        await tokenStorage.write(key: 'role', value: login.data?.role);
         final role = login.data?.role;
         print("ini role $role");
         if (role == 'user') {

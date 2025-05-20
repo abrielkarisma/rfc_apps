@@ -2,21 +2,14 @@ import 'package:rfc_apps/model/toko.dart';
 
 class TokoResponse {
   String? message;
-  TokoData? data;
+  final List<TokoData> data;
 
-  TokoResponse({this.message, this.data});
+  TokoResponse({this.message, required this.data});
 
-  TokoResponse.fromJson(Map<String, dynamic> json) {
-    message = json['message'];
-    data = json['data'] != null ? TokoData.fromJson(json['data']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['message'] = message;
-    if (this.data != null) {
-      data['data'] = this.data!.toJson();
-    }
-    return data;
+ factory TokoResponse.fromJson(Map<String, dynamic> json) {
+    return TokoResponse(
+      message: json['message'],
+      data: (json['data'] as List).map((item) => TokoData.fromJson(item)).toList(),
+    );
   }
 }

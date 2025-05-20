@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:rfc_apps/response/user.dart';
 
 class UserService {
-  final String baseUrl = 'http://10.0.2.2:4000/api/';
+  final String baseUrl = '${dotenv.env["BASE_URL"]}';
 
   Future<UserResponse> getUserById(String id) async {
     final response = await http.get(
@@ -19,7 +20,8 @@ class UserService {
     }
   }
 
-  Future<UserResponse> UpdateUser(String id, String name, String avatarUrl) async {
+  Future<UserResponse> UpdateUser(
+      String id, String name, String avatarUrl) async {
     final response = await http.put(
       headers: {'Content-Type': 'application/json'},
       Uri.parse('$baseUrl/user/$id'),

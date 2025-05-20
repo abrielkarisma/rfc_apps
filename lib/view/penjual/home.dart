@@ -17,20 +17,20 @@ class homeSeller extends StatefulWidget {
   State<homeSeller> createState() => _homeSellerState();
 }
 
-String $name = "";
-String $avatarUrl = "";
-String $tokoStatus = "";
-bool $unlockFeature = false;
-int $typeUnlock = 2;
-bool $isAccepted = true;
-bool $tokoRegistered = false;
-late Timer _timer;
-
 class _homeSellerState extends State<homeSeller> {
+  String $name = "";
+  String $avatarUrl = "";
+  String $tokoStatus = "";
+  bool $unlockFeature = false;
+  int $typeUnlock = 2;
+  bool $isAccepted = true;
+  bool $tokoRegistered = false;
+  late Timer _timer;
   @override
   void initState() {
     super.initState();
     _getTokoDatabyId();
+    print("Toko Data Loaded");
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
       _getTokoDatabyId();
     });
@@ -50,25 +50,25 @@ class _homeSellerState extends State<homeSeller> {
           $tokoRegistered = true;
         });
       }
-      final String name = toko.data!.nama ?? "";
-      final String tokoAvatar = toko.data!.logoToko ?? "";
-      final String tokoStatus = toko.data!.tokoStatus ?? "";
-      if (toko.data!.tokoStatus == "active") {
+      final String name = toko.data[0].nama ?? "";
+      final String tokoAvatar = toko.data[0].logoToko ?? "";
+      final String tokoStatus = toko.data[0].tokoStatus ?? "";
+      if (toko.data[0].tokoStatus == "active") {
         setState(() {
           $typeUnlock = 1;
           $isAccepted = true;
         });
-      } else if (toko.data!.tokoStatus == "request") {
+      } else if (toko.data[0].tokoStatus == "request") {
         setState(() {
           $isAccepted = false;
           $typeUnlock = 2;
         });
-      } else if (toko.data!.tokoStatus == "reject") {
+      } else if (toko.data[0].tokoStatus == "reject") {
         setState(() {
           $isAccepted = false;
           $typeUnlock = 3;
         });
-      } else if (toko.data!.tokoStatus == "delete") {
+      } else if (toko.data[0].tokoStatus == "delete") {
         setState(() {
           $isAccepted = false;
           $typeUnlock = 4;
@@ -92,7 +92,8 @@ class _homeSellerState extends State<homeSeller> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -174,7 +175,7 @@ class _homeSellerState extends State<homeSeller> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     $name.length > 15
-                                        ? '${$name.substring(0, 15)}...'
+                                        ? '${$name.substring(0, 12)}...'
                                         : $name,
                                     style: const TextStyle(
                                       fontFamily: "Poppins",
@@ -230,295 +231,321 @@ class _homeSellerState extends State<homeSeller> {
                           )),
                         ),
                 ),
-                SizedBox(height: context.getHeight(33)),
-                $isAccepted == true
+                $tokoRegistered == false
+                    ? const SizedBox(height: 20)
+                    : SizedBox(height: context.getHeight(33)),
+                $tokoRegistered == true
                     ? Container(
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.grey[200]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12.withOpacity(0.05),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                                color: Colors.white,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Status Pesanan",
-                                        style: TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14,
-                                          color: Colors.green,
-                                        ),
+                        child: $isAccepted == true
+                            ? Container(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                            color: Colors.grey[200]!),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12
+                                                .withOpacity(0.05),
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                        color: Colors.white,
                                       ),
-                                      Spacer(),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                              context, "/daftar_pesanan");
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              "Daftar Pesanan",
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Status Pesanan",
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                  color: Colors.green,
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pushNamed(context,
+                                                      "/daftar_pesanan");
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "Daftar Pesanan",
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontSize: 12,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                        Icons
+                                                            .arrow_forward_ios_rounded,
+                                                        size: 12,
+                                                        color: Colors.grey),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              _buildOrderStatusBox(
+                                                  "2", "Pesanan Masuk"),
+                                              _buildOrderStatusBox(
+                                                  "1", "Menunggu Diambil"),
+                                              _buildOrderStatusBox(
+                                                  "3", "Selesai"),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: context.getHeight(33)),
+                                    _buildSimpleCard(
+                                      title: "Kelola Produk Anda",
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                            context, "/kelola_produk");
+                                      },
+                                    ),
+                                    SizedBox(height: context.getHeight(33)),
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                            color: Colors.grey[200]!),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12
+                                                .withOpacity(0.05),
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                        color: Colors.white,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "Total Saldo",
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pushNamed(context,
+                                                      "/detail_produk");
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Theme.of(context)
+                                                          .primaryColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                  ),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8),
+                                                ),
+                                                child: const Text(
+                                                  "Tarik Dana",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontFamily: "Poppins",
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
+                                          const Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              "Rp. 100,000",
                                               style: TextStyle(
                                                 fontFamily: "Poppins",
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12,
-                                                color: Colors.grey,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w800,
                                               ),
                                             ),
-                                            Icon(
-                                                Icons.arrow_forward_ios_rounded,
-                                                size: 12,
-                                                color: Colors.grey),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildOrderStatusBox(
-                                          "2", "Pesanan Masuk"),
-                                      _buildOrderStatusBox(
-                                          "1", "Menunggu Diambil"),
-                                      _buildOrderStatusBox("3", "Selesai"),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: context.getHeight(33)),
-                            _buildSimpleCard(
-                              title: "Kelola Produk Anda",
-                              onTap: () {
-                                Navigator.pushNamed(context, "/kelola_produk");
-                              },
-                            ),
-                            SizedBox(height: context.getHeight(33)),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.grey[200]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12.withOpacity(0.05),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                                color: Colors.white,
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        "Total Saldo",
-                                        style: TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, "/detail_produk");
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Theme.of(context).primaryColor,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16, vertical: 8),
+                                          const SizedBox(height: 12),
+                                          const Divider(),
+                                          ListTile(
+                                            leading: const Icon(Icons.history,
+                                                color: Colors.green),
+                                            title: const Text(
+                                              "Riwayat Penjualan",
+                                              style: TextStyle(
+                                                fontFamily: "Poppins",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            trailing: const Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              size: 16,
+                                              color: Colors.grey,
+                                            ),
+                                            onTap: () {
+                                              print(
+                                                  "Riwayat Penjualan clicked");
+                                            },
+                                            contentPadding: EdgeInsets.zero,
+                                            dense: true,
+                                            minLeadingWidth: 0,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : $isAccepted == false
+                                ? Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Review Icon
+                                        Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            color: $typeUnlock == 2
+                                                ? Colors.orange.withOpacity(0.2)
+                                                : $typeUnlock == 3
+                                                    ? Colors.red
+                                                        .withOpacity(0.2)
+                                                    : $typeUnlock == 4
+                                                        ? Colors.black
+                                                            .withOpacity(0.2)
+                                                        : Colors.transparent,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Image.asset(
+                                              $typeUnlock == 2
+                                                  ? 'assets/images/menuIcon/review.png'
+                                                  : $typeUnlock == 3
+                                                      ? 'assets/images/menuIcon/rejected.png'
+                                                      : $typeUnlock == 4
+                                                          ? 'assets/images/menuIcon/banned.png'
+                                                          : "",
+                                              width: 60,
+                                              height: 60,
+                                              errorBuilder: (context, error,
+                                                      stackTrace) =>
+                                                  Icon(
+                                                $typeUnlock == 2
+                                                    ? Icons.hourglass_top
+                                                    : $typeUnlock == 3
+                                                        ? Icons.cancel
+                                                        : Icons.block,
+                                                size: 60,
+                                                color: $typeUnlock == 2
+                                                    ? Colors.orange
+                                                    : $typeUnlock == 3
+                                                        ? Colors.red
+                                                        : $typeUnlock == 4
+                                                            ? Colors.black
+                                                            : Colors
+                                                                .transparent,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                        child: const Text(
-                                          "Tarik Dana",
+                                        const SizedBox(height: 24),
+                                        // Title
+                                        Text(
+                                          $typeUnlock == 2
+                                              ? "Dalam Proses Review"
+                                              : $typeUnlock == 3
+                                                  ? "Pendaftaran Ditolak"
+                                                  : $typeUnlock == 4
+                                                      ? "Akun Diblokir"
+                                                      : "",
                                           style: TextStyle(
-                                            fontSize: 12,
                                             fontFamily: "Poppins",
+                                            fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: Colors.black,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Message
+                                        Text(
+                                          $typeUnlock == 2
+                                              ? "Akun anda masih dalam proses review, Lengkapi informasi toko anda dan tunggu beberapa saat agar bisa digunakan."
+                                              : $typeUnlock == 3
+                                                  ? "Pendaftaran toko anda ditolak. Silahkan periksa kembali data toko anda dan daftar menggunakan akun lain"
+                                                  : $typeUnlock == 4
+                                                      ? "Akun anda telah diblokir. Silahkan hubungi admin untuk informasi lebih lanjut."
+                                                      : "",
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                            height: 1.5,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 24),
+                                        // Progress Indicator
+                                        Container(
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: Colors.grey.withOpacity(0.2),
+                                          ),
+                                          child: LinearProgressIndicator(
+                                            backgroundColor: Colors.transparent,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Theme.of(context).primaryColor,
+                                            ),
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  const Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Rp. 100,000",
-                                      style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                                        const SizedBox(height: 24),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Divider(),
-                                  ListTile(
-                                    leading: const Icon(Icons.history,
-                                        color: Colors.green),
-                                    title: const Text(
-                                      "Riwayat Penjualan",
-                                      style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    trailing: const Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 16,
-                                      color: Colors.grey,
-                                    ),
-                                    onTap: () {
-                                      print("Riwayat Penjualan clicked");
-                                    },
-                                    contentPadding: EdgeInsets.zero,
-                                    dense: true,
-                                    minLeadingWidth: 0,
                                   )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                                : Container(),
                       )
-                    : $isAccepted == false
-                        ? Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Review Icon
-                                Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    color: $typeUnlock == 2
-                                        ? Colors.orange.withOpacity(0.2)
-                                        : $typeUnlock == 3
-                                            ? Colors.red.withOpacity(0.2)
-                                            : $typeUnlock == 4
-                                                ? Colors.black.withOpacity(0.2)
-                                                : Colors.transparent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Image.asset(
-                                      $typeUnlock == 2
-                                          ? 'assets/images/menuIcon/review.png'
-                                          : $typeUnlock == 3
-                                              ? 'assets/images/menuIcon/rejected.png'
-                                              : $typeUnlock == 4
-                                                  ? 'assets/images/menuIcon/banned.png'
-                                                  : "",
-                                      width: 60,
-                                      height: 60,
-                                      errorBuilder:
-                                          (context, error, stackTrace) => Icon(
-                                        $typeUnlock == 2
-                                            ? Icons.hourglass_top
-                                            : $typeUnlock == 3
-                                                ? Icons.cancel
-                                                : Icons.block,
-                                        size: 60,
-                                        color: $typeUnlock == 2
-                                            ? Colors.orange
-                                            : $typeUnlock == 3
-                                                ? Colors.red
-                                                : $typeUnlock == 4
-                                                    ? Colors.black
-                                                    : Colors.transparent,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                // Title
-                                Text(
-                                  $typeUnlock == 2
-                                      ? "Dalam Proses Review"
-                                      : $typeUnlock == 3
-                                          ? "Pendaftaran Ditolak"
-                                          : $typeUnlock == 4
-                                              ? "Akun Diblokir"
-                                              : "",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                // Message
-                                Text(
-                                  $typeUnlock == 2
-                                      ? "Akun anda masih dalam proses review, Lengkapi informasi toko anda dan tunggu beberapa saat agar bisa digunakan."
-                                      : $typeUnlock == 3
-                                          ? "Pendaftaran toko anda ditolak. Silahkan periksa kembali data toko anda dan daftar menggunakan akun lain"
-                                          : $typeUnlock == 4
-                                              ? "Akun anda telah diblokir. Silahkan hubungi admin untuk informasi lebih lanjut."
-                                              : "",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                    height: 1.5,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 24),
-                                // Progress Indicator
-                                Container(
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.grey.withOpacity(0.2),
-                                  ),
-                                  child: LinearProgressIndicator(
-                                    backgroundColor: Colors.transparent,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-                            ),
-                          )
-                        : Container(),
+                    : Container()
               ],
             ),
           ),

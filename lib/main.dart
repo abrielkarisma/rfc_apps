@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/view/auth/auth.dart';
+import 'package:rfc_apps/view/landingPage.dart';
 import 'package:rfc_apps/view/auth/login.dart';
 import 'package:rfc_apps/view/auth/login_admin.dart';
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
+import 'package:rfc_apps/view/pembeli/homepage/keranjang/keranjang.dart';
+import 'package:rfc_apps/view/pembeli/homepage/produk/detail_produk.dart';
+import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoInformation.dart';
+import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoProduk.dart';
 import 'package:rfc_apps/view/penjual/produk/detail_produk.dart';
 import 'package:rfc_apps/view/penjual/produk/kelola_produk.dart';
 import 'package:rfc_apps/view/penjual/produk/tambah_produk.dart';
 import 'package:rfc_apps/view/penjual/sellerStoreReg.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
 import 'package:rfc_apps/view/onboarding.dart';
-import 'package:rfc_apps/view/pembeli/homepage/profil.dart';
+import 'package:rfc_apps/view/pembeli/homepage/profileMenu/profil.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/changePassword.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/editProfile.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/privacy.dart';
@@ -18,8 +24,10 @@ import 'package:rfc_apps/view/pembeli/homepage/profileMenu/tnc.dart';
 import 'package:rfc_apps/view/penjual/daftar_pesanan.dart';
 import 'package:rfc_apps/view/penjual/home.dart';
 import 'package:rfc_apps/view/penjual/profil_seller.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -35,8 +43,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/onboarding',
+      initialRoute: '/landing',
       routes: {
+        '/landing': (context) => const LandingPage(),
         '/': (context) => Homepage(),
         '/auth': (context) => AuthScreen(),
         '/onboarding': (context) => OnboardingScreen(),
@@ -55,6 +64,10 @@ class MyApp extends StatelessWidget {
         '/kelola_produk': (context) => KelolaProduk(),
         '/tambah_produk': (context) => TambahProduk(),
         '/lupa_password': (context) => LupaPasswordPage(),
+        '/detail_produk_buyer': (context) {
+          final idProduk = ModalRoute.of(context)!.settings.arguments as String;
+          return DetailProdukBuyer(idProduk: idProduk);
+        },
         '/detail_produk': (context) {
           final idProduk = ModalRoute.of(context)!.settings.arguments as String;
           return DetailProdukPage(id_produk: idProduk);
@@ -69,7 +82,16 @@ class MyApp extends StatelessWidget {
             userId: args['userId'] ?? '',
             avatarUrl: args['avatarUrl'] ?? '',
           );
-        }
+        },
+        '/toko_detail': (context) {
+          final idToko = ModalRoute.of(context)!.settings.arguments as String;
+          return TokoInformation(tokoId: idToko);
+        },
+        '/toko_produk': (context) {
+          final idToko = ModalRoute.of(context)!.settings.arguments as String;
+          return ProdukToko(idToko: idToko);
+        },
+        '/keranjang': (context) => Keranjang(),
       },
     );
   }

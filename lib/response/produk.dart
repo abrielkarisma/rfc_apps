@@ -1,5 +1,5 @@
 import 'package:rfc_apps/model/produk.dart' show Produk;
-import 'package:rfc_apps/view/pembeli/homepage/produk.dart';
+import 'package:rfc_apps/view/pembeli/homepage/produk/produk.dart';
 
 class ProdukResponse {
   final String message;

@@ -1,11 +1,11 @@
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:rfc_apps/response/rekening.dart';
 import 'package:rfc_apps/service/token.dart';
 
 class rekeningService {
-  final String baseUrl = 'http://10.0.2.2:4000/api/store';
+  final String baseUrl = '${dotenv.env["BASE_URL"]}store';
 
   Future<RekeningResponse> getRekeningByUserId() async {
     final token = await tokenService().getAccessToken();
@@ -27,7 +27,7 @@ class rekeningService {
     }
   }
 
-  Future<RekeningResponse> CreateRekening(
+  Future<Map<String, dynamic>> CreateRekening(
       String namaPenerima, String namaBank, String nomorRekening) async {
     final token = await tokenService().getAccessToken();
     final response = await http.post(
@@ -35,7 +35,7 @@ class rekeningService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      Uri.parse('$baseUrl/rekening'),
+      Uri.parse('$baseUrl/rekening/'),
       body: jsonEncode({
         'nomorRekening': nomorRekening,
         'namaBank': namaBank,
@@ -44,17 +44,18 @@ class rekeningService {
     );
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
-      return getRekeningByUserId();
+      return CreateRekening(namaPenerima, namaBank, nomorRekening);
     }
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print(response.body);
-      return RekeningResponse.fromJson(jsonDecode(response.body));
+      print(jsonDecode(response.body));
+      return jsonDecode(response.body);
     } else {
       throw Exception('Failed to create rekening data');
     }
   }
 
-  Future<RekeningResponse> updateRekening(
+  Future<Map<String, dynamic>> updateRekening(
       String id, String namaPenerima, String namaBank, String noRek) async {
     final token = await tokenService().getAccessToken();
     final response = await http.put(
@@ -71,11 +72,10 @@ class rekeningService {
     );
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
-      return getRekeningByUserId();
+      return updateRekening(id, namaPenerima, namaBank, noRek);
     }
     if (response.statusCode == 200) {
-      print(response.body);
-      return RekeningResponse.fromJson(jsonDecode(response.body));
+      return jsonDecode(response.body);
     } else {
       throw Exception('Failed to update rekening data');
     }

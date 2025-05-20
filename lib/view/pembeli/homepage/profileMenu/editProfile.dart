@@ -4,7 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/user.dart';
-import 'package:rfc_apps/view/pembeli/homepage/profil.dart';
+import 'package:rfc_apps/utils/imagePicker.dart';
+import 'package:rfc_apps/view/pembeli/homepage/profileMenu/profil.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfile extends StatefulWidget {
@@ -73,15 +74,16 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  final ImagePicker _picker = ImagePicker();
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _profilePhoto = image.path;
-        ImageType = 1;
-      });
-    }
+    ImagePickerHelper.showImageSourceOptions(
+      context,
+      onImageSelected: (File image) {
+        setState(() {
+          _profilePhoto = image.path;
+          ImageType = 1;
+        });
+      },
+    );
   }
 
   @override
@@ -156,16 +158,22 @@ class _EditProfileState extends State<EditProfile> {
                               ),
                               child: ClipOval(
                                 child: ImageType == 0
-                                    ? SvgPicture.network(
-                                        _profilePhoto,
-                                        fit: BoxFit.cover,
-                                        placeholderBuilder:
-                                            (BuildContext context) => Container(
-                                          padding: const EdgeInsets.all(20),
-                                          child:
-                                              const CircularProgressIndicator(),
-                                        ),
-                                      )
+                                    ? _profilePhoto.endsWith('.svg')
+                                        ? SvgPicture.network(
+                                            _profilePhoto,
+                                            fit: BoxFit.cover,
+                                            placeholderBuilder:
+                                                (BuildContext context) =>
+                                                    Container(
+                                              padding: const EdgeInsets.all(20),
+                                              child:
+                                                  const CircularProgressIndicator(),
+                                            ),
+                                          )
+                                        : Image.network(
+                                            _profilePhoto,
+                                            fit: BoxFit.cover,
+                                          )
                                     : Image(
                                         image: FileImage(File(
                                             _profilePhoto)), // Use FileImage here

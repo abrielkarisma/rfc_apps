@@ -34,6 +34,12 @@ class StatusBadge extends StatelessWidget {
 
   Map<String, dynamic> _getStatusStyle(String status) {
     switch (status.toLowerCase()) {
+      case 'belum dibayar':
+        return {
+          'label': 'Belum Dibayar',
+          'background': Colors.amber.shade100,
+          'textColor': Colors.amber.shade800,
+        };
       case 'menunggu':
         return {
           'label': 'Menunggu',

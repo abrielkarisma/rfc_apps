@@ -2,7 +2,7 @@ import 'package:rfc_apps/response/auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OAuthService {
-  final String baseUrl = 'http://10.0.2.2:4000/api/auth/google';
+  final String baseUrl = 'dotenv.env["BASE_URL]auth/google';
 
   Future<AuthResponse> googleLogin() async {
     final LoginUrl = Uri.parse("$baseUrl/login");

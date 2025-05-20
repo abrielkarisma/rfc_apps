@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,6 +9,7 @@ import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/rekening.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
+import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 
 class profileSeller extends StatefulWidget {
@@ -19,23 +19,22 @@ class profileSeller extends StatefulWidget {
   State<profileSeller> createState() => _profileSellerState();
 }
 
-String $name = "";
-String $idUser = "";
-String $phone = "";
-String $address = "";
-String $description = "";
-String $avatarUrl = "";
-String $bank = "";
-String $noRek = "";
-String $rekeningName = "";
-bool rekeningRegistered = false;
-int buttonSaveImage = 0;
-
-final _namaRekeningController = TextEditingController();
-final _jenisRekeningController = TextEditingController();
-final _noRekeningController = TextEditingController();
-
 class _profileSellerState extends State<profileSeller> {
+  String $name = "";
+  String $idUser = "";
+  String $phone = "";
+  String $address = "";
+  String $description = "";
+  String $avatarUrl = "";
+  String $bank = "";
+  String $noRek = "";
+  String $rekeningName = "";
+  bool rekeningRegistered = false;
+  int buttonSaveImage = 0;
+
+  final _namaRekeningController = TextEditingController();
+  final _jenisRekeningController = TextEditingController();
+  final _noRekeningController = TextEditingController();
   void initState() {
     super.initState();
     _getTokoDatabyId();
@@ -46,12 +45,13 @@ class _profileSellerState extends State<profileSeller> {
   void _getTokoDatabyId() async {
     try {
       final toko = await tokoService().getTokoByUserId();
-      final String name = toko.data!.nama ?? "";
-      final String tokoAvatar = toko.data!.logoToko ?? "";
-      final String phone = toko.data!.phone ?? "";
-      final String address = toko.data!.alamat ?? "";
-      final String description = toko.data!.deskripsi ?? "";
-      final String idUser = toko.data!.userId ?? "";
+      print("yang ini gess ${toko.data[0].userId}");
+      final String name = toko.data[0].nama ?? "";
+      final String tokoAvatar = toko.data[0].logoToko ?? "";
+      final String phone = toko.data[0].phone ?? "";
+      final String address = toko.data[0].alamat ?? "";
+      final String description = toko.data[0].deskripsi ?? "";
+      final String idUser = toko.data[0].userId ?? "";
 
       setState(() {
         $name = name;
@@ -89,15 +89,16 @@ class _profileSellerState extends State<profileSeller> {
     }
   }
 
-  final ImagePicker _picker = ImagePicker();
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        $avatarUrl = image.path;
-        buttonSaveImage = 1;
-      });
-    }
+  void _pickImage() async {
+    ImagePickerHelper.showImageSourceOptions(
+      context,
+      onImageSelected: (File selectedImage) {
+        setState(() {
+          $avatarUrl = selectedImage.path;
+          buttonSaveImage = 1;
+        });
+      },
+    );
   }
 
   void _showEditTokoModal(BuildContext context) {
@@ -116,12 +117,12 @@ class _profileSellerState extends State<profileSeller> {
           $avatarUrl,
           _deskripsiTokoController.text,
         );
-        if (response.data == null) {
-          ToastHelper.showErrorToast(context, 'Gagal memperbarui data toko!');
-        } else {
+        if (response['message'] == "Successfully updated toko") {
           ToastHelper.showSuccessToast(
               context, 'Data toko berhasil diperbarui!');
           Navigator.pop(context);
+        } else {
+          ToastHelper.showErrorToast(context, 'Gagal memperbarui data toko!');
         }
       } catch (e) {
         print('Error: $e');
@@ -249,13 +250,13 @@ class _profileSellerState extends State<profileSeller> {
           bankController.text,
           noRekController.text,
         );
-        if (response.data == null) {
-          ToastHelper.showErrorToast(
-              context, 'Gagal memperbarui data rekening!');
-        } else {
+        if (response["message"] == "Successfully updated rekening data") {
           ToastHelper.showSuccessToast(
               context, 'Data rekening berhasil diperbarui!');
           Navigator.pop(context, "refresh");
+        } else {
+          ToastHelper.showErrorToast(
+              context, "Gagal memperbarui data rekening!");
         }
       } catch (e) {
         print('Error: $e');
@@ -460,16 +461,14 @@ class _profileSellerState extends State<profileSeller> {
         rekeningName,
         jenisRekening,
         noRekening,
-      );  
-      print(response);
-      if (response.data == null) {
+      );
+      if (response["message"] == "Successfully created new rekening data") {
+        ToastHelper.showSuccessToast(context, 'Rekening berhasil ditambahkan!');
+        Navigator.pop(context,"refresh");
+        _getRekeningDataById();
+      } else {
         ToastHelper.showErrorToast(context,
             'Gagal menambahkan rekening, coba lagi dalam beberapa saat');
-      }
-      if (response.data != null) {
-        ToastHelper.showSuccessToast(context, 'Rekening berhasil ditambahkan!');
-        Navigator.pop(context);
-        _getRekeningDataById();
       }
     } catch (e) {
       print('Error: $e');
@@ -825,14 +824,14 @@ class _profileSellerState extends State<profileSeller> {
       final response =
           await tokoService().UpdateTokoGambar($idUser, uploadedPhotoUrl);
       print(response);
-      if (response.data == null) {
-        ToastHelper.showErrorToast(context, 'Gagal memperbarui gambar!');
-      } else {
+      if (response["message"] == "Successfully updated toko") {
         ToastHelper.showSuccessToast(context, 'Gambar berhasil diperbarui!');
         setState(() {
           buttonSaveImage = 0;
         });
         Navigator.pop(context, "refresh");
+      } else {
+        ToastHelper.showErrorToast(context, 'Gagal memperbarui gambar!');
       }
     } catch (e) {
       print('Error: $e');
@@ -877,8 +876,10 @@ void _modalLogout(BuildContext context) {
                 ),
                 onPressed: () {
                   final tokenStorage = FlutterSecureStorage();
+                  tokenStorage.deleteAll();
                   tokenStorage.delete(key: 'token');
                   tokenStorage.delete(key: 'refreshToken');
+                  tokenStorage.delete(key: 'role');
                   Navigator.pop(context);
                   Navigator.pushNamedAndRemoveUntil(
                     context,

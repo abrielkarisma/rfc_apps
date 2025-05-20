@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:rfc_apps/model/user.dart';
 import 'package:rfc_apps/response/auth.dart';
 import 'package:rfc_apps/response/otp.dart';
 
 class AuthService {
-  final String baseUrl = 'http://10.0.2.2:4000/api/auth';
+  final String baseUrl = '${dotenv.env["BASE_URL"]}auth';
 
   Future<AuthResponse> registerUser(
       String name,
@@ -172,7 +173,9 @@ class AuthService {
       );
     }
   }
-  Future<OtpResponse> resetPassword(String email, String password, String confirmPassword, String otp) async {
+
+  Future<OtpResponse> resetPassword(
+      String email, String password, String confirmPassword, String otp) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/resetPassword'),
@@ -193,5 +196,4 @@ class AuthService {
       );
     }
   }
-
 }

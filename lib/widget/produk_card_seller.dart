@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/produk.dart';
+import 'package:rfc_apps/utils/ShimmerImage.dart';
 
 class ProdukCardSeller extends StatelessWidget {
   final Produk produk;
@@ -10,7 +11,7 @@ class ProdukCardSeller extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async{
+      onTap: () async {
         final result = await Navigator.pushNamed(
           context,
           '/detail_produk',
@@ -33,14 +34,9 @@ class ProdukCardSeller extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  produk.gambar,
-                  width: context.getWidth(127),
-                  height: context.getHeight(127),
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  borderRadius: BorderRadius.circular(8),
+                  child:
+                      ShimmerImage(imageUrl: produk.gambar, fit: BoxFit.cover)),
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -50,7 +46,7 @@ class ProdukCardSeller extends StatelessWidget {
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     overflow: TextOverflow.ellipsis,
-                    fontFamily: "Poppins",
+                    fontFamily: "Inter",
                   ),
                   maxLines: 1,
                   textAlign: TextAlign.start,
@@ -62,7 +58,7 @@ class ProdukCardSeller extends StatelessWidget {
                   'Stok: ${produk.stok} ${produk.satuan}',
                   style: TextStyle(
                     fontSize: 8,
-                    fontFamily: "Poppins",
+                    fontFamily: "Inter",
                     color: Colors.grey,
                   ),
                   maxLines: 1,
@@ -77,7 +73,7 @@ class ProdukCardSeller extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.green,
-                    fontFamily: "Poppins",
+                    fontFamily: "Inter",
                   ),
                 ),
               ),

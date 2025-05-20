@@ -4,8 +4,9 @@ import 'package:line_icons/line_icons.dart';
 import 'package:rfc_apps/view/pembeli/homepage/artikel.dart';
 import 'package:rfc_apps/view/pembeli/homepage/histori.dart';
 import 'package:rfc_apps/view/pembeli/homepage/home.dart';
-import 'package:rfc_apps/view/pembeli/homepage/produk.dart';
-import 'package:rfc_apps/view/pembeli/homepage/profil.dart';
+import 'package:rfc_apps/view/pembeli/homepage/produk/produk.dart';
+import 'package:rfc_apps/view/pembeli/homepage/profileMenu/profil.dart';
+import 'package:rfc_apps/view/pembeli/homepage/umkm/umkm.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key, this.initialIndex = 0});
@@ -40,7 +41,7 @@ class _HomepageState extends State<Homepage> {
       onSeeMoreArticles: _onSeeMoreArticles,
       onSeeMoreProducts: _onSeeMoreProducts,
     ),
-    ArtikelScreen(),
+    UMKMToko(),
     ProdukPage(),
     Histori(),
     Profil(),
@@ -99,8 +100,8 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
               GButton(
-                icon: LineIcons.paperclip,
-                text: 'Artikel',
+                icon: LineIcons.store,
+                text: 'UMKM',
                 textStyle: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -109,7 +110,7 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
               GButton(
-                icon: LineIcons.store,
+                icon: LineIcons.shoppingBasket,
                 text: 'Produk',
                 textStyle: TextStyle(
                   color: Colors.white,

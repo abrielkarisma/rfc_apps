@@ -292,6 +292,8 @@ class _ProfilState extends State<Profil> {
                           Navigator.pop(context);
                           final tokenStorage = FlutterSecureStorage();
                           tokenStorage.delete(key: 'token');
+                          tokenStorage.delete(key: 'refreshToken');
+                          tokenStorage.delete(key: 'role');
                           Navigator.pushNamedAndRemoveUntil(
                             context,
                             '/auth',
