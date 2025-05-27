@@ -28,6 +28,12 @@ class _ProdukTokoState extends State<ProdukToko> {
                 fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       extendBodyBehindAppBar: true,
       body: Stack(

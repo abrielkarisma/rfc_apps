@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/service/pesanan.dart';
 import 'package:rfc_apps/service/token.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/service/user.dart';
@@ -25,14 +26,23 @@ class _homeSellerState extends State<homeSeller> {
   int $typeUnlock = 2;
   bool $isAccepted = true;
   bool $tokoRegistered = false;
-  late Timer _timer;
+  late Timer _tokoDataTimer;
+  late Timer _pesananTimer;
+  String $tokoId = "";
+  int _pesananMasukCount = 0;
+  int _menungguDiambilCount = 0;
+  int _selesaiCount = 0;
   @override
   void initState() {
     super.initState();
     _getTokoDatabyId();
-    print("Toko Data Loaded");
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    getPesananToko();
+    _tokoDataTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       _getTokoDatabyId();
+    });
+
+    _pesananTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      getPesananToko();
     });
   }
 
@@ -53,6 +63,7 @@ class _homeSellerState extends State<homeSeller> {
       final String name = toko.data[0].nama ?? "";
       final String tokoAvatar = toko.data[0].logoToko ?? "";
       final String tokoStatus = toko.data[0].tokoStatus ?? "";
+      final String tokoId = toko.data[0].id ?? "";
       if (toko.data[0].tokoStatus == "active") {
         setState(() {
           $typeUnlock = 1;
@@ -83,6 +94,7 @@ class _homeSellerState extends State<homeSeller> {
         $name = name;
         $avatarUrl = tokoAvatar;
         $tokoStatus = tokoStatus;
+        $tokoId = tokoId;
       });
     } catch (e) {
       print('Error: $e');
@@ -90,9 +102,55 @@ class _homeSellerState extends State<homeSeller> {
     }
   }
 
+  void getPesananToko() async {
+    try {
+      final Map<String, dynamic> pesananResponse =
+          await PesananService().getPesananByTokoId($tokoId);
+      if (pesananResponse['message'] ==
+              "Berhasil mengambil daftar pesanan untuk toko" &&
+          pesananResponse['data'] is List) {
+        int pending = 0;
+        int accepted = 0;
+        int completed = 0;
+
+        for (var order in pesananResponse['data']) {
+          if (order is Map<String, dynamic> &&
+              order['MidtransOrder'] is Map<String, dynamic> &&
+              order['MidtransOrder']['transaction_status'] == "settlement") {
+            final orderStatus = order['status'];
+            if (orderStatus == "menunggu") {
+              pending++;
+            } else if (orderStatus == "diterima") {
+              accepted++;
+            } else if (orderStatus == "selesai") {
+              completed++;
+            } else if (orderStatus == "ditolak") {
+              completed++;
+            }
+          }
+        }
+
+        setState(() {
+          _pesananMasukCount = pending;
+          _menungguDiambilCount = accepted;
+          _selesaiCount = completed;
+        });
+      } else {
+        setState(() {
+          _pesananMasukCount = 0;
+          _menungguDiambilCount = 0;
+          _selesaiCount = 0;
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   void dispose() {
-    _timer?.cancel();
+    _tokoDataTimer?.cancel();
+    _pesananTimer?.cancel();
     super.dispose();
   }
 
@@ -275,7 +333,8 @@ class _homeSellerState extends State<homeSeller> {
                                               GestureDetector(
                                                 onTap: () {
                                                   Navigator.pushNamed(context,
-                                                      "/daftar_pesanan");
+                                                      "/daftar_pesanan",
+                                                      arguments: $tokoId);
                                                 },
                                                 child: Row(
                                                   children: [
@@ -305,11 +364,15 @@ class _homeSellerState extends State<homeSeller> {
                                                 MainAxisAlignment.spaceEvenly,
                                             children: [
                                               _buildOrderStatusBox(
-                                                  "2", "Pesanan Masuk"),
+                                                  _pesananMasukCount.toString(),
+                                                  "Pesanan Masuk"),
                                               _buildOrderStatusBox(
-                                                  "1", "Menunggu Diambil"),
+                                                  _menungguDiambilCount
+                                                      .toString(),
+                                                  "Menunggu Diambil"),
                                               _buildOrderStatusBox(
-                                                  "3", "Selesai"),
+                                                  _selesaiCount.toString(),
+                                                  "Selesai"),
                                             ],
                                           )
                                         ],
@@ -355,8 +418,7 @@ class _homeSellerState extends State<homeSeller> {
                                               const Spacer(),
                                               ElevatedButton(
                                                 onPressed: () {
-                                                  Navigator.pushNamed(context,
-                                                      "/detail_produk");
+                                                  getPesananToko();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:

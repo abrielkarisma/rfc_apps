@@ -59,7 +59,7 @@ class _HomepageState extends State<Homepage> {
                   fontWeight: FontWeight.w600)),
           centerTitle: true,
           backgroundColor: Colors.transparent,
-        ),
+        ), 
         extendBodyBehindAppBar: true,
         body: Stack(
           children: [

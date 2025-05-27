@@ -6,6 +6,7 @@ import 'package:rfc_apps/view/auth/login.dart';
 import 'package:rfc_apps/view/auth/login_admin.dart';
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
 import 'package:rfc_apps/view/pembeli/homepage/keranjang/keranjang.dart';
+import 'package:rfc_apps/view/pembeli/homepage/pesanan/nota.dart';
 import 'package:rfc_apps/view/pembeli/homepage/produk/detail_produk.dart';
 import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoInformation.dart';
 import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoProduk.dart';
@@ -21,7 +22,7 @@ import 'package:rfc_apps/view/pembeli/homepage/profileMenu/editProfile.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/privacy.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/setting.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/tnc.dart';
-import 'package:rfc_apps/view/penjual/daftar_pesanan.dart';
+import 'package:rfc_apps/view/penjual/pesanan/daftar_pesanan.dart';
 import 'package:rfc_apps/view/penjual/home.dart';
 import 'package:rfc_apps/view/penjual/profil_seller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -60,7 +61,10 @@ class MyApp extends StatelessWidget {
         '/home_seller': (context) => homeSeller(),
         '/toko_register': (context) => Sellerstorereg(),
         '/profil_seller': (context) => profileSeller(),
-        '/daftar_pesanan': (context) => DaftarPesanan(),
+        '/daftar_pesanan': (context) {
+          final tokoId = ModalRoute.of(context)!.settings.arguments as String;
+          return DaftarPesanan(tokoId: tokoId);
+        },
         '/kelola_produk': (context) => KelolaProduk(),
         '/tambah_produk': (context) => TambahProduk(),
         '/lupa_password': (context) => LupaPasswordPage(),
@@ -92,6 +96,11 @@ class MyApp extends StatelessWidget {
           return ProdukToko(idToko: idToko);
         },
         '/keranjang': (context) => Keranjang(),
+        '/bukti_pembayaran': (context) {
+          final data = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return PaymentSuccessPage(data: data);
+        },
       },
     );
   }

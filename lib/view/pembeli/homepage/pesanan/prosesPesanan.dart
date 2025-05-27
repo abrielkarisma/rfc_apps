@@ -29,15 +29,22 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text(
-            "Proses Pesanan",
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: "poppins",
-                fontSize: 16,
-                color: Colors.black),
-          )),
+        backgroundColor: Colors.white,
+        title: const Text(
+          "Proses Pesanan",
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: "poppins",
+              fontSize: 16,
+              color: Colors.black),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Container(
         color: Colors.white,
         child: Padding(

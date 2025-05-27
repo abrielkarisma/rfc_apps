@@ -92,7 +92,6 @@ class tokoService {
       await tokenService().refreshToken();
       return getTokoByUserId();
     }
-    print(response.body);
     if (response.statusCode == 200) {
       return TokoResponse.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 404) {
@@ -137,7 +136,8 @@ class tokoService {
     }
   }
 
-  Future<Map<String, dynamic>> UpdateTokoGambar(String id, String avatarUrl) async {
+  Future<Map<String, dynamic>> UpdateTokoGambar(
+      String id, String avatarUrl) async {
     final token = await tokenService().getAccessToken();
     print(token);
     final response = await http.put(

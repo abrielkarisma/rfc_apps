@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/keranjang.dart';
 import 'package:rfc_apps/service/produk.dart';
@@ -71,6 +72,24 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                   fontWeight: FontWeight.w600)),
           centerTitle: true,
           backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: SvgPicture.asset(
+                'assets/images/cart_black.svg',
+                width: 24,
+                height: 24,
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, "/keranjang");
+              },
+            ),
+          ],
         ),
         body: Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
@@ -256,5 +275,16 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
     final keranjangResponse =
         await KeranjangService().createKeranjang(widget.idProduk, jumlahProduk);
     print(keranjangResponse['message']);
+    if (keranjangResponse['message'] == "Successfully added to cart") {
+      ToastHelper.showSuccessToast(
+          context, 'Produk berhasil ditambahkan ke keranjang');
+    } else if (keranjangResponse['message'] ==
+        "Cart quantity updated successfully") {
+      ToastHelper.showSuccessToast(
+          context, 'Produk berhasil ditambahkan ke keranjang');
+    } else {
+      ToastHelper.showErrorToast(
+          context, 'Gagal menambahkan produk ke keranjang');
+    }
   }
 }

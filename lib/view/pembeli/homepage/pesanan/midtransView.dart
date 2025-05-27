@@ -31,7 +31,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
-          },           
+          },
         ),
       )
       ..loadRequest(Uri.parse(widget.paymentUrl));
@@ -40,7 +40,15 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pembayaran")),
+      appBar: AppBar(
+        title: const Text("Pembayaran"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: WebViewWidget(controller: _controller),
     );
   }

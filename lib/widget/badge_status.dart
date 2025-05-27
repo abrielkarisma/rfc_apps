@@ -8,11 +8,6 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusData = _getStatusStyle(status);
-    //cara panggil
-//     OrderStatusBadge(status: 'request'),
-// OrderStatusBadge(status: 'active'),
-// OrderStatusBadge(status: 'delete'),
-// OrderStatusBadge(status: 'reject'),
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -46,7 +41,7 @@ class StatusBadge extends StatelessWidget {
           'background': Colors.grey.shade300,
           'textColor': Colors.grey.shade800,
         };
-      case 'siap diambil':
+      case 'diterima':
         return {
           'label': 'Siap Diambil',
           'background': Colors.orange.shade100,

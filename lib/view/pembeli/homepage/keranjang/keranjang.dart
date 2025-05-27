@@ -284,6 +284,12 @@ class _KeranjangState extends State<Keranjang> {
                 fontFamily: "poppins",
                 fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: FutureBuilder<List<CartItem>>(
         future: futureKeranjang,

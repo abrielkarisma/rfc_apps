@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/produk.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
@@ -45,13 +46,10 @@ class _ProdukPageState extends State<ProdukPage> {
               onTap: () {
                 Navigator.pushNamed(context, "/keranjang");
               },
-              child: Container(
+              child: SizedBox(
                 width: 30,
                 height: 30,
-                child: Image(
-                  image: AssetImage('assets/images/cartwhite.png'),
-                  fit: BoxFit.contain,
-                ),
+                child: SvgPicture.asset("assets/images/cart_white.svg"),
               ),
             )
           ],

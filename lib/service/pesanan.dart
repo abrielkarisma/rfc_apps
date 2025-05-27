@@ -7,7 +7,8 @@ import 'package:rfc_apps/service/token.dart';
 class PesananService {
   final String baseUrl = '${dotenv.env["BASE_URL"]}store';
 
-  Future<Map<String, dynamic>> createPesanan(String orderId, List<CartItem> items) async {
+  Future<Map<String, dynamic>> createPesanan(
+      String orderId, List<CartItem> items) async {
     final token = await tokenService().getAccessToken();
     final url = Uri.parse("$baseUrl/pesanan/");
 
@@ -63,6 +64,56 @@ class PesananService {
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
       return result['data'];
+    } else {
+      throw Exception("Gagal memuat pesanan");
+    }
+  }
+
+  Future<Map<String, dynamic>> getPesananByTokoId(String id) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pesanan/toko/$id');
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+    print("Status code: ${response.statusCode}");
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getPesananByTokoId(id);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("Gagal memuat pesanan");
+    }
+  }
+
+  Future<void> putStatusPesanan(String pesananId, String status) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pesanan/status');
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode({
+        "pesananId": pesananId,
+        "status": status,
+      }),
+    );
+    print("Response body: ${response.body}");
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return putStatusPesanan(pesananId, status);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
     } else {
       throw Exception("Gagal memuat pesanan");
     }
