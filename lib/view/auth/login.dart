@@ -75,7 +75,7 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
         } else if (role == 'pjawab') {
           Navigator.pushNamedAndRemoveUntil(
             context,
-            '/login_admin',
+            '/pjawab_home',
             (Route<dynamic> route) => false,
           );
         } else {

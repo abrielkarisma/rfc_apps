@@ -27,10 +27,11 @@ class _LandingPageState extends State<LandingPage> {
         route = '/homepage';
       } else if (role == 'penjual') {
         route = '/home_seller';
-      } else if (role == 'admin') {
-        route = '/login_admin';
+      } else if (role == 'pjawab') {
+        route = '/pjawab_home';
       } else {
         route = '/onboarding';
+        FlutterSecureStorage().deleteAll();
       }
     } else {
       route = '/onboarding';

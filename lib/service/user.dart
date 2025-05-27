@@ -10,7 +10,7 @@ class UserService {
   Future<UserResponse> getUserById(String id) async {
     final response = await http.get(
       headers: {'Content-Type': 'application/json'},
-      Uri.parse('$baseUrl/user/$id'),
+      Uri.parse('$baseUrl/user/id/$id'),
     );
     if (response.statusCode == 200) {
       print(response.body);
@@ -36,6 +36,32 @@ class UserService {
       return UserResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to update user data');
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllPenjual() async {
+    final response = await http.get(
+      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$baseUrl/user/seller'),
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load penjual data');
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllPenjualById(String id) async {
+    final response = await http.get(
+      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$baseUrl/user/seller/$id'),
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load penjual data');
     }
   }
 }

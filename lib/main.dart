@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/view/auth/auth.dart';
 import 'package:rfc_apps/view/landingPage.dart';
 import 'package:rfc_apps/view/auth/login.dart';
-import 'package:rfc_apps/view/auth/login_admin.dart';
+
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
 import 'package:rfc_apps/view/pembeli/homepage/keranjang/keranjang.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/nota.dart';
@@ -26,6 +26,8 @@ import 'package:rfc_apps/view/penjual/pesanan/daftar_pesanan.dart';
 import 'package:rfc_apps/view/penjual/home.dart';
 import 'package:rfc_apps/view/penjual/profil_seller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:rfc_apps/view/pjawab/home.dart';
+import 'package:rfc_apps/view/pjawab/user/user_request.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -52,7 +54,7 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => OnboardingScreen(),
         '/login': (context) =>
             LoginPembeliWidget(pageController: PageController()),
-        '/login_admin': (context) => LoginAdmin(),
+        '/pjawab_home': (context) => PjawabHome(),
         '/homepage': (context) => Homepage(),
         '/profil': (context) => Homepage(initialIndex: 4),
         '/change_password': (context) => changePassword(),
@@ -101,6 +103,7 @@ class MyApp extends StatelessWidget {
               as Map<String, dynamic>;
           return PaymentSuccessPage(data: data);
         },
+        '/user_request': (context) => UserRequest(),
       },
     );
   }

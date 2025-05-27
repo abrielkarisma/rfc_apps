@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:rfc_apps/view/auth/login_admin.dart';
-
 class RFCLogo extends StatefulWidget {
   @override
   _RFCLogoState createState() => _RFCLogoState();
@@ -104,14 +102,7 @@ class _RFCLogoState extends State<RFCLogo> {
             color: Colors.white,
             child: Column(
               children: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginAdmin()),
-                      );
-                    },
-                    child: Text("Admin")),
+                TextButton(onPressed: () {}, child: Text("Admin")),
                 TextButton(
                   onPressed: () {
                     setState(() {
