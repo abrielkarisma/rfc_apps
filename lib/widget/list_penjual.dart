@@ -3,11 +3,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/service/user.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 
 class PenjualTable extends StatefulWidget {
   final List<dynamic> penjualList;
+  final bool onDelete;
 
-  const PenjualTable({super.key, required this.penjualList});
+  const PenjualTable(
+      {super.key, required this.penjualList, required this.onDelete});
 
   @override
   State<PenjualTable> createState() => _PenjualTableState();
@@ -26,6 +29,64 @@ class _PenjualTableState extends State<PenjualTable> {
           .toLowerCase()
           .contains(searchQuery.toLowerCase());
     }).toList();
+  }
+
+  Future<void> _deleteTokoHandler(String id) async {
+    await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Text("Konfirmasi Hapus"),
+          ],
+        ),
+        content: Text(
+          "Apakah Anda yakin ingin menghapus toko ini? ",
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(true);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black54,
+            ),
+            child: const Text("Batal"),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              try {
+                final response = await tokoService().deleteToko(id);
+                if (response['message'] == "Toko Delete successfully") {
+                  ToastHelper.showSuccessToast(
+                      context, "Toko berhasil dihapus");
+                  Navigator.of(context).pop(true);
+                } else {
+                  ToastHelper.showErrorToast(
+                      context, "Gagal menghapus toko: ${response['message']}");
+                }
+              } catch (e) {
+                ToastHelper.showErrorToast(context, "Gagal menghapus toko: $e");
+              }
+            },
+            icon: Icon(Icons.delete, size: 18),
+            label: Text("Hapus"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -91,7 +152,7 @@ class _PenjualTableState extends State<PenjualTable> {
                 )),
                 DataColumn(
                     label: SizedBox(
-                  width: context.getHeight(50),
+                  width: context.getHeight(80),
                   child: Text("Aksi",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 )),
@@ -115,7 +176,8 @@ class _PenjualTableState extends State<PenjualTable> {
                     children: [
                       InkWell(
                         onTap: () {
-                          _detailTokoHandler(penjual['id']);
+                          _detailTokoHandler(
+                              penjual['id'], penjual['Toko']?['id']);
                         },
                         child: MouseRegion(
                           cursor: SystemMouseCursors.click,
@@ -136,26 +198,30 @@ class _PenjualTableState extends State<PenjualTable> {
                         ),
                       ),
                       SizedBox(width: context.getWidth(8)),
-                      InkWell(
-                        onTap: () {},
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: AnimatedContainer(
-                            duration: Duration(milliseconds: 200),
-                            padding: EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              color: Colors.transparent,
-                            ),
-                            child: SvgPicture.asset(
-                              'assets/images/round-delete.svg',
-                              width: 24,
-                              height: 24,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
+                      widget.onDelete == true
+                          ? InkWell(
+                              onTap: () {
+                                _deleteTokoHandler(penjual['Toko']?['id']);
+                              },
+                              child: MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 200),
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: Colors.transparent,
+                                  ),
+                                  child: SvgPicture.asset(
+                                    'assets/images/round-delete.svg',
+                                    width: 24,
+                                    height: 24,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox.shrink(),
                     ],
                   )),
                 ]);
@@ -188,7 +254,7 @@ class _PenjualTableState extends State<PenjualTable> {
     );
   }
 
-  Future<void> _detailTokoHandler(penjualId) async {
+  Future<void> _detailTokoHandler(penjualId, tokoId) async {
     final detail = await UserService().getAllPenjualById(penjualId);
 
     if (detail['message'] == "Successfully retrieved all penjual data") {
@@ -246,27 +312,111 @@ class _PenjualTableState extends State<PenjualTable> {
                         rekening?['nomorRekening']?.toString() ?? '-'),
                     SizedBox(height: 24),
                     Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Color.fromARGB(255, 52, 161, 175),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Tutup',
-                            style: TextStyle(
-                              fontFamily: 'poppins',
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
-                    ),
+                        alignment: Alignment.centerRight,
+                        child: widget.onDelete == true
+                            ? TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor:
+                                      Color.fromARGB(255, 52, 161, 175),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Tutup',
+                                  style: TextStyle(
+                                    fontFamily: 'poppins',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ))
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          final response = await tokoService()
+                                              .rejectToko(tokoId);
+                                          if (response['message'] ==
+                                              "Toko rejected successfully") {
+                                            ToastHelper.showSuccessToast(
+                                                context,
+                                                "Permintaan Toko berhasil ditolak");
+                                          } else {
+                                            ToastHelper.showErrorToast(context,
+                                                "Gagal menolak permintaan Toko: ${response['message']}");
+                                          }
+                                        } catch (e) {
+                                          ToastHelper.showErrorToast(context,
+                                              "Gagal menolak permintaan Toko: $e");
+                                        }
+                                        Navigator.of(context).pop();
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        backgroundColor: Colors.red,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Tolak',
+                                        style: TextStyle(
+                                          fontFamily: 'poppins',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )),
+                                  TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          final response = await tokoService()
+                                              .activateToko(tokoId);
+                                          if (response['message'] ==
+                                              "Toko activated successfully") {
+                                            ToastHelper.showSuccessToast(
+                                                context,
+                                                "Permintaan Toko berhasil diterima");
+                                          } else {
+                                            ToastHelper.showErrorToast(context,
+                                                "Gagal menerima permintaan Toko: ${response['message']}");
+                                          }
+                                        } catch (e) {
+                                          ToastHelper.showErrorToast(context,
+                                              "Gagal menerima permintaan Toko: $e");
+                                        }
+                                        Navigator.of(context).pop();
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Terima',
+                                        style: TextStyle(
+                                          fontFamily: 'poppins',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ))
+                                ],
+                              )),
                   ],
                 ),
               ),

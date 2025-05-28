@@ -58,7 +58,7 @@ class _RegisterPembeliWidgetState extends State<RegisterPembeliWidget> {
       return;
     }
     final passwordRegex = RegExp(
-        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}!');
     if (!passwordRegex.hasMatch(_passwordController.text)) {
       ToastHelper.showErrorToast(context,
           'Password harus minimal 8 karakter, mengandung setidaknya satu huruf besar, satu huruf kecil, satu angka, dan satu simbol');

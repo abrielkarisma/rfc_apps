@@ -28,6 +28,9 @@ class AuthService {
         'role': role,
       }),
     );
+    print(name);
+    print(jsonEncode(response.body));
+
     return AuthResponse.fromJson(jsonDecode(response.body));
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/user.dart';
@@ -31,10 +32,17 @@ class _UserListState extends State<UserList> {
     try {
       final response = await UserService().getAllPenjual();
       final data = response['data'] ?? [];
-      final inactiveCount =
-          data.where((item) => item['is_active'] == false).length;
+      final inactiveCount = data
+          .where((item) =>
+              item['Toko'] != null && item['Toko']['tokoStatus'] == 'request')
+          .length;
+      final filtered = data.where((e) {
+        print(
+            "Toko status: ${e['Toko']?['tokoStatus']}");
+        return e['Toko'] != null && e['Toko']['tokoStatus'] == 'active';
+      }).toList();
       setState(() {
-        _penjualList = response['data'] ?? [];
+        _penjualList = filtered;
         requestCount = inactiveCount;
       });
     } catch (e) {
@@ -135,9 +143,132 @@ class _UserListState extends State<UserList> {
             ),
           ),
           SizedBox(height: context.getHeight(16)),
-          PenjualTable(penjualList: _penjualList),
+          PenjualTable(penjualList: _penjualList, onDelete: true,),
+          SizedBox(height: context.getHeight(16)),
+          Container(
+            padding: const EdgeInsets.all(8),
+            height: context.getHeight(60),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: InkWell(
+              onTap: () {
+                _modalLogout(context);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontFamily: "poppins",
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      LineIcons.alternateSignOut,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+void _modalLogout(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    backgroundColor: Colors.white,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Apakah kamu yakin akan keluar dari akun?',
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                fontSize: 26,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFEAEA),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () {
+                  final tokenStorage = FlutterSecureStorage();
+                  tokenStorage.deleteAll();
+                  tokenStorage.delete(key: 'token');
+                  tokenStorage.delete(key: 'refreshToken');
+                  tokenStorage.delete(key: 'role');
+                  Navigator.pop(context);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/auth',
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                child: const Text(
+                  'Ya, Logout',
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  color: Color(0xFF979797),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

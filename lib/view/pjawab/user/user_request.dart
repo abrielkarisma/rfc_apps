@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
@@ -13,11 +15,15 @@ class UserRequest extends StatefulWidget {
 
 class _UserRequestState extends State<UserRequest> {
   List<dynamic> _penjualList = [];
-
+  Timer? _timer;
+  
   @override
   void initState() {
     super.initState();
     _fetchPenjual();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _fetchPenjual();
+    });
   }
 
   Future<void> _fetchPenjual() async {
@@ -25,7 +31,10 @@ class _UserRequestState extends State<UserRequest> {
       final response = await UserService().getAllPenjual();
       final data = response['data'] ?? [];
 
-      final filtered = data.where((e) => e['isActive'] == false).toList();
+      final filtered = data.where((e) {
+        print("Toko status: ${e['Toko']?['tokoStatus']}");
+        return e['Toko'] != null && e['Toko']['tokoStatus'] == 'request';
+      }).toList();
 
       setState(() {
         _penjualList = filtered;
@@ -33,6 +42,11 @@ class _UserRequestState extends State<UserRequest> {
     } catch (e) {
       print("Error: $e");
     }
+  }
+
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -74,7 +88,7 @@ class _UserRequestState extends State<UserRequest> {
               ),
               SizedBox(height: context.getHeight(100)),
               Container(
-                child: PenjualTable(penjualList: _penjualList),
+                child: PenjualTable(penjualList: _penjualList, onDelete: false),
               ),
             ]),
           ),

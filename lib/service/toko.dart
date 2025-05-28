@@ -164,4 +164,71 @@ class tokoService {
       throw Exception('Failed to update toko data');
     }
   }
+
+  Future<Map<String, dynamic>> deleteToko(String id) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.put(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/toko/ban/$id'),
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return deleteToko(id);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to delete toko data');
+    }
+  }
+  Future <Map<String, dynamic>>activateToko(String id) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.put(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/toko/activate/$id'),
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return activateToko(id);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to delete toko data');
+    }
+  }
+  Future <Map<String, dynamic>>rejectToko(String id) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.put(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/toko/reject/$id'),
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return activateToko(id);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to delete toko data');
+    }
+  }
 }
