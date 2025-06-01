@@ -89,7 +89,6 @@ class _KeranjangState extends State<Keranjang> {
       return;
     }
 
-    // Cek stok ulang
     for (var item in selected) {
       try {
         final stockResponse =
@@ -106,12 +105,17 @@ class _KeranjangState extends State<Keranjang> {
       }
     }
 
-    Navigator.push(
+    final callback = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProsesPesananPage(items: selected),
       ),
     );
+    if (callback == "refresh") {
+      setState(() {
+        futureKeranjang = KeranjangService().getAllKeranjang();
+      });
+    }
   }
 
   void _showEditJumlahDialog(CartItem item) {
@@ -332,7 +336,6 @@ class _KeranjangState extends State<Keranjang> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Tampilkan logo toko dan nama toko dengan batasan ukuran agar tidak terdorong
                         CheckboxListTile(
                           value: selectedToko[tokoName],
                           onChanged: (val) =>

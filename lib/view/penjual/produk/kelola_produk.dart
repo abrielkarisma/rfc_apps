@@ -30,6 +30,13 @@ class _KelolaProdukState extends State<KelolaProduk> {
                 fontSize: 16,
                 fontFamily: "Monserrat_Alternates",
                 fontWeight: FontWeight.w600)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -58,7 +65,12 @@ class _KelolaProdukState extends State<KelolaProduk> {
                 ),
               ),
               SizedBox(height: context.getHeight(50)),
-              Expanded(child: ProdukGrid(key: _produkListKey, cardType: "kelola", id: "",)),
+              Expanded(
+                  child: ProdukGrid(
+                key: _produkListKey,
+                cardType: "kelola",
+                id: "",
+              )),
               SizedBox(height: context.getHeight(47)),
             ]))
       ]),

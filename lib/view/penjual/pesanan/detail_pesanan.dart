@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/pesanan.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
+import 'package:rfc_apps/utils/imagePicker.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 
 class DetailPesanan extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -14,6 +19,8 @@ class DetailPesanan extends StatefulWidget {
 }
 
 class _DetailPesananState extends State<DetailPesanan> {
+  late String _profilePhoto = "";
+  bool uloadedBukti = false;
   @override
   void initState() {
     super.initState();
@@ -24,6 +31,17 @@ class _DetailPesananState extends State<DetailPesanan> {
     final formatter =
         NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0);
     return formatter.format(amount);
+  }
+
+  Future<void> _pickImage() async {
+    ImagePickerHelper.showImageSourceOptions(
+      context,
+      onImageSelected: (File image) {
+        setState(() {
+          _profilePhoto = image.path;
+        });
+      },
+    );
   }
 
   void _tolakPesanan() {
@@ -136,8 +154,15 @@ class _DetailPesananState extends State<DetailPesanan> {
   }
 
   void _siapDiambil() {
+    if (_profilePhoto.isEmpty) {
+      ToastHelper.showErrorToast(
+          context, "Silakan unggah bukti pengambilan terlebih dahulu.");
+      return;
+    }
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
@@ -148,7 +173,7 @@ class _DetailPesananState extends State<DetailPesanan> {
                 fontSize: 20,
                 color: Colors.black87,
               )),
-          content: Text("Apakah Anda ingin menandai pesanan ini sudah diambil?",
+          content: Text("Apakah Anda yakin pesanan ini sudah diambil?",
               style: TextStyle(
                 fontFamily: "poppins",
                 fontSize: 16,
@@ -168,15 +193,45 @@ class _DetailPesananState extends State<DetailPesanan> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await PesananService().putStatusPesanan(
-                  widget.order['id'],
-                  'selesai',
-                );
-                Navigator.pop(context);
+                try {
+                  final file = File(_profilePhoto);
+                  if (!file.existsSync()) {
+                    throw Exception('File gambar tidak ditemukan.');
+                  }
+
+                  final cloudinaryService = CloudinaryService();
+                  final uploadResult =
+                      await cloudinaryService.getUploadUrl(file);
+
+                  final uploadedPhotoUrl = uploadResult['url'];
+                  final buktiResult = await PesananService()
+                      .createBuktiPengambilan(
+                          widget.order['id'], uploadedPhotoUrl);
+                  final putStatus = await PesananService().putStatusPesanan(
+                    widget.order['id'],
+                    'selesai',
+                  );
+                  final pendapatan = await PesananService().addPendapatan(
+                      widget.order['id'], widget.order['totalHarga']);
+                  if (buktiResult['message'] ==
+                          "Bukti diterima berhasil dibuat" &&
+                      putStatus['message'] ==
+                          "Status pesanan berhasil diperbarui") {
+                    ToastHelper.showSuccessToast(
+                        context, "Pesanan Berhasil Diselesaikan");
+                  } else {
+                    ToastHelper.showErrorToast(context,
+                        "Gagal menyelesaikan pesanan: ${buktiResult['message']}");
+                  }
+                  Navigator.pop(context);
+                } catch (e) {
+                  Navigator.pop(context);
+                }
                 Navigator.pop(context, 'refresh');
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor),
+                backgroundColor: Theme.of(context).primaryColor,
+              ),
               child: Text("Sudah",
                   style: TextStyle(
                     color: Colors.white,
@@ -224,6 +279,12 @@ class _DetailPesananState extends State<DetailPesanan> {
         backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -334,7 +395,39 @@ class _DetailPesananState extends State<DetailPesanan> {
                     _buildInfoRow("Nama Pembeli", user?['name'] ?? ''),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: context.getHeight(20)),
+                StatusPesanan == "diterima"
+                    ? _buildSectionCard(
+                        title: "Tambah Bukti Pengambilan",
+                        children: [
+                          Center(
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: _profilePhoto.isEmpty
+                                  ? Container(
+                                      width: context.getWidth(100),
+                                      height: context.getHeight(100),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(Icons.add_a_photo,
+                                          size: 50, color: Colors.grey),
+                                    )
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        File(_profilePhoto),
+                                        width: context.getWidth(150),
+                                        height: context.getHeight(150),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                            ),
+                          )
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),

@@ -1,7 +1,7 @@
-// File: lib/pages/proses_pesanan_page.dart
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/keranjang.dart';
+import 'package:rfc_apps/service/keranjang.dart';
 import 'package:rfc_apps/service/midtrans.dart';
 import 'package:rfc_apps/service/pesanan.dart';
 import 'package:rfc_apps/utils/rupiahFormatter.dart';
@@ -41,7 +41,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, "refresh");
           },
         ),
       ),
@@ -182,6 +182,10 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
           await PesananService().createPesanan(generateOrderId, widget.items);
       print(response);
       if (response['message'] == "Pesanan berhasil dibuat") {
+        for (var item in widget.items) {
+          print(item.id);
+          await KeranjangService().deleteKeranjang(item.id);
+        }
         final response = await MidtransService()
             .createTransaction(generateOrderId, widget.items);
         setState(() {

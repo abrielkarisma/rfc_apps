@@ -5,8 +5,7 @@ import 'package:rfc_apps/model/keranjang.dart';
 import 'package:rfc_apps/service/token.dart';
 
 class KeranjangService {
-  final String baseUrl =
-      '${dotenv.env["BASE_URL"]}store'; 
+  final String baseUrl = '${dotenv.env["BASE_URL"]}store';
 
   Future<List<CartItem>> getAllKeranjang() async {
     final token = await tokenService().getAccessToken();
@@ -107,4 +106,5 @@ class KeranjangService {
       throw Exception('Gagal menghapus item keranjang');
     }
   }
+
 }

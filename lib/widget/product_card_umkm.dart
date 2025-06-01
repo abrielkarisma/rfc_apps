@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/produk.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
+import 'package:rfc_apps/utils/rupiahFormatter.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 
 class ProdukCardUMKM extends StatelessWidget {
@@ -79,7 +80,7 @@ class ProdukCardUMKM extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      'Rp. ${produk.harga}',
+                      'Rp ${Formatter.rupiah(produk.harga)}',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,

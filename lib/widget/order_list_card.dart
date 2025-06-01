@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart'; 
 import 'package:rfc_apps/utils/ShimmerImage.dart';
-import 'package:rfc_apps/widget/badge_status.dart'; // Import ShimmerImage
+import 'package:rfc_apps/widget/badge_status.dart'; 
 
 class OrderListCard extends StatelessWidget {
   final Map<String, dynamic> order;
-  final VoidCallback? onTap; // Optional callback for "Lihat Selengkapnya"
+  final VoidCallback? onTap;
 
   const OrderListCard({
     Key? key,
@@ -58,7 +58,7 @@ class OrderListCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: Colors.grey.withOpacity(0.2), // Optional border color
+          color: Colors.grey.withOpacity(0.2), 
           width: 1, // Optional border width
         ),
       ),

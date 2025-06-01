@@ -23,16 +23,19 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (request) {
-            if (request.url.contains("transaction_status=settlement")) {
-              _handleTransactionInfo();
-              Navigator.pop(context);
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
+        NavigationDelegate(onNavigationRequest: (request) {
+          if (request.url.contains("transaction_status=settlement")) {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.pop(context);
+
+            return NavigationDecision.prevent;
+          } else if (request.url
+              .contains("transaction_status=pending&action=back")) {
+            Navigator.pop(context);
+          }
+          return NavigationDecision.navigate;
+        }),
       )
       ..loadRequest(Uri.parse(widget.paymentUrl));
   }
@@ -41,7 +44,12 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pembayaran"),
+        title: const Text("Pembayaran",
+            style: TextStyle(
+                fontFamily: "poppins",
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
@@ -51,17 +59,5 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
       ),
       body: WebViewWidget(controller: _controller),
     );
-  }
-
-  Future<void> _handleTransactionInfo() async {
-    final response =
-        await MidtransService().getTransactionStatus(widget.orderId);
-    if (response["message"] == "Status transaksi berhasil diambil") {
-      print(response);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal mendapatkan status transaksi')),
-      );
-    }
   }
 }

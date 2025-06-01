@@ -72,6 +72,12 @@ class _SellerstoreregState extends State<Sellerstorereg> {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),

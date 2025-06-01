@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/service/pendapatan.dart';
 import 'package:rfc_apps/service/pesanan.dart';
 import 'package:rfc_apps/service/token.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/service/user.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
+import 'package:rfc_apps/utils/rupiahFormatter.dart';
 import 'package:rfc_apps/view/penjual/sellerStoreReg.dart';
 import 'package:rfc_apps/widget/badge_status.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,10 +30,13 @@ class _homeSellerState extends State<homeSeller> {
   bool $tokoRegistered = false;
   late Timer _tokoDataTimer;
   late Timer _pesananTimer;
+  late Timer _pendapatanTimer;
   String $tokoId = "";
   int _pesananMasukCount = 0;
   int _menungguDiambilCount = 0;
   int _selesaiCount = 0;
+  List<Map<String, dynamic>> allData = [];
+  List<Map<String, dynamic>> filteredData = [];
   @override
   void initState() {
     super.initState();
@@ -46,8 +51,12 @@ class _homeSellerState extends State<homeSeller> {
     });
   }
 
+  int get totalPendapatan =>
+      filteredData.fold(0, (sum, item) => sum + (item['harga'] as int));
   void _getTokoDatabyId() async {
     try {
+      final response = await PendapatanService().getPendapatan($tokoId);
+      final List rawData = response['data'];
       final toko = await tokoService().getTokoByUserId();
       print(toko.message);
       if (toko.message == "Toko not found for this user") {
@@ -95,6 +104,8 @@ class _homeSellerState extends State<homeSeller> {
         $avatarUrl = tokoAvatar;
         $tokoStatus = tokoStatus;
         $tokoId = tokoId;
+        allData = List<Map<String, dynamic>>.from(rawData);
+        filteredData = allData;
       });
     } catch (e) {
       print('Error: $e');
@@ -151,6 +162,7 @@ class _homeSellerState extends State<homeSeller> {
   void dispose() {
     _tokoDataTimer?.cancel();
     _pesananTimer?.cancel();
+    _pendapatanTimer?.cancel();
     super.dispose();
   }
 
@@ -387,104 +399,114 @@ class _homeSellerState extends State<homeSeller> {
                                       },
                                     ),
                                     SizedBox(height: context.getHeight(33)),
-                                    Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                            color: Colors.grey[200]!),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12
-                                                .withOpacity(0.05),
-                                            blurRadius: 5,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                        color: Colors.white,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Text(
-                                                "Total Saldo",
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          "/penjualan",
+                                          arguments: $tokoId,
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          border: Border.all(
+                                              color: Colors.grey[200]!),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12
+                                                  .withOpacity(0.05),
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                          color: Colors.white,
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Text(
+                                                  "Total Pendapatan",
+                                                  style: TextStyle(
+                                                    fontFamily: "Poppins",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                // ElevatedButton(
+                                                //   onPressed: () {
+                                                //     getPesananToko();
+                                                //   },
+                                                //   style: ElevatedButton.styleFrom(
+                                                //     backgroundColor:
+                                                //         Theme.of(context)
+                                                //             .primaryColor,
+                                                //     shape: RoundedRectangleBorder(
+                                                //       borderRadius:
+                                                //           BorderRadius.circular(
+                                                //               12),
+                                                //     ),
+                                                //     padding: const EdgeInsets
+                                                //         .symmetric(
+                                                //         horizontal: 16,
+                                                //         vertical: 8),
+                                                //   ),
+                                                //   child: const Text(
+                                                //     "Tarik Dana",
+                                                //     style: TextStyle(
+                                                //       fontSize: 12,
+                                                //       fontFamily: "Poppins",
+                                                //       fontWeight: FontWeight.bold,
+                                                //       color: Colors.white,
+                                                //     ),
+                                                //   ),
+                                                // )
+                                              ],
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                "Rp. ${Formatter.rupiah(totalPendapatan)}",
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            const Divider(),
+                                            ListTile(
+                                              leading: const Icon(Icons.history,
+                                                  color: Colors.green),
+                                              title: const Text(
+                                                "Riwayat Penjualan",
                                                 style: TextStyle(
                                                   fontFamily: "Poppins",
                                                   fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
                                               ),
-                                              const Spacer(),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  getPesananToko();
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      Theme.of(context)
-                                                          .primaryColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                  ),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8),
-                                                ),
-                                                child: const Text(
-                                                  "Tarik Dana",
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontFamily: "Poppins",
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(height: 10),
-                                          const Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              "Rp. 100,000",
-                                              style: TextStyle(
-                                                fontFamily: "Poppins",
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w800,
+                                              trailing: const Icon(
+                                                Icons.arrow_forward_ios_rounded,
+                                                size: 16,
+                                                color: Colors.grey,
                                               ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          const Divider(),
-                                          ListTile(
-                                            leading: const Icon(Icons.history,
-                                                color: Colors.green),
-                                            title: const Text(
-                                              "Riwayat Penjualan",
-                                              style: TextStyle(
-                                                fontFamily: "Poppins",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            trailing: const Icon(
-                                              Icons.arrow_forward_ios_rounded,
-                                              size: 16,
-                                              color: Colors.grey,
-                                            ),
-                                            onTap: () {
-                                              print(
-                                                  "Riwayat Penjualan clicked");
-                                            },
-                                            contentPadding: EdgeInsets.zero,
-                                            dense: true,
-                                            minLeadingWidth: 0,
-                                          )
-                                        ],
+                                              onTap: () {
+                                                print(
+                                                    "Riwayat Penjualan clicked");
+                                              },
+                                              contentPadding: EdgeInsets.zero,
+                                              dense: true,
+                                              minLeadingWidth: 0,
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],

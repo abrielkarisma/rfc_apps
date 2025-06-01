@@ -35,6 +35,12 @@ class StatusBadge extends StatelessWidget {
           'background': Colors.amber.shade100,
           'textColor': Colors.amber.shade800,
         };
+      case 'expired':
+        return {
+          'label': 'Expired',
+          'background': Colors.red.shade100,
+          'textColor': Colors.red.shade800,
+        };
       case 'menunggu':
         return {
           'label': 'Menunggu',

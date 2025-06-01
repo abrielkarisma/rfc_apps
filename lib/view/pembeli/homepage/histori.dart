@@ -61,7 +61,13 @@ class _HistoriState extends State<Histori> {
                 final midtransOrder = pesanan['MidtransOrder'];
                 final tanggal = DateFormat('dd MMMM yyyy')
                     .format(DateTime.parse(pesanan['createdAt']));
-
+                String status;
+                if (midtransOrder != null &&
+                    midtransOrder['transaction_status'] == 'pending') {
+                  status = 'belum dibayar';
+                } else {
+                  status = pesanan['status'] ?? 'unknown';
+                }
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
@@ -123,12 +129,7 @@ class _HistoriState extends State<Histori> {
                                 ],
                               ),
                               Spacer(),
-                              StatusBadge(
-                                status: midtransOrder['transaction_status'] ==
-                                        'pending'
-                                    ? 'belum dibayar'
-                                    : pesanan['status'],
-                              ),
+                              StatusBadge(status: status),
                             ],
                           ),
                           Divider(

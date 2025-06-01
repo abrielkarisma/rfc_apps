@@ -107,7 +107,6 @@ class _EditProdukState extends State<EditProduk> {
     try {
       String imageUrl = _produkgambar;
 
-      // Upload new image if changed
       if (_imageChanged && _produkPhoto != null) {
         final cloudinaryService = CloudinaryService();
         final uploadResponse =

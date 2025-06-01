@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/pesanan.dart';
@@ -23,10 +25,14 @@ class _DaftarPesananState extends State<DaftarPesanan> {
   List<Map<String, dynamic>> _selesai = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  Timer? _timer;
   @override
   void initState() {
     super.initState();
     _fetchOrders();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _fetchOrders();
+    });
   }
 
   Future<void> _fetchOrders() async {
@@ -46,8 +52,8 @@ class _DaftarPesananState extends State<DaftarPesanan> {
 
     try {
       final PesananService pesananService = PesananService();
-      final Map<String, dynamic> fullResponse = await pesananService
-          .getPesananByTokoId(widget.tokoId); // Use widget.tokoId directly
+      final Map<String, dynamic> fullResponse =
+          await pesananService.getPesananByTokoId(widget.tokoId);
 
       if (fullResponse['message'] ==
               "Berhasil mengambil daftar pesanan untuk toko" &&
@@ -83,6 +89,11 @@ class _DaftarPesananState extends State<DaftarPesanan> {
             'Terjadi kesalahan saat memuat pesanan. Silakan coba lagi.';
       });
     }
+  }
+
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   void _filterOrders(List<Map<String, dynamic>> allOrders) {

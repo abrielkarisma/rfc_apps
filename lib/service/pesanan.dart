@@ -92,7 +92,8 @@ class PesananService {
     }
   }
 
-  Future<void> putStatusPesanan(String pesananId, String status) async {
+  Future<Map<String, dynamic>> putStatusPesanan(
+      String pesananId, String status) async {
     final token = await tokenService().getAccessToken();
     final url = Uri.parse('$baseUrl/pesanan/status');
 
@@ -114,6 +115,62 @@ class PesananService {
     }
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else {
+      throw Exception("Gagal memuat pesanan");
+    }
+  }
+
+  Future<Map<String, dynamic>> createBuktiPengambilan(
+      String pesananId, String image) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pesanan/bukti');
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode({
+        "pesananId": pesananId,
+        "buktiDiterima": image,
+      }),
+    );
+    print("Status code: ${response.statusCode}");
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return createBuktiPengambilan(pesananId, image);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("Gagal memuat pesanan");
+    }
+  }
+
+  Future<Map<String, dynamic>> addPendapatan(String pesananId, int jumlahPendapatan) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pendapatan/');
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode({
+        "pesananId": pesananId,
+        "jumlahPendapatan": jumlahPendapatan,
+      }),
+    );
+    
+    print("Status code: ${response.statusCode}");
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return addPendapatan(pesananId, jumlahPendapatan);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception("Gagal memuat pesanan");
     }

@@ -464,7 +464,7 @@ class _profileSellerState extends State<profileSeller> {
       );
       if (response["message"] == "Successfully created new rekening data") {
         ToastHelper.showSuccessToast(context, 'Rekening berhasil ditambahkan!');
-        Navigator.pop(context,"refresh");
+        Navigator.pop(context, "refresh");
         _getRekeningDataById();
       } else {
         ToastHelper.showErrorToast(context,
@@ -486,6 +486,13 @@ class _profileSellerState extends State<profileSeller> {
                   fontSize: 16,
                   fontFamily: "Monserrat_Alternates",
                   fontWeight: FontWeight.w600)),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
           centerTitle: true,
           backgroundColor: Colors.transparent,
         ),
