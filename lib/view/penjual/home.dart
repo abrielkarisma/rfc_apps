@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/pendapatan.dart';
 import 'package:rfc_apps/service/pesanan.dart';
+import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/service/token.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/service/user.dart';
@@ -30,18 +30,23 @@ class _homeSellerState extends State<homeSeller> {
   bool $tokoRegistered = false;
   late Timer _tokoDataTimer;
   late Timer _pesananTimer;
-  late Timer _pendapatanTimer;
+  late Timer _saldoTimer;
   String $tokoId = "";
   int _pesananMasukCount = 0;
   int _menungguDiambilCount = 0;
   int _selesaiCount = 0;
   List<Map<String, dynamic>> allData = [];
   List<Map<String, dynamic>> filteredData = [];
+  int totalPendapatan = 0;
+  final SaldoService _saldoService = SaldoService();
+  late Future<Map<String, dynamic>> _saldoFuture;
   @override
   void initState() {
     super.initState();
     _getTokoDatabyId();
     getPesananToko();
+    _fetchSaldo();
+    _getPendapatan();
     _tokoDataTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       _getTokoDatabyId();
     });
@@ -49,14 +54,34 @@ class _homeSellerState extends State<homeSeller> {
     _pesananTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       getPesananToko();
     });
+    _saldoTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _fetchSaldo();
+      ();
+    });
   }
 
-  int get totalPendapatan =>
-      filteredData.fold(0, (sum, item) => sum + (item['harga'] as int));
+  void _fetchSaldo() {
+    if (mounted) {
+      setState(() {
+        _saldoFuture = _saldoService.getMySaldo();
+      });
+    }
+  }
+
+  void _getPendapatan() async {
+    print("Fetching pendapatan for toko ID: ${$tokoId}");
+    final response = await PendapatanService().getPendapatan($tokoId);
+    final List rawData = response['data'];
+    setState(() {
+      allData = List<Map<String, dynamic>>.from(rawData);
+      filteredData = allData;
+      totalPendapatan =
+          filteredData.fold(0, (sum, item) => sum + (item['harga'] as int));
+    });
+  }
+
   void _getTokoDatabyId() async {
     try {
-      final response = await PendapatanService().getPendapatan($tokoId);
-      final List rawData = response['data'];
       final toko = await tokoService().getTokoByUserId();
       print(toko.message);
       if (toko.message == "Toko not found for this user") {
@@ -104,8 +129,6 @@ class _homeSellerState extends State<homeSeller> {
         $avatarUrl = tokoAvatar;
         $tokoStatus = tokoStatus;
         $tokoId = tokoId;
-        allData = List<Map<String, dynamic>>.from(rawData);
-        filteredData = allData;
       });
     } catch (e) {
       print('Error: $e');
@@ -162,7 +185,7 @@ class _homeSellerState extends State<homeSeller> {
   void dispose() {
     _tokoDataTimer?.cancel();
     _pesananTimer?.cancel();
-    _pendapatanTimer?.cancel();
+    _saldoTimer?.cancel();
     super.dispose();
   }
 
@@ -338,7 +361,8 @@ class _homeSellerState extends State<homeSeller> {
                                                   fontFamily: "Poppins",
                                                   fontWeight: FontWeight.w700,
                                                   fontSize: 14,
-                                                  color: Colors.green,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
                                                 ),
                                               ),
                                               Spacer(),
@@ -400,13 +424,7 @@ class _homeSellerState extends State<homeSeller> {
                                     ),
                                     SizedBox(height: context.getHeight(33)),
                                     InkWell(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          "/penjualan",
-                                          arguments: $tokoId,
-                                        );
-                                      },
+                                      onTap: () {},
                                       child: Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
@@ -429,7 +447,7 @@ class _homeSellerState extends State<homeSeller> {
                                             Row(
                                               children: [
                                                 const Text(
-                                                  "Total Pendapatan",
+                                                  "Saldo Toko",
                                                   style: TextStyle(
                                                     fontFamily: "Poppins",
                                                     fontSize: 14,
@@ -437,53 +455,90 @@ class _homeSellerState extends State<homeSeller> {
                                                   ),
                                                 ),
                                                 const Spacer(),
-                                                // ElevatedButton(
-                                                //   onPressed: () {
-                                                //     getPesananToko();
-                                                //   },
-                                                //   style: ElevatedButton.styleFrom(
-                                                //     backgroundColor:
-                                                //         Theme.of(context)
-                                                //             .primaryColor,
-                                                //     shape: RoundedRectangleBorder(
-                                                //       borderRadius:
-                                                //           BorderRadius.circular(
-                                                //               12),
-                                                //     ),
-                                                //     padding: const EdgeInsets
-                                                //         .symmetric(
-                                                //         horizontal: 16,
-                                                //         vertical: 8),
-                                                //   ),
-                                                //   child: const Text(
-                                                //     "Tarik Dana",
-                                                //     style: TextStyle(
-                                                //       fontSize: 12,
-                                                //       fontFamily: "Poppins",
-                                                //       fontWeight: FontWeight.bold,
-                                                //       color: Colors.white,
-                                                //     ),
-                                                //   ),
-                                                // )
                                               ],
                                             ),
                                             const SizedBox(height: 10),
                                             Align(
                                               alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                "Rp. ${Formatter.rupiah(totalPendapatan)}",
-                                                style: TextStyle(
-                                                  fontFamily: "Poppins",
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
+                                              child: FutureBuilder<
+                                                  Map<String, dynamic>>(
+                                                future: _saldoFuture,
+                                                builder: (context, snapshot) {
+                                                  if (snapshot
+                                                          .connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return Text(
+                                                      "Memuat saldo...",
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.grey[400],
+                                                      ),
+                                                    );
+                                                  } else if (snapshot
+                                                      .hasError) {
+                                                    return Text(
+                                                      "Gagal memuat saldo",
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.red[400],
+                                                      ),
+                                                    );
+                                                  } else if (snapshot.hasData &&
+                                                      snapshot.data != null) {
+                                                    final saldoDataMap =
+                                                        snapshot.data!;
+                                                    final dynamic saldoValue =
+                                                        saldoDataMap[
+                                                            'saldoTersedia'];
+                                                    double saldoNumerik = 0.0;
+
+                                                    if (saldoValue is String) {
+                                                      saldoNumerik =
+                                                          double.tryParse(
+                                                                  saldoValue) ??
+                                                              0.0;
+                                                    } else if (saldoValue
+                                                        is num) {
+                                                      saldoNumerik =
+                                                          saldoValue.toDouble();
+                                                    }
+                                                    return Text(
+                                                      Formatter().formatRupiah(
+                                                          saldoNumerik),
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return Text(
+                                                      "Saldo tidak tersedia",
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.grey[500],
+                                                      ),
+                                                    );
+                                                  }
+                                                },
                                               ),
                                             ),
                                             const SizedBox(height: 12),
                                             const Divider(),
                                             ListTile(
-                                              leading: const Icon(Icons.history,
-                                                  color: Colors.green),
+                                              leading: Icon(Icons.history,
+                                                  color: Theme.of(context)
+                                                      .primaryColor),
                                               title: const Text(
                                                 "Riwayat Penjualan",
                                                 style: TextStyle(
@@ -498,8 +553,37 @@ class _homeSellerState extends State<homeSeller> {
                                                 color: Colors.grey,
                                               ),
                                               onTap: () {
-                                                print(
-                                                    "Riwayat Penjualan clicked");
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  "/penjualan",
+                                                  arguments: $tokoId,
+                                                );
+                                              },
+                                              contentPadding: EdgeInsets.zero,
+                                              dense: true,
+                                              minLeadingWidth: 0,
+                                            ),
+                                            ListTile(
+                                              leading: Icon(
+                                                  Icons.account_balance_wallet,
+                                                  color: Theme.of(context)
+                                                      .primaryColor),
+                                              title: const Text(
+                                                "Saldo Toko ",
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              trailing: const Icon(
+                                                Icons.arrow_forward_ios_rounded,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              ),
+                                              onTap: () {
+                                                Navigator.pushNamed(
+                                                    context, "/saldo");
                                               },
                                               contentPadding: EdgeInsets.zero,
                                               dense: true,
@@ -629,7 +713,7 @@ class _homeSellerState extends State<homeSeller> {
                                   )
                                 : Container(),
                       )
-                    : Container()
+                    : Container(),
               ],
             ),
           ),
@@ -693,15 +777,16 @@ class _homeSellerState extends State<homeSeller> {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: "Poppins",
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.green,
+                color: Theme.of(context).primaryColor,
               ),
             ),
             const Spacer(),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.green),
+            Icon(Icons.arrow_forward_ios_rounded,
+                color: Theme.of(context).primaryColor),
           ],
         ),
       ),

@@ -1,9 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/view/auth/auth.dart';
 import 'package:rfc_apps/view/landingPage.dart';
 import 'package:rfc_apps/view/auth/login.dart';
-
 import 'package:rfc_apps/view/auth/lupaPassword.dart';
 import 'package:rfc_apps/view/pembeli/homepage/keranjang/keranjang.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/nota.dart';
@@ -30,9 +31,43 @@ import 'package:rfc_apps/view/penjual/profil_seller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rfc_apps/view/pjawab/home.dart';
 import 'package:rfc_apps/view/pjawab/user/user_request.dart';
+import 'package:rfc_apps/view/saldo/riwayatMutasi.dart';
+import 'package:rfc_apps/view/saldo/saldoUser.dart';
+import 'package:rfc_apps/view/saldo/tarikSaldo.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyCgyn7fy5R-flroGtPU2-mHR6gEuiMGUxQ",
+      appId: "1:15806207070:android:0d76922695a396f78950cf",
+      messagingSenderId: "15806207070",
+      projectId: "farmcenter-61683",
+    ),
+  );
+
+  print("📲 Handling a background message: ${message.messageId}");
+  print('   Data Pesan Background: ${message.data}');
+  if (message.notification != null) {
+    print(
+        '   Notifikasi Pesan Background: ${message.notification!.title} - ${message.notification!.body}');
+  }
+}
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyCgyn7fy5R-flroGtPU2-mHR6gEuiMGUxQ",
+      appId: "1:15806207070:android:0d76922695a396f78950cf",
+      messagingSenderId: "15806207070",
+      projectId: "farmcenter-61683",
+    ),
+  );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
 }
 
@@ -41,6 +76,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'RFC Apps',
       theme: ThemeData(
         primaryColor: Color(0XFF4CAD73),
@@ -119,6 +155,8 @@ class MyApp extends StatelessWidget {
             Id: args['Id'] as String,
           );
         },
+        '/saldo': (context) => SaldoPage(),
+        '/mutasi_saldo': (context) => RiwayatMutasiPage(),
       },
     );
   }

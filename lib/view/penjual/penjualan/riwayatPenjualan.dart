@@ -171,7 +171,7 @@ class _riwayatPenjualanState extends State<riwayatPenjualan> {
                                       color: Colors.white),
                                 ),
                                 Text(
-                                  "Pesanan Id: ${item['id'].substring(0, 8)}",
+                                  "Pesanan Id: ${item['pesananId'].substring(0, 8)}",
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontFamily: "poppins",
@@ -184,7 +184,7 @@ class _riwayatPenjualanState extends State<riwayatPenjualan> {
                             onTap: () {
                               Navigator.pushNamed(context, '/detail_pendapatan',
                                   arguments: {
-                                    'Id': item['id'],
+                                    'Id': item['pesananId'],
                                   });
                             },
                           ),

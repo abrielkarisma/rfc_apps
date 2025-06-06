@@ -432,60 +432,64 @@ class _DetailPesananState extends State<DetailPesanan> {
             ),
           ),
           Positioned(
-              left: 20,
-              right: 20,
-              bottom: 20,
-              child: StatusPesanan == "menunggu"
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _tolakPesanan,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 15),
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: StatusPesanan == "menunggu"
+                ? Row(
+                    // This part remains the same
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _tolakPesanan,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text(
-                              "Tolak Pesanan",
-                              style: TextStyle(
-                                fontFamily: "poppins",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          child: const Text(
+                            "Tolak Pesanan",
+                            style: TextStyle(
+                              fontFamily: "poppins",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _pesananSiap,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 15),
+                      ),
+                      SizedBox(width: 15),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _pesananSiap,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text(
-                              "Pesanan Siap",
-                              style: TextStyle(
-                                fontFamily: "poppins",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          child: const Text(
+                            "Pesanan Siap",
+                            style: TextStyle(
+                              fontFamily: "poppins",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ],
-                    )
-                  : StatusPesanan == "diterima"
-                      ? Container(
-                          child: Expanded(
+                      ),
+                    ],
+                  )
+                : StatusPesanan == "diterima"
+                    ? Row(
+                        // Changed from Container to Row
+                        children: [
+                          Expanded(
+                            // Now Expanded is a child of Row
                             child: ElevatedButton(
                               onPressed: _siapDiambil,
                               style: ElevatedButton.styleFrom(
@@ -506,9 +510,11 @@ class _DetailPesananState extends State<DetailPesanan> {
                               ),
                             ),
                           ),
-                        )
-                      : Container(
-                          child: Expanded(
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.pop(context, 'refresh');
@@ -531,7 +537,9 @@ class _DetailPesananState extends State<DetailPesanan> {
                               ),
                             ),
                           ),
-                        ))
+                        ],
+                      ),
+          )
         ],
       ),
     );

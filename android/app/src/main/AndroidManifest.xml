@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
      <uses-permission android:name="android.permission.INTERNET"/>
+     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
      <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
@@ -47,6 +49,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@drawable/ic_notification" />
+
+        <meta-data
+        android:name="com.google.firebase.messaging.default_notification_color"
+        android:resource="@color/notification_color" />
         <!-- Added for image_cropper package -->
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

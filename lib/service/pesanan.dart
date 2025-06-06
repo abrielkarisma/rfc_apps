@@ -88,7 +88,7 @@ class PesananService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception("Gagal memuat pesanan");
+      throw Exception("Gagal memuat pesanannnn");
     }
   }
 
@@ -148,7 +148,8 @@ class PesananService {
     }
   }
 
-  Future<Map<String, dynamic>> addPendapatan(String pesananId, int jumlahPendapatan) async {
+  Future<Map<String, dynamic>> addPendapatan(
+      String pesananId, int jumlahPendapatan) async {
     final token = await tokenService().getAccessToken();
     final url = Uri.parse('$baseUrl/pendapatan/');
 
@@ -163,7 +164,7 @@ class PesananService {
         "jumlahPendapatan": jumlahPendapatan,
       }),
     );
-    
+
     print("Status code: ${response.statusCode}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
@@ -173,6 +174,29 @@ class PesananService {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception("Gagal memuat pesanan");
+    }
+  }
+
+  Future<Map<String, dynamic>> getPendapatanByPesananId(String id) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pesanan/id/$id');
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+    print("Status code: ${response.statusCode}");
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getPendapatanByPesananId(id);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("Gagal memuat pendapatan");
     }
   }
 }

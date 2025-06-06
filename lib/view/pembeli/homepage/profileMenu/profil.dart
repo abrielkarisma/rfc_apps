@@ -171,8 +171,8 @@ class _ProfilState extends State<Profil> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildMenuItem('assets/images/menuIcon/profile.png',
-                            'Pengaturan Akun',
-                            onTapRoute: '/account_setting', context: context),
+                            'Saldo Pengguna',
+                            onTapRoute: '/saldo', context: context),
                         _buildMenuItem(
                             'assets/images/menuIcon/lock.png', 'Ubah Password',
                             onTapRoute: '/change_password', context: context),

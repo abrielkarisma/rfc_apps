@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:rfc_apps/service/notification.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -10,6 +11,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  final NotificationService _notificationService = NotificationService();
   @override
   void initState() {
     super.initState();
@@ -17,6 +19,8 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Future<void> _navigateUser() async {
+     _notificationService.initializeTokenManagement();
+    await _notificationService.requestNotificationPermission();
     final storage = FlutterSecureStorage();
     String? token = await storage.read(key: 'refreshToken');
     String? role = await storage.read(key: 'role');

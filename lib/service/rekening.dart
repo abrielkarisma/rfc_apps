@@ -26,7 +26,31 @@ class rekeningService {
       throw Exception('Failed to load Rekening data');
     }
   }
-
+Future<Map<String, dynamic>?> getRekeningBytoken() async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.get(
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/rekening/user'),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getRekeningBytoken();
+    }
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      if (responseBody['data'] != null) {
+        return responseBody['data'] as Map<String, dynamic>;
+      } else {
+        return null; 
+      }
+    } else if (response.statusCode == 404) {
+        return null; 
+    } else {
+      throw Exception(responseBody['message'] ?? 'Gagal mengambil data rekening aktif');
+    }
+  }
   Future<Map<String, dynamic>> CreateRekening(
       String namaPenerima, String namaBank, String nomorRekening) async {
     final token = await tokenService().getAccessToken();

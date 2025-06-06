@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/view/pjawab/penarikan/penarikan.dart';
 import 'package:rfc_apps/view/pjawab/user/user_list.dart';
 
 class PjawabHome extends StatefulWidget {
@@ -24,7 +25,7 @@ class _PjawabHomeState extends State<PjawabHome> {
   late final List<Widget> _widgetOptions = <Widget>[
     UserList(),
     Center(child: Text('Manage Artikel')),
-    Center(child: Text('Penarikan')),
+    AdminRequestPenarikanPage()
   ];
   @override
   Widget build(BuildContext context) {
@@ -64,7 +65,7 @@ class _PjawabHomeState extends State<PjawabHome> {
                 ),
               ),
               SizedBox(height: context.getHeight(16)),
-              Container(
+              Expanded(
                 child: _widgetOptions.elementAt(_selectedIndex),
               ),
             ]))

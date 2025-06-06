@@ -25,7 +25,7 @@ class PendapatanService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Gagal memuat pendapatan');
+      throw Exception('Gagal memuat pendapatannnnn');
     }
   }
 }

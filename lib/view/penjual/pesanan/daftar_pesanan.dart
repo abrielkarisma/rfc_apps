@@ -140,6 +140,12 @@ class _DaftarPesananState extends State<DaftarPesanan> {
                 fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
