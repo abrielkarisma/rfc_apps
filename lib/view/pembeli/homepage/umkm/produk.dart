@@ -11,6 +11,7 @@ class ProdukUMKM extends StatefulWidget {
 
 class _ProdukUMKMState extends State<ProdukUMKM> {
   Key _produkListKey = UniqueKey();
+  String _searchQuery = '';
 
   void _refreshProduk() {
     setState(() {
@@ -38,11 +39,20 @@ class _ProdukUMKMState extends State<ProdukUMKM> {
               contentPadding:
                   EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             ),
-            onChanged: (value) {},
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
           ),
         ),
         SizedBox(height: context.getHeight(20)),
-        Expanded(child: ProdukGrid(key: _produkListKey, cardType: "umkm", id: "")),
+        Expanded(
+            child: ProdukGrid(
+                key: _produkListKey,
+                cardType: "umkm",
+                id: "",
+                searchQuery: _searchQuery)),
       ],
     );
   }
