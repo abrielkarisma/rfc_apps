@@ -177,6 +177,10 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
         backgroundColor: appPrimaryColor, // Warna baru
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       backgroundColor: Colors.grey[100],
       body: Padding(
@@ -447,12 +451,18 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                       penarikan['catatanAdmin']?.toString() ?? '-'),
                 if (penarikan['buktiTransfer'] != null &&
                     penarikan['buktiTransfer'].toString().isNotEmpty)
-                  _buildDetailRow('Bukti Transfer:',
-                      penarikan['buktiTransfer']?.toString() ?? '-'),
-                if (penarikan['referensiBank'] != null &&
-                    penarikan['referensiBank'].toString().isNotEmpty)
-                  _buildDetailRow('Ref. Bank:',
-                      penarikan['referensiBank']?.toString() ?? '-'),
+                  TextButton(
+                      onPressed: () {
+                        _showBuktiTransferDialog(
+                            context, penarikan['buktiTransfer']);
+                      },
+                      child: Text(
+                        "Lihat Bukti Transfer",
+                        style: TextStyle(
+                            color: appPrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ))
               ],
             ),
           ),
@@ -493,6 +503,39 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                           isBold ? FontWeight.bold : FontWeight.normal))),
         ],
       ),
+    );
+  }
+
+  void _showBuktiTransferDialog(BuildContext context, penarikan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Bukti Transfer',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: SingleChildScrollView(
+            child: Image.network(
+              penarikan,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Text('Gagal memuat gambar bukti transfer.',
+                    style: TextStyle(color: Colors.red));
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Tutup',
+                  style: TextStyle(color: appPrimaryColor)), // Warna baru
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

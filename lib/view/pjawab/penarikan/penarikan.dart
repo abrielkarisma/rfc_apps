@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rfc_apps/service/saldo.dart';
@@ -21,6 +23,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
   final SaldoService _saldoService = SaldoService();
   final List<Map<String, dynamic>> _requests = [];
   final ScrollController _scrollController = ScrollController();
+  Timer? _timer;
 
   String _selectedStatus = 'pending';
   final List<String> _statusOptions = ['pending', 'completed', 'rejected'];
@@ -36,12 +39,16 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
     super.initState();
     _fetchRequests(isRefresh: true);
     _scrollController.addListener(_onScroll);
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _fetchRequests(isRefresh: true);
+    });
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -197,41 +204,50 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
 
   Widget _buildFilterChips() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-      color: Colors.white,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _statusOptions.map((status) {
-            final bool isSelected = status == _selectedStatus;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: ChoiceChip(
-                label: Text(_formatStatusPenarikan(status)),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    _changeStatusFilter(status);
-                  }
-                },
-                selectedColor: appPrimaryColor.withOpacity(0.8),
-                backgroundColor: Colors.grey[200],
-                labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                avatar: isSelected
-                    ? Icon(Icons.check_circle, color: Colors.white, size: 18)
-                    : null,
-                shape: StadiumBorder(
-                    side: BorderSide(
+      padding: const EdgeInsets.symmetric(horizontal: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_statusOptions.length, (index) {
+          final status = _statusOptions[index];
+          final bool isSelected = status == _selectedStatus;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => _changeStatusFilter(status),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: isSelected ? Colors.green[100] : Colors.transparent),
+                child: Column(
+                  children: [
+                    Text(
+                      _formatStatusPenarikan(status),
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                         color: isSelected
-                            ? appPrimaryColor
-                            : Colors.grey.shade300)),
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[500],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 3,
+                      width: isSelected ? 30 : 0,
+                      decoration: BoxDecoration(
+                        color: appPrimaryColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    )
+                  ],
+                ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }),
       ),
     );
   }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:intl/intl.dart';
+import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/service/saldo.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/saldo/riwayatPenarikan.dart';
 
 // Definisikan warna utama Anda di sini atau dari file tema
@@ -25,9 +29,8 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _catatanAdminController;
-  late TextEditingController _buktiTransferController;
+  File? _buktiTransferImage;
   late TextEditingController _referensiBankController;
-
   bool _isSubmitting = false;
   late String _currentStatus; // Untuk menyimpan status awal
 
@@ -36,8 +39,6 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
     super.initState();
     _catatanAdminController = TextEditingController(
         text: widget.requestData['catatanAdmin']?.toString());
-    _buktiTransferController = TextEditingController(
-        text: widget.requestData['buktiTransfer']?.toString());
     _referensiBankController = TextEditingController(
         text: widget.requestData['referensiBank']?.toString());
     _currentStatus = widget.requestData['status']?.toString() ?? 'pending';
@@ -46,7 +47,6 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
   @override
   void dispose() {
     _catatanAdminController.dispose();
-    _buktiTransferController.dispose();
     _referensiBankController.dispose();
     super.dispose();
   }
@@ -69,6 +69,18 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
     } catch (e) {
       return dateString;
     }
+  }
+
+  Future<void> _pickBuktiTransfer() async {
+    ImagePickerHelper.showImageSourceOptions(
+      context,
+      onImageSelected: (File image) {
+        setState(() {
+          _buktiTransferImage = image;
+        });
+      },
+      shouldCrop: false,
+    );
   }
 
   String _formatStatusDisplay(String? status) {
@@ -98,6 +110,11 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
   }
 
   Future<void> _submitProses(String newStatus) async {
+    if (newStatus == 'rejected' &&
+        _catatanAdminController.text.trim().isEmpty) {
+      ToastHelper.showInfoToast(context, "Harap isi Catatan");
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       bool confirm = await showDialog(
             context: context,
@@ -142,15 +159,31 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
       });
 
       try {
+        if (newStatus == 'completed' && _buktiTransferImage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Silakan unggah bukti transfer terlebih dahulu'),
+                backgroundColor: Colors.red),
+          );
+          setState(() {
+            _isSubmitting = false;
+          });
+          return;
+        }
+
+        String? buktiTransferUrl;
+        if (_buktiTransferImage != null) {
+          final uploadResult = await CloudinaryService()
+              .getUploadUrl(File(_buktiTransferImage!.path));
+          buktiTransferUrl = uploadResult['url'];
+        }
         await _saldoService.prosesPenarikanSaldo(
           penarikanId: widget.requestData['id'].toString(),
           status: newStatus,
           catatanAdmin: _catatanAdminController.text.trim().isNotEmpty
               ? _catatanAdminController.text.trim()
               : null,
-          buktiTransfer: _buktiTransferController.text.trim().isNotEmpty
-              ? _buktiTransferController.text.trim()
-              : null,
+          buktiTransfer: buktiTransferUrl,
           referensiBank: _referensiBankController.text.trim().isNotEmpty
               ? _referensiBankController.text.trim()
               : null,
@@ -311,29 +344,38 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _buktiTransferController,
-                  decoration: InputDecoration(
-                    labelText: 'No. Bukti Transfer',
-                    hintText: 'Jika transfer manual',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Bukti Transfer',
+                        style: TextStyle(fontFamily: 'poppins')),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickBuktiTransfer,
+                      child: Container(
+                        width: double.infinity,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.green),
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                        ),
+                        child: _buktiTransferImage == null
+                            ? const Icon(Icons.add_a_photo,
+                                size: 50, color: Colors.grey)
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  _buktiTransferImage!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _referensiBankController,
-                  decoration: InputDecoration(
-                    labelText: 'No. Referensi Bank',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
               if (_isSubmitting)
                 const Center(
@@ -341,8 +383,7 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
                   padding: EdgeInsets.symmetric(vertical: 20.0),
                   child: CircularProgressIndicator(color: appPrimaryColor),
                 ))
-              else if (_currentStatus ==
-                  'pending')
+              else if (_currentStatus == 'pending')
                 Padding(
                   padding: const EdgeInsets.only(top: 24.0),
                   child: Row(

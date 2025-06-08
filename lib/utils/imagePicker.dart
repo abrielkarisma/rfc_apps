@@ -11,6 +11,7 @@ class ImagePickerHelper {
   static Future<void> showImageSourceOptions(
     BuildContext context, {
     required Function(File) onImageSelected,
+    bool shouldCrop = true,
   }) async {
     await showModalBottomSheet(
       context: context,
@@ -34,8 +35,11 @@ class ImagePickerHelper {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    pickImageFromSource(ImageSource.gallery,
-                        onImageSelected: onImageSelected);
+                    pickImageFromSource(
+                      ImageSource.gallery,
+                      onImageSelected: onImageSelected,
+                      shouldCrop: shouldCrop,
+                    );
                   },
                 ),
                 ListTile(
@@ -50,8 +54,11 @@ class ImagePickerHelper {
                       )),
                   onTap: () {
                     Navigator.pop(context);
-                    pickImageFromSource(ImageSource.camera,
-                        onImageSelected: onImageSelected);
+                    pickImageFromSource(
+                      ImageSource.camera,
+                      onImageSelected: onImageSelected,
+                      shouldCrop: shouldCrop,
+                    );
                   },
                 ),
               ],
@@ -66,13 +73,19 @@ class ImagePickerHelper {
   static Future<void> pickImageFromSource(
     ImageSource source, {
     required Function(File) onImageSelected,
+    bool shouldCrop = true,
   }) async {
     try {
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
-        File? croppedImage = await cropImage(File(image.path));
-        if (croppedImage != null) {
-          onImageSelected(croppedImage);
+        File file = File(image.path);
+        if (shouldCrop) {
+          File? croppedImage = await cropImageFile(file);
+          if (croppedImage != null) {
+            onImageSelected(croppedImage);
+          }
+        } else {
+          onImageSelected(file);
         }
       }
     } catch (e) {
@@ -83,21 +96,23 @@ class ImagePickerHelper {
   /// Directly pick from gallery without showing the options bottom sheet
   static Future<void> pickFromGallery({
     required Function(File) onImageSelected,
+    bool shouldCrop = true,
   }) async {
     await pickImageFromSource(ImageSource.gallery,
-        onImageSelected: onImageSelected);
+        onImageSelected: onImageSelected,shouldCrop: shouldCrop,);
   }
 
   /// Directly pick from camera without showing the options bottom sheet
   static Future<void> pickFromCamera({
     required Function(File) onImageSelected,
+    bool shouldCrop = true,
   }) async {
     await pickImageFromSource(ImageSource.camera,
-        onImageSelected: onImageSelected);
+        onImageSelected: onImageSelected, shouldCrop: shouldCrop,);
   }
 
   /// Crops the image with a square (1:1) aspect ratio
-  static Future<File?> cropImage(File imageFile) async {
+  static Future<File?> cropImageFile(File imageFile) async {
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
       aspectRatio:

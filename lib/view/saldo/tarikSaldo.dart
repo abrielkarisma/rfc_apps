@@ -141,6 +141,10 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
         backgroundColor: primaryColor, // Warna baru
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
@@ -312,18 +316,14 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                 color: Colors.orange.shade700, size: 30),
             const SizedBox(height: 8),
             const Text(
-              'Anda belum memiliki rekening bank terverifikasi.',
+              'Anda belum memiliki rekening bank ',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
-                // TODO: Navigasi ke halaman pengaturan/tambah rekening bank
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Navigasi ke Pengaturan Rekening (TODO)')),
-                );
+                Navigator.pushNamed(context, '/informasi_rekening');
               },
               child: const Text('Tambahkan Rekening Sekarang',
                   style: TextStyle(

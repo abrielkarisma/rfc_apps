@@ -278,6 +278,15 @@ class _SaldoPageState extends State<SaldoPage> {
               },
               isOutlined: true,
             ),
+            _buildActionButton(
+              context,
+              icon: Icons.account_balance_rounded,
+              label: 'Informasi Rekening',
+              onPressed: () {
+                Navigator.pushNamed(context, '/informasi_rekening');
+              },
+              isOutlined: true,
+            ),
           ],
         ),
       ),

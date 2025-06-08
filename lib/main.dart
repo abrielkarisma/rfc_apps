@@ -34,6 +34,7 @@ import 'package:rfc_apps/view/pjawab/user/user_request.dart';
 import 'package:rfc_apps/view/saldo/riwayatMutasi.dart';
 import 'package:rfc_apps/view/saldo/saldoUser.dart';
 import 'package:rfc_apps/view/saldo/tarikSaldo.dart';
+import 'package:rfc_apps/view/saldo/informasiRekening.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 @pragma('vm:entry-point')
@@ -157,6 +158,7 @@ class MyApp extends StatelessWidget {
         },
         '/saldo': (context) => SaldoPage(),
         '/mutasi_saldo': (context) => RiwayatMutasiPage(),
+        '/informasi_rekening': (context) => const InformasiRekeningPage(),
       },
     );
   }

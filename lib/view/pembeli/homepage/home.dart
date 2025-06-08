@@ -7,6 +7,8 @@ import 'package:rfc_apps/service/artikel.dart';
 import 'package:rfc_apps/widget/carousel_artikel.dart';
 import 'package:rfc_apps/widget/produk_list.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:rfc_apps/service/saldo.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   final VoidCallback onSeeMoreArticles;
@@ -23,9 +25,126 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Key _produkListKey = UniqueKey();
+  final SaldoService _saldoService = SaldoService();
+  late Future<Map<String, dynamic>> _saldoFuture;
+
+  void _loadSaldo() {
+    setState(() {
+      _saldoFuture = _saldoService.getMySaldo();
+    });
+  }
+
+  String formatRupiah(dynamic amount) {
+    double numericAmount = 0.0;
+    if (amount is String) {
+      numericAmount = double.tryParse(amount) ?? 0.0;
+    } else if (amount is num) {
+      numericAmount = amount.toDouble();
+    }
+
+    final formatCurrency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatCurrency.format(numericAmount);
+  }
+
+  Widget _buildSaldoCard(String saldo) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/saldo'),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Theme.of(context).primaryColor, const Color(0xFF93E2B3)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).primaryColor.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Saldo Tersedia:',
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.9),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              formatRupiah(saldo),
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.1,
+              ),
+            ),
+            SizedBox(height: context.getHeight(10)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.history_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    SizedBox(width: context.getWidth(10)),
+                    Text(
+                      'Lihat Riwayat',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    SizedBox(width: context.getWidth(10)),
+                    Text(
+                      'Rekening Saya',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void initState() {
     super.initState();
     _produkListKey = UniqueKey();
+    _loadSaldo();
   }
 
   @override
@@ -52,67 +171,46 @@ class _HomeState extends State<Home> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Container(
-                  child: FutureBuilder<List<Artikel>>(
-                    future: fetchArtikel(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(
-                          child: Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: context.getWidth(300),
-                                      height: context.getHeight(163),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(14.0),
-                                      ),
-                                    ),
-                                    Padding(
-                                        padding: EdgeInsets.only(
-                                            left: context.getWidth(10))),
-                                    Container(
-                                      width: context.getWidth(300),
-                                      height: context.getHeight(163),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(14.0),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: context.getHeight(13)),
-                                Container(
-                                  height: context.getHeight(10),
-                                  width: context.getWidth(110),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14.0),
-                                  ),
-                                )
-                              ],
-                            ),
+                FutureBuilder<Map<String, dynamic>>(
+                  future: _saldoFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                        width: double.infinity,
+                        height: context.getHeight(120),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return GestureDetector(
+                        onTap: _loadSaldo,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No data found'));
-                      } else {
-                        List<Artikel> items = snapshot.data!;
-                        return ArtikelCarousel(artikels: items);
-                      }
-                    },
-                  ),
+                          child: Text(
+                            'Gagal memuat saldo',
+                            style: TextStyle(
+                                color: Colors.redAccent, fontFamily: 'poppins'),
+                          ),
+                        ),
+                      );
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      final saldoTersedia =
+                          snapshot.data!['saldoTersedia']?.toString() ?? '0';
+
+                      return _buildSaldoCard(saldoTersedia);
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
                 ),
+                SizedBox(height: context.getHeight(20)),
                 Padding(padding: EdgeInsets.only(top: context.getHeight(13))),
                 Container(
                     width: double.infinity,
