@@ -5,7 +5,8 @@ import 'package:rfc_apps/widget/toko_card.dart';
 import 'package:shimmer/shimmer.dart'; // Add shimmer import
 
 class TokoListWidget extends StatefulWidget {
-  const TokoListWidget({Key? key}) : super(key: key);
+  final String searchQuery;
+  const TokoListWidget({Key? key, this.searchQuery = ''}) : super(key: key);
 
   @override
   State<TokoListWidget> createState() => _TokoListWidgetState();
@@ -106,7 +107,19 @@ class _TokoListWidgetState extends State<TokoListWidget> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Tidak ada toko yang tersedia'));
         } else {
-          final tokoList = snapshot.data!;
+          List<TokoData> tokoList = snapshot.data!;
+          if (widget.searchQuery.isNotEmpty) {
+            tokoList = tokoList
+                .where((item) => item.nama
+                    .toLowerCase()
+                    .contains(widget.searchQuery.toLowerCase()))
+                .toList();
+          }
+
+          if (tokoList.isEmpty) {
+            return const Center(child: Text('Tidak ada toko yang sesuai'));
+          }
+
           return Container(
             child: ListView.builder(
               padding: EdgeInsets.zero,

@@ -10,6 +10,7 @@ class TokoUmkm extends StatefulWidget {
 }
 
 class _TokoUmkmState extends State<TokoUmkm> {
+  String _searchQuery = '';
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -31,12 +32,16 @@ class _TokoUmkmState extends State<TokoUmkm> {
               contentPadding:
                   EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             ),
-            onChanged: (value) {},
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
           ),
         ),
         SizedBox(height: context.getHeight(16)),
         Expanded(
-          child: TokoListWidget(),
+          child: TokoListWidget(searchQuery: _searchQuery),
         )
       ],
     );

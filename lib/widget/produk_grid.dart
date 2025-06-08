@@ -9,9 +9,14 @@ import 'package:rfc_apps/model/produk.dart';
 import 'package:shimmer/shimmer.dart'; // Add shimmer import
 
 class ProdukGrid extends StatefulWidget {
-  const ProdukGrid({super.key, required this.cardType, required this.id});
+  const ProdukGrid(
+      {super.key,
+      required this.cardType,
+      required this.id,
+      this.searchQuery = ''});
   final String id;
   final String cardType;
+  final String searchQuery;
 
   @override
   State<ProdukGrid> createState() => _ProdukGridState();
@@ -194,6 +199,19 @@ class _ProdukGridState extends State<ProdukGrid> {
             return const Center(child: Text('Tidak ada produk tersedia'));
           }
 
+          List<Produk> produkList = snapshot.data!;
+          if (widget.searchQuery.isNotEmpty) {
+            produkList = produkList
+                .where((item) => item.nama
+                    .toLowerCase()
+                    .contains(widget.searchQuery.toLowerCase()))
+                .toList();
+          }
+
+          if (produkList.isEmpty) {
+            return const Center(child: Text('Tidak ada produk yang sesuai'));
+          }
+
           return Container(
             child: GridView.builder(
               physics: const BouncingScrollPhysics(),
@@ -204,9 +222,9 @@ class _ProdukGridState extends State<ProdukGrid> {
                 mainAxisSpacing: 30,
                 childAspectRatio: 143 / 201,
               ),
-              itemCount: snapshot.data!.length,
+              itemCount: produkList.length,
               itemBuilder: (context, index) {
-                return _returnCard(snapshot.data![index]);
+                return _returnCard(produkList[index]);
               },
             ),
           );

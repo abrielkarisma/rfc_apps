@@ -13,6 +13,7 @@ class ProdukPage extends StatefulWidget {
 
 class _ProdukPageState extends State<ProdukPage> {
   Key _produkListKey = UniqueKey();
+  String _searchQuery = '';
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -38,7 +39,11 @@ class _ProdukPageState extends State<ProdukPage> {
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 ),
-                onChanged: (value) {},
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
               ),
             ),
             SizedBox(width: context.getWidth(16)),
@@ -56,7 +61,11 @@ class _ProdukPageState extends State<ProdukPage> {
         ),
         SizedBox(height: context.getHeight(50)),
         Expanded(
-            child: ProdukGrid(key: _produkListKey, cardType: "rfc", id: "")),
+            child: ProdukGrid(
+                key: _produkListKey,
+                cardType: "rfc",
+                id: "",
+                searchQuery: _searchQuery)),
       ]),
     );
   }
