@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/widget/produk_card_seller.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
 
@@ -76,12 +77,27 @@ class _KelolaProdukState extends State<KelolaProduk> {
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.pushNamed(
-            context,
-            '/tambah_produk',
-          );
-          if (result == 'refresh') {
-            _refreshProduk();
+          final typetoko = await tokoService().getTokoByUserId();
+          print(typetoko.data[0].TypeToko);
+          if (typetoko.data[0].TypeToko == "rfc") {
+            final result = await Navigator.pushNamed(
+              context,
+              '/komoditas',
+            );
+            if (result == 'refresh') {
+              _refreshProduk();
+            }
+            return;
+          }
+          if (typetoko.data[0].TypeToko == "umkm") {
+            final result = await Navigator.pushNamed(
+              context,
+              '/tambah_produk',
+            );
+            if (result == 'refresh') {
+              _refreshProduk();
+            }
+            return;
           }
         },
         backgroundColor: Color(0XFF4CAD73),

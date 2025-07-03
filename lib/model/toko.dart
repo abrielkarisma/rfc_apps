@@ -9,6 +9,7 @@ class TokoData {
   final String tokoStatus;
   final String createdAt;
   final String updatedAt;
+  final String TypeToko;
   final String userId;
 
   TokoData({
@@ -22,6 +23,7 @@ class TokoData {
     required this.tokoStatus,
     required this.createdAt,
     required this.updatedAt,
+    required this.TypeToko,
     required this.userId,
   });
 
@@ -37,6 +39,7 @@ class TokoData {
       tokoStatus: json['tokoStatus'] ?? '',
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
+      TypeToko: json['TypeToko'] ?? '',
       userId: json['UserId'] ?? '',
     );
   }
