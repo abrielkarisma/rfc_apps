@@ -32,7 +32,7 @@ class KomoditasService {
   Future<KomoditasResponse> getKomoditasById(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(
-      Uri.parse('$baseUrl/komoditas/id/$id'),
+      Uri.parse('$baseUrl/komoditas/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
