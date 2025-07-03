@@ -23,7 +23,6 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
 
   Future<void> _fetch() async {
     try {
-
       final komoditas = await KomoditasService().getKomoditasById(widget.id);
       setState(() {
         data = komoditas;
@@ -116,6 +115,16 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
                           ),
                         ),
                         SizedBox(height: context.getHeight(20)),
+                        Container(
+                          width: double.infinity,
+                          child: Text("Informasi Komoditas",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              )),
+                        ),
                         _buildRow('Nama Komoditas', data!.nama),
                         _buildRow('Jumlah', data!.jumlah.toString()),
                         _buildRow('Tipe', data!.tipeKomoditas),
