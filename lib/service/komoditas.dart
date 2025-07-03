@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:rfc_apps/response/komoditas.dart';
@@ -31,6 +30,7 @@ class KomoditasService {
     }
   }
 
+
   Future<KomoditasData> getKomoditasById(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(
@@ -47,6 +47,7 @@ class KomoditasService {
     }
 
     if (response.statusCode == 200) {
+
       final decoded = jsonDecode(response.body);
       return KomoditasData.fromJson(decoded['data']);
     } else {

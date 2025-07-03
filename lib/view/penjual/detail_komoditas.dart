@@ -23,6 +23,7 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
 
   Future<void> _fetch() async {
     try {
+
       final komoditas = await KomoditasService().getKomoditasById(widget.id);
       setState(() {
         data = komoditas;
