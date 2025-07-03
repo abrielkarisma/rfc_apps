@@ -12,6 +12,7 @@ import 'package:rfc_apps/view/pembeli/homepage/produk/detail_produk.dart';
 import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoInformation.dart';
 import 'package:rfc_apps/view/pembeli/homepage/umkm/tokoProduk.dart';
 import 'package:rfc_apps/view/penjual/komoditas.dart';
+import 'package:rfc_apps/view/penjual/detail_komoditas.dart';
 import 'package:rfc_apps/view/penjual/penjualan/detailPendapatan.dart';
 import 'package:rfc_apps/view/penjual/penjualan/riwayatPenjualan.dart';
 import 'package:rfc_apps/view/penjual/produk/detail_produk.dart';
@@ -159,6 +160,10 @@ class MyApp extends StatelessWidget {
         },
         '/saldo': (context) => SaldoPage(),
         '/komoditas': (context) => Komoditas(),
+        '/detail_komoditas': (context) {
+          final id = ModalRoute.of(context)!.settings.arguments as String;
+          return DetailKomoditasPage(id: id);
+        },
         '/mutasi_saldo': (context) => RiwayatMutasiPage(),
         '/informasi_rekening': (context) => const InformasiRekeningPage(),
       },
