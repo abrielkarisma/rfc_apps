@@ -35,9 +35,14 @@ class ProdukCardSeller extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: context.getWidth(170),
+                  height: context.getHeight(170),
                   child:
-                      ShimmerImage(imageUrl: produk.gambar, fit: BoxFit.cover)),
+                      ShimmerImage(imageUrl: produk.gambar, fit: BoxFit.cover),
+                ),
+              ),
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,

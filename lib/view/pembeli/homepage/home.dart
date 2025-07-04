@@ -211,30 +211,6 @@ class _HomeState extends State<Home> {
                   },
                 ),
                 SizedBox(height: context.getHeight(20)),
-                Padding(padding: EdgeInsets.only(top: context.getHeight(13))),
-                Container(
-                    width: double.infinity,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Lihat lebih banyak artikel",
-                          style: TextStyle(
-                              fontFamily: "poppins",
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        GestureDetector(
-                          onTap: widget.onSeeMoreArticles,
-                          child: Icon(
-                            LineIcons.arrowRight,
-                            color: Theme.of(context).primaryColor,
-                            size: 24,
-                          ),
-                        )
-                      ],
-                    )),
                 Padding(padding: EdgeInsets.only(top: context.getHeight(26))),
                 Container(
                   child: Column(

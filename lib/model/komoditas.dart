@@ -72,7 +72,7 @@ class KomoditasData {
   final String id;
   final String nama;
   final String gambar;
-  final int jumlah;
+  final double jumlah;
   final bool hapusObjek;
   final String tipeKomoditas;
   final bool isDeleted;
@@ -106,7 +106,7 @@ class KomoditasData {
       id: json['id'] ?? '',
       nama: json['nama'] ?? '',
       gambar: json['gambar'] ?? '',
-      jumlah: json['jumlah'] ?? 0,
+      jumlah: double.tryParse(json['jumlah'].toString()) ?? 0.0,
       hapusObjek: json['hapusObjek'] ?? false,
       tipeKomoditas: json['tipeKomoditas'] ?? '',
       isDeleted: json['isDeleted'] ?? false,
