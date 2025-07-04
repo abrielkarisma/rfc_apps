@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/komoditas.dart';
 import 'package:rfc_apps/service/komoditas.dart';
+import 'package:rfc_apps/service/produk.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 
 class DetailKomoditasPage extends StatefulWidget {
   final String id;
@@ -14,11 +16,22 @@ class DetailKomoditasPage extends StatefulWidget {
 
 class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
   KomoditasData? data;
+  final _formKey = GlobalKey<FormState>();
+  final _hargaController = TextEditingController();
+  final _deskripsiController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _fetch();
+  }
+
+  @override
+  void dispose() {
+    _hargaController.dispose();
+    _deskripsiController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetch() async {
@@ -29,6 +42,47 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
       });
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<void> _createProduct() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await ProdukService().createProductByKomoditas(
+        widget.id,
+        data!.nama,
+        _hargaController.text,
+        data!.jumlah.toString(),
+        data!.satuan.lambang.toLowerCase(),
+        _deskripsiController.text,
+        data!.gambar,
+      );
+
+      if (mounted) {
+        ToastHelper.showSuccessToast(
+          context,
+          'Produk berhasil ditambahkan',
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.showErrorToast(
+          context,
+          'Gagal menambahkan produk: ${e.toString()}',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -58,6 +112,55 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
                 fontFamily: 'Poppins',
                 fontSize: 14,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormField({
+    required String label,
+    required TextEditingController controller,
+    required String? Function(String?) validator,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            validator: validator,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Theme.of(context).primaryColor),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.all(16),
             ),
           ),
         ],
@@ -101,40 +204,111 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
             child: data == null
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: context.getWidth(300),
-                          height: context.getHeight(300),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: ShimmerImage(
-                              imageUrl: data!.gambar,
-                              fit: BoxFit.cover,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: context.getWidth(300),
+                            height: context.getHeight(300),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: ShimmerImage(
+                                imageUrl: data!.gambar,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: context.getHeight(20)),
-                        Container(
-                          width: double.infinity,
-                          child: Text("Informasi Komoditas",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              )),
-                        ),
-                        _buildRow('Nama Komoditas', data!.nama),
-                        _buildRow('Jumlah', data!.jumlah.toString()),
-                        _buildRow('Tipe', data!.tipeKomoditas),
-                        _buildRow('Satuan', data!.satuan.nama),
-                        _buildRow('Jenis Budidaya', data!.jenisBudidaya.nama),
-                      ],
+                          SizedBox(height: context.getHeight(20)),
+                          Container(
+                            width: double.infinity,
+                            child: Text("Informasi Komoditas",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                )),
+                          ),
+                          _buildRow('Nama Komoditas', data!.nama),
+                          _buildRow('Jumlah', data!.jumlah.toString()),
+                          _buildRow('Tipe', data!.tipeKomoditas),
+                          _buildRow('Satuan', data!.satuan.nama),
+                          _buildRow('Jenis Budidaya', data!.jenisBudidaya.nama),
+                          SizedBox(height: context.getHeight(30)),
+                          Container(
+                            width: double.infinity,
+                            child: Text("Tambah Produk",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                )),
+                          ),
+                          _buildFormField(
+                            label: 'Harga per ${data!.satuan.nama}',
+                            controller: _hargaController,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Harga tidak boleh kosong';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'Harga harus berupa angka';
+                              }
+                              if (int.parse(value) <= 0) {
+                                return 'Harga harus lebih dari 0';
+                              }
+                              return null;
+                            },
+                          ),
+                          _buildFormField(
+                            label: 'Deskripsi Produk',
+                            controller: _deskripsiController,
+                            maxLines: 4,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Deskripsi tidak boleh kosong';
+                              }
+                              if (value.length < 10) {
+                                return 'Deskripsi minimal 10 karakter';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: context.getHeight(100)),
+                        ],
+                      ),
                     ),
                   ),
           ),
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Material(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: _isLoading ? null : _createProduct,
+            child: Container(
+              height: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Tambahkan Produk",
+                        style: TextStyle(
+                            fontFamily: 'poppins',
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18)),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

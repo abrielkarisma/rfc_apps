@@ -52,6 +52,51 @@ class ProdukService {
     }
   }
 
+  Future<Map<String, dynamic>> createProductByKomoditas(
+    String komoditasId,
+    String namaProduk,
+    String harga,
+    String stok,
+    String satuan,
+    String deskripsi,
+    String gambarProduk,
+  ) async {
+    final token = await tokenService().getAccessToken();
+
+    final response = await http.post(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      Uri.parse('$baseUrl/produk/komoditas'),
+      body: jsonEncode({
+        'komoditasId': komoditasId,
+        'nama': namaProduk,
+        'harga': harga,
+        'stok': stok,
+        'satuan': satuan,
+        'deskripsi': deskripsi,
+        'gambar': gambarProduk,
+      }),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return createProduk(
+        namaProduk,
+        harga,
+        stok,
+        satuan,
+        deskripsi,
+        gambarProduk,
+      );
+    }
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to create produk data');
+    }
+  }
+
   Future<List<Produk>> getProdukByTokoId(String Id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(

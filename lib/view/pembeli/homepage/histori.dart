@@ -62,9 +62,17 @@ class _HistoriState extends State<Histori> {
                 final tanggal = DateFormat('dd MMMM yyyy')
                     .format(DateTime.parse(pesanan['createdAt']));
                 String status;
-                if (midtransOrder != null &&
+                if (pesanan['status'] == 'expired') {
+                  status = 'expired';
+                } else if (midtransOrder != null &&
                     midtransOrder['transaction_status'] == 'pending') {
                   status = 'belum dibayar';
+                } else if (pesanan['status'] == 'menunggu') {
+                  status = 'menunggu';
+                } else if (pesanan['status'] == 'diterima') {
+                  status = 'diterima';
+                } else if (pesanan['status'] == 'selesai') {
+                  status = 'selesai';
                 } else {
                   status = pesanan['status'] ?? 'unknown';
                 }

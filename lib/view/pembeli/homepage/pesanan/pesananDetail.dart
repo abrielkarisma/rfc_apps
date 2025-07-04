@@ -32,7 +32,8 @@ class PesananDetailPage extends StatelessWidget {
 
   Future<void> _handlePaymentAction(
       BuildContext context, Map<String, dynamic> data) async {
-    if (data['MidtransOrder']['transaction_status'] == 'pending') {
+    if (data['MidtransOrder']['transaction_status'] == 'pending' &&
+        data['status'] == 'menunggu') {
       try {
         final result = await MidtransService()
             .createTransactionForPesanan(data["MidtransOrderId"], data['id']);
@@ -282,36 +283,49 @@ class PesananDetailPage extends StatelessWidget {
                   ),
                 ),
                 StatusBadge(
-                  status: transactionStatus == "pending"
-                      ? 'belum dibayar'
-                      : orderStatus,
+                  status:
+                      transactionStatus == "pending" && orderStatus == "expired"
+                          ? 'expired'
+                          : transactionStatus == "pending" &&
+                                  orderStatus == "menunggu"
+                              ? 'belum dibayar'
+                              : orderStatus,
                 ),
               ],
             ),
             SizedBox(height: context.getHeight(8)),
-            transactionStatus == "pending"
+            transactionStatus == "pending" && orderStatus == "expired"
                 ? Text(
-                    "Silahkan lakukan pembayaran untuk menyelesaikan pesanan.",
+                    "Pesanan telah kadaluarsa, silahkan lakukan pemesanan ulang.",
                     style: TextStyle(
                       fontFamily: "poppins",
                       fontSize: 12,
                       color: Colors.red,
                     ),
                   )
-                : TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => PaymentSuccessPage(
-                                    data: data,
-                                  )));
-                    },
-                    child: Text("Lihat Bukti Pembayaran",
+                : transactionStatus == "pending" && orderStatus == "menunggu"
+                    ? Text(
+                        "Silahkan lakukan pembayaran untuk menyelesaikan pesanan.",
                         style: TextStyle(
-                            fontFamily: "poppins",
-                            fontSize: 12,
-                            color: Theme.of(context).primaryColor))),
+                          fontFamily: "poppins",
+                          fontSize: 12,
+                          color: Colors.red,
+                        ),
+                      )
+                    : TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => PaymentSuccessPage(
+                                        data: data,
+                                      )));
+                        },
+                        child: Text("Lihat Bukti Pembayaran",
+                            style: TextStyle(
+                                fontFamily: "poppins",
+                                fontSize: 12,
+                                color: Theme.of(context).primaryColor))),
             SizedBox(height: context.getHeight(24)),
             const Text(
               "Alamat Pengambilan",
@@ -355,7 +369,9 @@ class PesananDetailPage extends StatelessWidget {
             ),
           ),
           child: Text(
-            transactionStatus == "pending" ? "Lakukan Pembayaran" : "Selesai",
+            transactionStatus == "pending" && orderStatus == "menunggu"
+                ? "Lakukan Pembayaran"
+                : "Selesai",
             style: const TextStyle(
               color: Colors.white,
               fontFamily: "poppins",

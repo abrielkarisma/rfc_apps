@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 
@@ -39,7 +40,7 @@ class _EditProdukState extends State<EditProduk> {
   final TextEditingController _stokProdukController = TextEditingController();
   final TextEditingController _hargaProdukController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-
+  bool editStokSatuan = false;
   String? _produkPhoto;
   String _produkgambar = "";
   bool _imageChanged = false;
@@ -51,6 +52,8 @@ class _EditProdukState extends State<EditProduk> {
 
   @override
   void initState() {
+    editStokSatuan = false;
+    editStatus();
     super.initState();
     // Initialize form fields with current product data
     _namaProdukController.text = widget.nama;
@@ -80,6 +83,20 @@ class _EditProdukState extends State<EditProduk> {
         });
       },
     );
+  }
+
+  Future<void> editStatus() async {
+    final toko = await tokoService().getTokoByUserId();
+    if (toko.data[0].TypeToko == "rfc") {
+      setState(() {
+        editStokSatuan = true;
+        _selectedSatuan = widget.satuan;
+      });
+    } else if (toko.data[0].TypeToko == "umkm") {
+      setState(() {
+        editStokSatuan = false;
+      });
+    }
   }
 
   Future<void> _updateProduk() async {
@@ -276,6 +293,7 @@ class _EditProdukState extends State<EditProduk> {
                               child: _buildTextField(
                                 controller: _stokProdukController,
                                 keyboardType: TextInputType.number,
+                                enabled: !editStokSatuan,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -285,7 +303,9 @@ class _EditProdukState extends State<EditProduk> {
                                 value: _selectedSatuan,
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.grey[200],
+                                  fillColor: editStokSatuan
+                                      ? Colors.grey[300]
+                                      : Colors.grey[200],
                                   contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 14),
                                   border: OutlineInputBorder(
@@ -305,11 +325,13 @@ class _EditProdukState extends State<EditProduk> {
                                             fontSize: 14)),
                                   );
                                 }).toList(),
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    _selectedSatuan = value;
-                                  });
-                                },
+                                onChanged: editStokSatuan
+                                    ? null
+                                    : (String? value) {
+                                        setState(() {
+                                          _selectedSatuan = value;
+                                        });
+                                      },
                               ),
                             )
                           ],
@@ -358,14 +380,16 @@ class _EditProdukState extends State<EditProduk> {
     required TextEditingController controller,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
+    bool enabled = true,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      enabled: enabled,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: enabled ? Colors.grey[200] : Colors.grey[300],
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
@@ -373,7 +397,8 @@ class _EditProdukState extends State<EditProduk> {
           borderSide: BorderSide.none,
         ),
       ),
-      style: TextStyle(color: Colors.black, fontSize: 16),
+      style: TextStyle(
+          color: enabled ? Colors.black : Colors.grey[600], fontSize: 16),
     );
   }
 }
