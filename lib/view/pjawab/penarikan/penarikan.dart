@@ -298,6 +298,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       itemCount: _requests.length + (_isLoadingMore ? 1 : 0),
       padding: const EdgeInsets.all(12.0),
@@ -441,6 +442,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: 5,
         padding: const EdgeInsets.all(12.0),
         itemBuilder: (_, __) => Card(

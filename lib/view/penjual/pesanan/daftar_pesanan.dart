@@ -91,6 +91,10 @@ class _DaftarPesananState extends State<DaftarPesanan> {
     }
   }
 
+  Future<void> _refreshOrders() async {
+    await _fetchOrders();
+  }
+
   void dispose() {
     _timer?.cancel();
     super.dispose();
@@ -188,18 +192,21 @@ class _DaftarPesananState extends State<DaftarPesanan> {
                       ),
                       const SizedBox(height: 20),
                       Expanded(
-                        child: PageView(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-                          },
-                          children: [
-                            _buildOrderList(_pesananMasuk),
-                            _buildOrderList(_menungguDiambil),
-                            _buildOrderList(_selesai),
-                          ],
+                        child: RefreshIndicator(
+                          onRefresh: _refreshOrders,
+                          child: PageView(
+                            controller: _pageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                            },
+                            children: [
+                              _buildOrderList(_pesananMasuk),
+                              _buildOrderList(_menungguDiambil),
+                              _buildOrderList(_selesai),
+                            ],
+                          ),
                         ),
                       )
                     ],
@@ -222,6 +229,7 @@ class _DaftarPesananState extends State<DaftarPesanan> {
       );
     }
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       itemCount: orders.length,

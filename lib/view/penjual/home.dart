@@ -80,6 +80,13 @@ class _homeSellerState extends State<homeSeller> {
     });
   }
 
+  Future<void> _refreshSellerHome() async {
+    _getTokoDatabyId();
+    getPesananToko();
+    _fetchSaldo();
+    _getPendapatan();
+  }
+
   void _getTokoDatabyId() async {
     try {
       final toko = await tokoService().getTokoByUserId();
@@ -204,20 +211,24 @@ class _homeSellerState extends State<homeSeller> {
         backgroundColor: Colors.transparent,
       ),
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            child: Image.asset(
-              'assets/images/homebackground.png',
-              fit: BoxFit.fill,
+      body: RefreshIndicator(
+        onRefresh: _refreshSellerHome,
+        child: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: Image.asset(
+                'assets/images/homebackground.png',
+                fit: BoxFit.fill,
+              ),
             ),
-          ),
-          Container(
-            margin: EdgeInsets.only(
-                left: 20, right: 20, top: context.getHeight(100), bottom: 20),
-            child: Column(
+            SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                margin: EdgeInsets.only(
+                    left: 20, right: 20, top: context.getHeight(100), bottom: 20),
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(

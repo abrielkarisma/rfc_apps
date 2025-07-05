@@ -34,6 +34,13 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> _refreshHome() async {
+    _loadSaldo();
+    setState(() {
+      _produkListKey = UniqueKey();
+    });
+  }
+
   String formatRupiah(dynamic amount) {
     double numericAmount = 0.0;
     if (amount is String) {
@@ -168,8 +175,11 @@ class _HomeState extends State<Home> {
         Padding(padding: EdgeInsets.only(top: context.getHeight(59))),
         Container(
           height: context.getHeight(670),
-          child: SingleChildScrollView(
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: _refreshHome,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
               children: [
                 FutureBuilder<Map<String, dynamic>>(
                   future: _saldoFuture,
