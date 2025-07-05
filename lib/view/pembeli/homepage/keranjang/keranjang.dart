@@ -306,139 +306,142 @@ class _KeranjangState extends State<Keranjang> {
         child: FutureBuilder<List<CartItem>>(
           future: futureKeranjang,
           builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
-
-          final items = snapshot.data!;
-          grouped = groupByToko(items);
-
-          for (var toko in grouped.keys) {
-            selectedToko.putIfAbsent(toko, () => false);
-            for (var item in grouped[toko]!) {
-              selectedItems.putIfAbsent(item, () => false);
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
             }
-          }
+            if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 80),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: grouped.length,
-              itemBuilder: (context, index) {
-                final tokoName = grouped.keys.elementAt(index);
-                final tokoItems = grouped[tokoName]!;
-                final toko = tokoItems.first.produk.toko;
+            final items = snapshot.data!;
+            grouped = groupByToko(items);
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CheckboxListTile(
-                          value: selectedToko[tokoName],
-                          onChanged: (val) =>
-                              handleTokoCheck(tokoName, tokoItems, val),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          title: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.network(
-                                  toko.logoToko,
-                                  width: 30,
-                                  height: 30,
-                                  fit: BoxFit.cover,
+            for (var toko in grouped.keys) {
+              selectedToko.putIfAbsent(toko, () => false);
+              for (var item in grouped[toko]!) {
+                selectedItems.putIfAbsent(item, () => false);
+              }
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: grouped.length,
+                itemBuilder: (context, index) {
+                  final tokoName = grouped.keys.elementAt(index);
+                  final tokoItems = grouped[tokoName]!;
+                  final toko = tokoItems.first.produk.toko;
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CheckboxListTile(
+                            value: selectedToko[tokoName],
+                            onChanged: (val) =>
+                                handleTokoCheck(tokoName, tokoItems, val),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            title: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    toko.logoToko,
+                                    width: 30,
+                                    height: 30,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  toko.nama,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    toko.nama,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const Divider(),
-                        ...tokoItems.map((item) => CheckboxListTile(
-                              value: selectedItems[item],
-                              onChanged: (val) =>
-                                  handleItemCheck(tokoName, item, val),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              title: Row(
-                                children: [
-                                  Image.network(item.produk.gambar,
-                                      width: 40, height: 40),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
+                          const Divider(),
+                          ...tokoItems.map((item) => CheckboxListTile(
+                                value: selectedItems[item],
+                                onChanged: (val) =>
+                                    handleItemCheck(tokoName, item, val),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                title: Row(
+                                  children: [
+                                    Image.network(item.produk.gambar,
+                                        width: 40, height: 40),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item.produk.nama,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w500)),
+                                          Text(
+                                              "${item.jumlah} ${item.produk.satuan}",
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey)),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.end,
                                       children: [
-                                        Text(item.produk.nama,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w500)),
                                         Text(
-                                            "${item.jumlah} ${item.produk.satuan}",
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey)),
+                                          "Rp. ${Formatter.rupiah(item.produk.harga)}",
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit,
+                                                  size: 18),
+                                              onPressed: () =>
+                                                  _showEditJumlahDialog(item),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete,
+                                                  size: 18, color: Colors.red),
+                                              onPressed: () =>
+                                                  _handleDelete(item),
+                                            ),
+                                          ],
+                                        )
                                       ],
                                     ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        "Rp. ${Formatter.rupiah(item.produk.harga)}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit,
-                                                size: 18),
-                                            onPressed: () =>
-                                                _showEditJumlahDialog(item),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.delete,
-                                                size: 18, color: Colors.red),
-                                            onPressed: () =>
-                                                _handleDelete(item),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )),
-                      ],
+                                  ],
+                                ),
+                              )),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),

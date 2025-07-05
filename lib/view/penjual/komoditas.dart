@@ -97,7 +97,7 @@ class _KomoditasState extends State<Komoditas> {
               },
             ),
           ),
-        ],
+       ) ],
       ),
     );
   }

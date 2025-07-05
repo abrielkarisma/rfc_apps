@@ -225,6 +225,6 @@ class _HistoriState extends State<Histori> {
               },
             ),
           )
-        ]));
+        )]));
   }
 }

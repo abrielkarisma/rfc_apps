@@ -729,8 +729,9 @@ class _homeSellerState extends State<homeSeller> {
               ],
             ),
           ),
-        ],
+        )],
       ),
+    )
     );
   }
 
