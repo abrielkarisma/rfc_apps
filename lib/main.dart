@@ -87,10 +87,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/landing',
+      initialRoute: '/',
       routes: {
-        '/landing': (context) => const LandingPage(),
-        '/': (context) => Homepage(),
+        '/': (context) => const LandingPage(),
         '/auth': (context) => AuthScreen(),
         '/onboarding': (context) => OnboardingScreen(),
         '/login': (context) =>

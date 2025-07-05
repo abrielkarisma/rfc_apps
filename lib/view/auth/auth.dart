@@ -17,27 +17,27 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/authbackground.png',
-                fit: BoxFit.fill,
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/authbackground.png',
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            Container(
-              padding: EdgeInsets.all(20),
-              child: RFCLogo(),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                    // color: Colors.red,
+              Container(
+                padding: EdgeInsets.all(20),
+                child: RFCLogo(),
+              ),
+              Column(
+                children: [
+                  Spacer(),
+                  Container(
                     height: context.getHeight(510),
                     width: context.getWidth(400),
                     margin: EdgeInsets.only(
@@ -53,10 +53,12 @@ class _AuthScreenState extends State<AuthScreen> {
                         LoginPembeliWidget(pageController: _pageController),
                         RegisterPembeliWidget(pageController: _pageController),
                       ],
-                    )),
-              ],
-            )
-          ],
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

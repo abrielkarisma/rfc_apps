@@ -16,7 +16,7 @@ class UserRequest extends StatefulWidget {
 class _UserRequestState extends State<UserRequest> {
   List<dynamic> _penjualList = [];
   Timer? _timer;
-  
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +53,10 @@ class _UserRequestState extends State<UserRequest> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           title: Text("Rooftop Farming Center.",
               style: TextStyle(
                   color: Colors.white,

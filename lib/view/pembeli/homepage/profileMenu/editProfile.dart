@@ -99,28 +99,36 @@ class _EditProfileState extends State<EditProfile> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
       ),
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            child: Image.asset(
-              'assets/images/homebackground.png',
-              fit: BoxFit.fill,
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(
-                left: 20, right: 20, top: context.getHeight(100), bottom: 20),
-            width: double.infinity,
-            height: double.infinity,
-            child: Column(
-              children: [
-                Expanded(
+      body: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: Image.asset(
+                  'assets/images/homebackground.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: context.getHeight(100),
+                    bottom: 20),
+                width: double.infinity,
+                child: SingleChildScrollView(
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
@@ -300,15 +308,15 @@ class _EditProfileState extends State<EditProfile> {
                               ],
                             )
                           ],
-                        ),
+                        )
                       ],
                     ),
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

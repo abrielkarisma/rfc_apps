@@ -51,6 +51,7 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text("Rooftop Farming Center.",
               style: TextStyle(
                   color: Colors.white,
