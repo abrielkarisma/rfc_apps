@@ -239,6 +239,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       itemCount: _penarikanList.length + (_isLoadingMore ? 1 : 0),
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -341,6 +342,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       baseColor: Colors.grey[350]!,
       highlightColor: Colors.grey[200]!,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: 5,
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         itemBuilder: (_, __) => Card(

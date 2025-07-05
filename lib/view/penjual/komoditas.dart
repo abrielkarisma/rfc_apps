@@ -20,6 +20,12 @@ class _KomoditasState extends State<Komoditas> {
     _komoditasFuture = _fetchKomoditas();
   }
 
+  Future<void> _refreshKomoditas() async {
+    setState(() {
+      _komoditasFuture = _fetchKomoditas();
+    });
+  }
+
   Future<List<KomoditasData>> _fetchKomoditas() async {
     final response = await KomoditasService().getUnproductKomoditas();
     return response.data;
@@ -60,9 +66,11 @@ class _KomoditasState extends State<Komoditas> {
           Padding(
             padding: EdgeInsets.only(
                 left: 20, right: 20, top: context.getHeight(100), bottom: 20),
-            child: FutureBuilder<List<KomoditasData>>(
-              future: _komoditasFuture,
-              builder: (context, snapshot) {
+            child: RefreshIndicator(
+              onRefresh: _refreshKomoditas,
+              child: FutureBuilder<List<KomoditasData>>(
+                future: _komoditasFuture,
+                builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -74,6 +82,7 @@ class _KomoditasState extends State<Komoditas> {
                   return const Center(child: Text('Tidak ada komoditas'));
                 }
                 return GridView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 20,

@@ -196,6 +196,7 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
             : _mutasiList.isEmpty && !_isLoading
                 ? _buildEmptyState()
                 : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     controller: _scrollController,
                     itemCount: _mutasiList.length +
                         (_isLoading && _currentPage <= _totalPages
@@ -289,6 +290,7 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
 
   Widget _buildMutasiListShimmer() {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: 7,
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
       itemBuilder: (context, index) {

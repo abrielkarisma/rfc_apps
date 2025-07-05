@@ -35,6 +35,10 @@ class _riwayatPenjualanState extends State<riwayatPenjualan> {
     });
   }
 
+  Future<void> _refreshRiwayat() async {
+    await fetchPendapatan();
+  }
+
   void filterByMonth(String? month) {
     if (month == null) return;
 
@@ -139,9 +143,12 @@ class _riwayatPenjualanState extends State<riwayatPenjualan> {
             ),
             SizedBox(height: context.getHeight(20)),
             Expanded(
-              child: filteredData.isEmpty
-                  ? Center(child: Text("Tidak ada data"))
-                  : ListView.builder(
+              child: RefreshIndicator(
+                onRefresh: _refreshRiwayat,
+                child: filteredData.isEmpty
+                    ? Center(child: Text("Tidak ada data"))
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: filteredData.length,
                       itemBuilder: (context, index) {
                         final item = filteredData[index];
