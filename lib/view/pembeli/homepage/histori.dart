@@ -31,6 +31,10 @@ class _HistoriState extends State<Histori> {
     }
   }
 
+  Future<void> _refreshHistori() async {
+    await _loadPesanan();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -51,8 +55,11 @@ class _HistoriState extends State<Histori> {
           ),
           SizedBox(height: context.getHeight(20)),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+            child: RefreshIndicator(
+              onRefresh: _refreshHistori,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
               itemCount: _pesananList.length,
               itemBuilder: (context, index) {
                 final pesanan = _pesananList[index];

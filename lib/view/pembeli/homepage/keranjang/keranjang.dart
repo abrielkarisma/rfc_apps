@@ -25,6 +25,12 @@ class _KeranjangState extends State<Keranjang> {
     futureKeranjang = KeranjangService().getAllKeranjang();
   }
 
+  Future<void> _refreshKeranjang() async {
+    setState(() {
+      futureKeranjang = KeranjangService().getAllKeranjang();
+    });
+  }
+
   Map<String, List<CartItem>> groupByToko(List<CartItem> items) {
     Map<String, List<CartItem>> result = {};
     for (var item in items) {
@@ -295,9 +301,11 @@ class _KeranjangState extends State<Keranjang> {
           },
         ),
       ),
-      body: FutureBuilder<List<CartItem>>(
-        future: futureKeranjang,
-        builder: (context, snapshot) {
+      body: RefreshIndicator(
+        onRefresh: _refreshKeranjang,
+        child: FutureBuilder<List<CartItem>>(
+          future: futureKeranjang,
+          builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -318,6 +326,7 @@ class _KeranjangState extends State<Keranjang> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 80),
             child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: grouped.length,
               itemBuilder: (context, index) {
