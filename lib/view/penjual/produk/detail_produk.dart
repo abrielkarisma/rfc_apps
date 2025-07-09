@@ -77,141 +77,208 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
             ),
           ),
 
-          // Content
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with title
-              Container(
-                padding: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: MediaQuery.of(context).padding.top + 56),
-                child: const Text(
-                  "Detail Produk",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+          // Content with RefreshIndicator
+          RefreshIndicator(
+            onRefresh: _getDataProduk,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
                 ),
-              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with title
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          top: MediaQuery.of(context).padding.top + 56),
+                      child: const Text(
+                        "Detail Produk",
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
 
-              SizedBox(
-                height: context.getHeight(60),
-              ),
-              Center(
-                child: Container(
-                    width: context.getWidth(400),
-                    height: context.getHeight(400),
-                    alignment: Alignment.center,
-                    child: $gambar.isNotEmpty
-                        ? Image(image: NetworkImage($gambar))
-                        : CircularProgressIndicator()),
-              ),
+                    SizedBox(
+                      height: context.getHeight(60),
+                    ),
 
-              SizedBox(
-                height: context.getHeight(20),
-              ),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      _buildDetailRow("Nama Produk", $nama),
-                      _buildDetailRow("Deskripsi Produk", $deskripsi),
-                      _buildDetailRow("Stok Produk", $stok),
-                      _buildDetailRow("Satuan Produk", $satuan),
-                      _buildDetailRow("Harga Produk", $harga),
-
-                      const Spacer(),
-
-                      // Action buttons
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _deleteProduk();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFFF4D37),
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Hapus Produk",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                    Center(
+                      child: Container(
+                        width: context.getWidth(320),
+                        height: context.getHeight(320),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF4CAD73).withOpacity(0.8),
+                              Colors.white.withOpacity(0.8),
+                              Color(0xFF4CAD73).withOpacity(0.6),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                              spreadRadius: 2,
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditProduk(
-                                        id: $id_produk,
-                                        nama: $nama,
-                                        harga: $harga,
-                                        stok: $stok,
-                                        satuan: $satuan,
-                                        deskripsi: $deskripsi,
-                                        gambar: $gambar,
-                                      ),
-                                    ),
-                                  );
-                                  if (result == 'refresh') {
-                                    await _getDataProduk();
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFF4CAD73),
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Edit Produk",
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                            BoxShadow(
+                              color: Color(0xFF4CAD73).withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, -5),
+                              spreadRadius: 1,
                             ),
                           ],
                         ),
-                      ),
-
-                      // Bottom indicator line
-                      Container(
-                        width: 100,
-                        height: 4,
-                        margin: EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(2),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: $gambar.isNotEmpty
+                                  ? Image(
+                                      image: NetworkImage($gambar),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    )
+                                  : Container(
+                                      alignment: Alignment.center,
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF4CAD73),
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    SizedBox(
+                      height: context.getHeight(20),
+                    ),
+
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          _buildDetailRow("Nama Produk", $nama),
+                          _buildDetailRow("Deskripsi Produk", $deskripsi),
+                          _buildDetailRow("Stok Produk", $stok),
+                          _buildDetailRow("Satuan Produk", $satuan),
+                          _buildDetailRow("Harga Produk", $harga),
+
+                          SizedBox(height: context.getHeight(40)),
+
+                          // Action buttons
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _deleteProduk();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFFFF4D37),
+                                      foregroundColor: Colors.white,
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Hapus Produk",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditProduk(
+                                            id: $id_produk,
+                                            nama: $nama,
+                                            harga: $harga,
+                                            stok: $stok,
+                                            satuan: $satuan,
+                                            deskripsi: $deskripsi,
+                                            gambar: $gambar,
+                                          ),
+                                        ),
+                                      );
+                                      if (result == 'refresh') {
+                                        await _getDataProduk();
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFF4CAD73),
+                                      foregroundColor: Colors.white,
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Edit Produk",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Bottom indicator line
+                          Container(
+                            width: 100,
+                            height: 4,
+                            margin: EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -289,16 +356,19 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.of(context).pop();
+                final navigator = Navigator.of(context);
+                navigator.pop(); // Close dialog first
+
                 try {
                   final response =
                       await ProdukService().deleteProduk($id_produk);
                   print(response);
                   if (response.message == "Successfully deleted produk data") {
-                    Navigator.pop(
-                      context,
-                    );
-                    Navigator.pop(context, 'refresh');
+                    if (mounted) {
+                      // Return to previous page with refresh signal
+                      navigator.pop('refresh');
+                      print("Navigating back with refresh signal");
+                    }
                   } else {
                     print("Failed to delete product: ${response.message}");
                   }

@@ -60,7 +60,7 @@ class _HomepageState extends State<Homepage> {
                   fontWeight: FontWeight.w600)),
           centerTitle: true,
           backgroundColor: Colors.transparent,
-        ), 
+        ),
         extendBodyBehindAppBar: true,
         body: Stack(
           children: [
@@ -77,76 +77,88 @@ class _HomepageState extends State<Homepage> {
             ),
           ],
         ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GNav(
-            rippleColor: Colors.grey[300]!,
-            hoverColor: Colors.grey[100]!,
-            gap: 8,
-            activeColor: Colors.white,
-            iconSize: 28,
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            duration: Duration(milliseconds: 400),
-            tabBackgroundColor: Theme.of(context).primaryColor,
-            color: Theme.of(context).primaryColor,
-            tabs: [
-              GButton(
-                icon: LineIcons.home,
-                text: 'Beranda',
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              GButton(
-                icon: LineIcons.store,
-                text: 'UMKM',
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              GButton(
-                icon: LineIcons.shoppingBasket,
-                text: 'Produk',
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              GButton(
-                icon: LineIcons.history,
-                text: 'Histori',
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              GButton(
-                icon: LineIcons.user,
-                text: 'Profil',
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20,
+                color: Colors.black.withOpacity(0.1),
               ),
             ],
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: GNav(
+              rippleColor: Colors.grey[300]!,
+              hoverColor: Colors.grey[100]!,
+              gap: 6,
+              activeColor: Colors.white,
+              iconSize: 22,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              duration: Duration(milliseconds: 300),
+              tabBackgroundColor: Theme.of(context).primaryColor,
+              color: Theme.of(context).primaryColor,
+              tabs: [
+                GButton(
+                  icon: LineIcons.home,
+                  text: 'Beranda',
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                GButton(
+                  icon: LineIcons.store,
+                  text: 'UMKM',
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                GButton(
+                  icon: LineIcons.shoppingBasket,
+                  text: 'Produk',
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                GButton(
+                  icon: LineIcons.history,
+                  text: 'Histori',
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                GButton(
+                  icon: LineIcons.user,
+                  text: 'Profil',
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+              selectedIndex: _selectedIndex,
+              onTabChange: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
           ),
         ));
   }

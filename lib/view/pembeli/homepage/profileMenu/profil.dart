@@ -175,7 +175,9 @@ class _ProfilState extends State<Profil> {
                             onTapRoute: '/saldo', context: context),
                         _buildMenuItem(
                             'assets/images/menuIcon/lock.png', 'Ubah Password',
-                            onTapRoute: '/change_password', context: context),
+                            onTapRoute: '/lupa_password',
+                            routeArguments: 'ganti',
+                            context: context),
                         _buildMenuItem('assets/images/menuIcon/star.png',
                             'Beri Rating Kami',
                             onTapRoute: '/tnc', context: context),
@@ -201,6 +203,7 @@ class _ProfilState extends State<Profil> {
   Widget _buildMenuItem(String assetPath, String title,
       {Color? iconColor,
       required String onTapRoute,
+      String? routeArguments,
       required BuildContext context}) {
     return Container(
       width: double.infinity,
@@ -225,7 +228,7 @@ class _ProfilState extends State<Profil> {
         trailing: const Icon(Icons.arrow_forward_ios_rounded,
             size: 16, color: Color(0xFF979797)),
         onTap: () {
-          Navigator.pushNamed(context, onTapRoute);
+          Navigator.pushNamed(context, onTapRoute, arguments: routeArguments);
         },
       ),
     );

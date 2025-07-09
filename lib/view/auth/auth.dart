@@ -150,72 +150,7 @@ class _AuthWidgetState extends State<AuthWidget> {
           ),
         ),
         Padding(padding: EdgeInsets.only(top: context.getHeight(34.5))),
-        Container(
-            width: double.infinity,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Divider(color: Color(0XFF333333), thickness: 1.5),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    "Atau login dengan",
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 12,
-                      color: Color(0XFF333333),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Divider(color: Color(0XFF333333), thickness: 1.5),
-                ),
-              ],
-            )),
         Padding(padding: EdgeInsets.only(top: context.getHeight(34.5))),
-        GestureDetector(
-          onTap: () {
-            _googleHandler();
-          },
-          child: Container(
-            width: double.infinity,
-            height: context.getHeight(38),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.grey,
-                width: 2,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  height: context.getHeight(24),
-                  padding: EdgeInsets.only(
-                    left: 20,
-                  ),
-                  child: Image(
-                    image: AssetImage("assets/images/google.png"),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                Text("Register dengan Google",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0XFF333333),
-                      fontFamily: "poppins",
-                      fontWeight: FontWeight.w400,
-                    )),
-                SizedBox(
-                  width: context.getWidth(24),
-                  height: context.getHeight(24),
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }

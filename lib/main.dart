@@ -109,7 +109,10 @@ class MyApp extends StatelessWidget {
         },
         '/kelola_produk': (context) => KelolaProduk(),
         '/tambah_produk': (context) => TambahProduk(),
-        '/lupa_password': (context) => LupaPasswordPage(),
+        '/lupa_password': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as String;
+  return LupaPasswordPage(from: args);
+        },
         '/detail_produk_buyer': (context) {
           final idProduk = ModalRoute.of(context)!.settings.arguments as String;
           return DetailProdukBuyer(idProduk: idProduk);

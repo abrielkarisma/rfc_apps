@@ -24,13 +24,19 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
   String deskripsiProduk = "";
   String hargaProduk = "";
   String kategoriProduk = "";
-  String stokProduk = "";
+  String stokProduk = "0"; // Initialize with "0" instead of empty string
   String satuanProduk = "";
   int jumlahProduk = 1;
   Key _produkListKey = UniqueKey();
 
   void _updateQuantity(int newQuantity) {
     jumlahProduk = newQuantity;
+  }
+
+  // Helper function to safely parse stock
+  int _getStokValue() {
+    if (stokProduk.isEmpty) return 0;
+    return int.tryParse(stokProduk) ?? 0;
   }
 
   void initState() {
@@ -105,12 +111,64 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                       ),
                       width: context.getWidth(300),
                       height: context.getHeight(300),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: ShimmerImage(
-                          imageUrl: gambarProduk,
-                          fit: BoxFit.cover,
-                        ),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: ColorFiltered(
+                              colorFilter: _getStokValue() == 0
+                                  ? ColorFilter.mode(
+                                      Colors.grey.withOpacity(0.6),
+                                      BlendMode.saturation,
+                                    )
+                                  : ColorFilter.mode(
+                                      Colors.transparent,
+                                      BlendMode.multiply,
+                                    ),
+                              child: ShimmerImage(
+                                imageUrl: gambarProduk,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          if (_getStokValue() == 0)
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.black.withOpacity(0.4),
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.inventory_2_outlined,
+                                      size: 50,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        'STOK HABIS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: "Inter",
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -153,14 +211,32 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                       ),
                       Container(
                         width: context.getWidth(60),
-                        child: Text(
-                          "Stok : $stokProduk",
-                          style: TextStyle(
-                              fontFamily: "Inter",
-                              color: Colors.black,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600),
-                        ),
+                        child: _getStokValue() == 0
+                            ? Column(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                  Text(
+                                    "Habis",
+                                    style: TextStyle(
+                                        fontFamily: "Inter",
+                                        color: Colors.red,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                "Stok : $stokProduk",
+                                style: TextStyle(
+                                    fontFamily: "Inter",
+                                    color: Colors.black,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600),
+                              ),
                       ),
                     ],
                   ),
@@ -186,33 +262,46 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      QuantityCounter(
-                        satuan: satuanProduk,
-                        stok: stokProduk,
-                        onQuantityChanged: _updateQuantity,
-                      ),
-                      SizedBox(width: 20),
+                      if (_getStokValue() > 0)
+                        QuantityCounter(
+                          satuan: satuanProduk,
+                          stok: stokProduk,
+                          onQuantityChanged: _updateQuantity,
+                        ),
+                      if (_getStokValue() == 0)
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              children: [],
+                            ),
+                          ),
+                        ),
+                      if (_getStokValue() > 0) SizedBox(width: 20),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          backgroundColor: Colors.green,
+                          backgroundColor:
+                              _getStokValue() == 0 ? Colors.grey : Colors.green,
                           padding: EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                         ),
                         label: Text(
-                          'Beli Sekarang',
+                          _getStokValue() == 0 ? 'Stok Habis' : 'Beli Sekarang',
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontFamily: "Poppins",
                               fontSize: 12,
                               color: Colors.white),
                         ),
-                        onPressed: () async {
-                          print('Selected quantity: $jumlahProduk');
-                          _addToKeranjang();
-                        },
+                        onPressed: _getStokValue() == 0
+                            ? null
+                            : () async {
+                                print('Selected quantity: $jumlahProduk');
+                                _addToKeranjang();
+                              },
                       ),
                     ]),
                 SizedBox(

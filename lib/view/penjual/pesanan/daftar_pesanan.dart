@@ -19,12 +19,9 @@ class _DaftarPesananState extends State<DaftarPesanan> {
   final PageController _pageController = PageController();
 
   final List<String> _tabs = ['Pesanan Masuk', 'Menunggu Diambil', 'Selesai'];
-  List<Map<String, dynamic>> _allOrders = [];
   List<Map<String, dynamic>> _pesananMasuk = [];
   List<Map<String, dynamic>> _menungguDiambil = [];
   List<Map<String, dynamic>> _selesai = [];
-  bool _isLoading = true;
-  String _errorMessage = '';
   Timer? _timer;
   @override
   void initState() {
@@ -37,18 +34,8 @@ class _DaftarPesananState extends State<DaftarPesanan> {
 
   Future<void> _fetchOrders() async {
     if (widget.tokoId.isEmpty) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage =
-            "Toko ID tidak tersedia. Harap kembali ke halaman utama.";
-      });
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
 
     try {
       final PesananService pesananService = PesananService();
@@ -74,20 +61,9 @@ class _DaftarPesananState extends State<DaftarPesanan> {
         }
 
         _filterOrders(fetchedOrders);
-      } else {
-        setState(() {
-          _isLoading = false;
-          _errorMessage =
-              fullResponse['message'] ?? 'Gagal mengambil data pesanan.';
-        });
       }
     } catch (e) {
       print('Error fetching orders in DaftarPesanan: $e');
-      setState(() {
-        _isLoading = false;
-        _errorMessage =
-            'Terjadi kesalahan saat memuat pesanan. Silakan coba lagi.';
-      });
     }
   }
 
@@ -95,6 +71,7 @@ class _DaftarPesananState extends State<DaftarPesanan> {
     await _fetchOrders();
   }
 
+  @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
@@ -124,11 +101,9 @@ class _DaftarPesananState extends State<DaftarPesanan> {
     }
 
     setState(() {
-      _allOrders = allOrders;
       _pesananMasuk = pesananMasukTemp;
       _menungguDiambil = menungguDiambilTemp;
       _selesai = selesaiTemp;
-      _isLoading = false;
     });
   }
 
@@ -218,14 +193,22 @@ class _DaftarPesananState extends State<DaftarPesanan> {
 
   Widget _buildOrderList(List<Map<String, dynamic>> orders) {
     if (orders.isEmpty) {
-      return Center(
-        child: Text(
-          "Belum ada pesanan.",
-          style: TextStyle(
-            fontFamily: "poppins",
-            fontSize: 14,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Center(
+              child: Text(
+                "Belum ada pesanan.",
+                style: TextStyle(
+                  fontFamily: "poppins",
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
     return ListView.builder(
@@ -237,8 +220,8 @@ class _DaftarPesananState extends State<DaftarPesanan> {
         final order = orders[index];
         return OrderListCard(
           order: order,
-          onTap: () {
-            final result = Navigator.push(
+          onTap: () async {
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => DetailPesanan(order: order),

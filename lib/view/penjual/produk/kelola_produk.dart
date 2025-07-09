@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/service/produk.dart';
 import 'package:rfc_apps/service/toko.dart';
-import 'package:rfc_apps/widget/produk_card_seller.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
 
 class KelolaProduk extends StatefulWidget {
@@ -67,11 +65,18 @@ class _KelolaProdukState extends State<KelolaProduk> {
               ),
               SizedBox(height: context.getHeight(50)),
               Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    _refreshProduk();
+                  },
                   child: ProdukGrid(
-                key: _produkListKey,
-                cardType: "kelola",
-                id: "",
-              )),
+                    key: _produkListKey,
+                    cardType: "kelola",
+                    id: "",
+                    onRefresh: _refreshProduk,
+                  ),
+                ),
+              ),
               SizedBox(height: context.getHeight(47)),
             ]))
       ]),

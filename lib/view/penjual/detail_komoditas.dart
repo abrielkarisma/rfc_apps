@@ -211,11 +211,58 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
                           Container(
                             width: context.getWidth(300),
                             height: context.getHeight(300),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: ShimmerImage(
-                                imageUrl: data!.gambar,
-                                fit: BoxFit.cover,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: [
+                                  Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.8),
+                                  Colors.white.withOpacity(0.8),
+                                  Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.6),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                  spreadRadius: 2,
+                                ),
+                                BoxShadow(
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, -5),
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: ShimmerImage(
+                                    imageUrl: data!.gambar,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

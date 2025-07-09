@@ -71,56 +71,57 @@ class _PjawabHomeState extends State<PjawabHome> {
               ),
             ]))
       ]),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GNav(
-          rippleColor: Colors.grey[300]!,
-          hoverColor: Colors.grey[100]!,
-          gap: 8,
-          activeColor: Colors.white,
-          iconSize: 28,
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          duration: Duration(milliseconds: 400),
-          tabBackgroundColor: Color(0xFF6BC0CA),
-          color: Color(0xFF6BC0CA),
-          tabs: [
-            GButton(
-              icon: LineIcons.users,
-              text: 'Manage User',
-              textStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: "poppins",
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            GButton(
-              icon: LineIcons.paperclip,
-              text: 'Manage Artikel',
-              textStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: "poppins",
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            GButton(
-              icon: LineIcons.moneyBill,
-              text: 'Penarikan',
-              textStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: "poppins",
-                fontWeight: FontWeight.w500,
-              ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(0.1),
             ),
           ],
-          selectedIndex: _selectedIndex,
-          onTabChange: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: GNav(
+            rippleColor: Colors.grey[300]!,
+            hoverColor: Colors.grey[100]!,
+            gap: 8,
+            activeColor: Colors.white,
+            iconSize: 24,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            duration: Duration(milliseconds: 300),
+            tabBackgroundColor: Color(0xFF6BC0CA),
+            color: Color(0xFF6BC0CA),
+            tabs: [
+              GButton(
+                icon: LineIcons.users,
+                text: 'Kelola Penjual',
+                textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontFamily: "poppins",
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              GButton(
+                icon: LineIcons.moneyBill,
+                text: 'Penarikan',
+                textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontFamily: "poppins",
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+            selectedIndex: _selectedIndex,
+            onTabChange: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
         ),
       ),
     );

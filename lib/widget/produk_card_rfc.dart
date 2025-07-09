@@ -12,6 +12,8 @@ class ProdukCardRFC extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isOutOfStock = produk.stok == 0;
+
     return GestureDetector(
       onTap: () async {
         final result = await Navigator.pushNamed(
@@ -24,10 +26,12 @@ class ProdukCardRFC extends StatelessWidget {
         }
       },
       child: Card(
-        color: Colors.white,
-        elevation: 4,
+        color: isOutOfStock ? Colors.grey[200] : Colors.white,
+        elevation: isOutOfStock ? 2 : 4,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.grey, width: 0.5),
+          side: BorderSide(
+              color: isOutOfStock ? Colors.grey[400]! : Colors.grey,
+              width: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
@@ -42,10 +46,58 @@ class ProdukCardRFC extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     height: context.getHeight(143),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: ShimmerImage(
-                            imageUrl: produk.gambar, fit: BoxFit.cover)),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: ColorFiltered(
+                              colorFilter: isOutOfStock
+                                  ? ColorFilter.mode(
+                                      Colors.grey.withOpacity(0.6),
+                                      BlendMode.saturation,
+                                    )
+                                  : ColorFilter.mode(
+                                      Colors.transparent,
+                                      BlendMode.multiply,
+                                    ),
+                              child: ShimmerImage(
+                                  imageUrl: produk.gambar, fit: BoxFit.cover),
+                            ),
+                          ),
+                        ),
+                        if (isOutOfStock)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.black.withOpacity(0.3),
+                              ),
+                              child: Center(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'HABIS',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: "Inter",
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -57,6 +109,7 @@ class ProdukCardRFC extends StatelessWidget {
                         fontWeight: FontWeight.normal,
                         overflow: TextOverflow.ellipsis,
                         fontFamily: "Inter",
+                        color: isOutOfStock ? Colors.grey[600] : Colors.black,
                       ),
                       maxLines: 1,
                       textAlign: TextAlign.start,
@@ -80,11 +133,14 @@ class ProdukCardRFC extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      'Rp ${Formatter.rupiah(produk.harga)}',
+                      isOutOfStock
+                          ? 'Stok Habis'
+                          : 'Rp ${Formatter.rupiah(produk.harga)}',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         fontFamily: "Inter",
+                        color: isOutOfStock ? Colors.red : Colors.black,
                       ),
                     ),
                   ),
@@ -97,8 +153,10 @@ class ProdukCardRFC extends StatelessWidget {
                 bottom: context.getHeight(8),
                 right: context.getWidth(8),
                 child: Container(
-                    child:
-                        Image(image: AssetImage('assets/images/cartplus.png'))),
+                    child: Opacity(
+                        opacity: isOutOfStock ? 0.3 : 1.0,
+                        child: Image(
+                            image: AssetImage('assets/images/cartplus.png')))),
               ),
               Positioned(
                 top: context.getHeight(0),

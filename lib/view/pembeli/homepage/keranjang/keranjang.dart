@@ -457,7 +457,7 @@ class _KeranjangState extends State<Keranjang> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Bayar",
+                  const Text("Pesan Sekarang",
                       style: TextStyle(
                           fontFamily: 'poppins',
                           color: Colors.white,

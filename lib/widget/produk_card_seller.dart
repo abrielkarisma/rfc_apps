@@ -6,11 +6,14 @@ import 'package:rfc_apps/utils/rupiahFormatter.dart';
 
 class ProdukCardSeller extends StatelessWidget {
   final Produk produk;
+  final VoidCallback? onRefresh;
 
-  const ProdukCardSeller({super.key, required this.produk});
+  const ProdukCardSeller({super.key, required this.produk, this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
+    bool isOutOfStock = produk.stok == 0;
+
     return GestureDetector(
       onTap: () async {
         final result = await Navigator.pushNamed(
@@ -18,12 +21,17 @@ class ProdukCardSeller extends StatelessWidget {
           '/detail_produk',
           arguments: produk.id,
         );
+        if (result == 'refresh' && onRefresh != null) {
+          onRefresh!();
+        }
       },
       child: Card(
-        color: Colors.white,
-        elevation: 4,
+        color: isOutOfStock ? Colors.grey[200] : Colors.white,
+        elevation: isOutOfStock ? 2 : 4,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.grey, width: 0.5),
+          side: BorderSide(
+              color: isOutOfStock ? Colors.grey[400]! : Colors.grey,
+              width: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
@@ -34,14 +42,57 @@ class ProdukCardSeller extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: context.getWidth(170),
-                  height: context.getHeight(170),
-                  child:
-                      ShimmerImage(imageUrl: produk.gambar, fit: BoxFit.cover),
-                ),
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: context.getWidth(170),
+                      height: context.getHeight(170),
+                      child: ColorFiltered(
+                        colorFilter: isOutOfStock
+                            ? ColorFilter.mode(
+                                Colors.grey.withOpacity(0.6),
+                                BlendMode.saturation,
+                              )
+                            : ColorFilter.mode(
+                                Colors.transparent,
+                                BlendMode.multiply,
+                              ),
+                        child: ShimmerImage(
+                            imageUrl: produk.gambar, fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+                  if (isOutOfStock)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.black.withOpacity(0.3),
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'HABIS',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "Inter",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Container(
@@ -53,6 +104,7 @@ class ProdukCardSeller extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     overflow: TextOverflow.ellipsis,
                     fontFamily: "Inter",
+                    color: isOutOfStock ? Colors.grey[600] : Colors.black,
                   ),
                   maxLines: 1,
                   textAlign: TextAlign.start,
@@ -61,11 +113,15 @@ class ProdukCardSeller extends StatelessWidget {
               Container(
                 width: double.infinity,
                 child: Text(
-                  'Stok: ${produk.stok} ${produk.satuan}',
+                  isOutOfStock
+                      ? 'Stok Habis'
+                      : 'Stok: ${produk.stok} ${produk.satuan}',
                   style: TextStyle(
                     fontSize: 8,
                     fontFamily: "Inter",
-                    color: Colors.grey,
+                    color: isOutOfStock ? Colors.red : Colors.grey,
+                    fontWeight:
+                        isOutOfStock ? FontWeight.bold : FontWeight.normal,
                   ),
                   maxLines: 1,
                   textAlign: TextAlign.start,
@@ -74,11 +130,13 @@ class ProdukCardSeller extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  'Rp ${Formatter.rupiah(produk.harga)}',
+                  isOutOfStock
+                      ? 'Tidak Tersedia'
+                      : 'Rp ${Formatter.rupiah(produk.harga)}',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: isOutOfStock ? Colors.red : Colors.green,
                     fontFamily: "Inter",
                   ),
                 ),

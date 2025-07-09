@@ -4,6 +4,8 @@ import 'package:rfc_apps/utils/toastHelper.dart';
 import 'dart:async';
 
 class LupaPasswordPage extends StatefulWidget {
+  final String from;
+  LupaPasswordPage({required this.from});
   @override
   State<LupaPasswordPage> createState() => _LupaPasswordPageState();
 }
@@ -116,11 +118,22 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Lupa Password',
-          style: TextStyle(fontFamily: 'Poppins'),
+          widget.from == "login" ? 'Lupa Password' : "Ganti Password",
+          style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -140,7 +153,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             ),
             SizedBox(height: 10),
             Text(
-              'Masukkan email Anda untuk menerima tautan reset password.',
+              'Masukkan email Anda untuk menerima kode via WhatsApp ke nomor yang terdaftar.',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[700],
@@ -317,9 +330,11 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             ),
             Spacer(),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pop(context);
+              },
               child: Text(
-                'Kembali ke Login',
+                'Kembali',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontFamily: 'Poppins',

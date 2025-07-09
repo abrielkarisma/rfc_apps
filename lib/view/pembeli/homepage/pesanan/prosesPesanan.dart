@@ -162,7 +162,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
             minimumSize: Size.fromHeight(context.getHeight(60)),
           ),
           child: const Text(
-            "Buat Pesanan",
+            "Bayar",
             style: TextStyle(
               fontFamily: "poppins",
               fontWeight: FontWeight.bold,

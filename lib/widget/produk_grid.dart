@@ -13,10 +13,12 @@ class ProdukGrid extends StatefulWidget {
       {super.key,
       required this.cardType,
       required this.id,
-      this.searchQuery = ''});
+      this.searchQuery = '',
+      this.onRefresh});
   final String id;
   final String cardType;
   final String searchQuery;
+  final VoidCallback? onRefresh;
 
   @override
   State<ProdukGrid> createState() => _ProdukGridState();
@@ -73,7 +75,7 @@ class _ProdukGridState extends State<ProdukGrid> {
 
   Widget _returnCard(Produk produk) {
     if (index == 0) {
-      return ProdukCardSeller(produk: produk);
+      return ProdukCardSeller(produk: produk, onRefresh: widget.onRefresh);
     } else if (index == 1) {
       return ProdukCardRFC(produk: produk);
     } else if (index == 2) {
@@ -214,7 +216,7 @@ class _ProdukGridState extends State<ProdukGrid> {
 
           return Container(
             child: GridView.builder(
-              physics: const BouncingScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,

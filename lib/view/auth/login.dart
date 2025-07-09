@@ -368,7 +368,8 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/lupa_password');
+                Navigator.pushNamed(context, '/lupa_password',
+                    arguments: 'login');
               },
               child: Text("Lupa Password?",
                   style: TextStyle(
