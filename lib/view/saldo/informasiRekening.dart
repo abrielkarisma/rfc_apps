@@ -98,7 +98,11 @@ class _InformasiRekeningPageState extends State<InformasiRekeningPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Informasi Rekening',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'poppins',
+                fontSize: 16,
+                color: Colors.white)),
         backgroundColor: _primaryColor,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),

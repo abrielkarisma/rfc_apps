@@ -24,7 +24,6 @@ class _PjawabHomeState extends State<PjawabHome> {
 
   late final List<Widget> _widgetOptions = <Widget>[
     UserList(),
-    Center(child: Text('Manage Artikel')),
     AdminRequestPenarikanPage()
   ];
   @override
@@ -98,6 +97,7 @@ class _PjawabHomeState extends State<PjawabHome> {
             duration: Duration(milliseconds: 300),
             tabBackgroundColor: Color(0xFF6BC0CA),
             color: Color(0xFF6BC0CA),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             tabs: [
               GButton(
                 icon: LineIcons.users,

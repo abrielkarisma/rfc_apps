@@ -131,7 +131,13 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
                       fontSize: 12)),
               SizedBox(height: context.getHeight(10)),
               Text(
-                toko.alamat,
+                toko.alamat.isEmpty ||
+                        toko.alamat ==
+                            "Alamat akan ditampilkan di proses pesanan" ||
+                        toko.alamat ==
+                            "Lokasi pengambilan akan dikonfirmasi setelah pembayaran"
+                    ? "Lokasi pengambilan akan dikonfirmasi setelah pembayaran"
+                    : toko.alamat,
                 style: const TextStyle(
                   fontFamily: "poppins",
                   fontSize: 12,
@@ -150,9 +156,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
         child: ElevatedButton(
           onPressed: () {
             _handlePesanan();
-            
           },
-          
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
@@ -182,7 +186,11 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
           await PesananService().createPesanan(generateOrderId, widget.items);
       if (response['message'] == "Pesanan berhasil dibuat") {
         for (var item in widget.items) {
-          await KeranjangService().deleteKeranjang(item.id);
+          if (!item.id.startsWith("temp_")) {
+            try {
+              await KeranjangService().deleteKeranjang(item.id);
+            } catch (e) {}
+          }
         }
         final response = await MidtransService()
             .createTransaction(generateOrderId, widget.items);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:rfc_apps/service/saldo.dart';
+import 'package:rfc_apps/utils/date_formatter.dart';
+import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:shimmer/shimmer.dart';
 
 const Color appPrimaryColor = Color(0xFF4CAD73);
@@ -60,7 +61,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     try {
       final response = await _saldoService.getMyPenarikanSaldoHistory(
           page: _currentPage, limit: 10);
-      
+
       final List<dynamic> newPenarikan =
           response['data'] as List<dynamic>? ?? [];
 
@@ -96,28 +97,6 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
         !_isLoadingMore &&
         _currentPage <= _totalPages) {
       _fetchPenarikanHistory();
-    }
-  }
-
-  String formatRupiah(dynamic amount) {
-    double numericAmount = 0.0;
-    if (amount is String) {
-      numericAmount = double.tryParse(amount) ?? 0.0;
-    } else if (amount is num) {
-      numericAmount = amount.toDouble();
-    }
-    final formatCurrency =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return formatCurrency.format(numericAmount);
-  }
-
-  String formatTanggal(String? dateString) {
-    if (dateString == null) return 'Tgl tidak tersedia';
-    try {
-      final DateTime dateTime = DateTime.parse(dateString);
-      return DateFormat('dd MMM yy, HH:mm', 'id_ID').format(dateTime);
-    } catch (e) {
-      return dateString;
     }
   }
 
@@ -173,22 +152,52 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Riwayat Penarikan',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: appPrimaryColor, 
-        elevation: 1,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'poppins',
+              fontSize: 16,
+            )),
+        backgroundColor: appPrimaryColor,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                appPrimaryColor,
+                appPrimaryColorDark,
+              ],
+            ),
+          ),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      backgroundColor: Colors.grey[100],
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: RefreshIndicator(
-          onRefresh: () => _fetchPenarikanHistory(isRefresh: true),
-          color: appPrimaryColor, 
-          child: _buildPenarikanList(),
+      backgroundColor: Colors.grey[50],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.grey.shade50,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: RefreshIndicator(
+            onRefresh: () => _fetchPenarikanHistory(isRefresh: true),
+            color: appPrimaryColor,
+            backgroundColor: Colors.white,
+            child: _buildPenarikanList(),
+          ),
         ),
       ),
     );
@@ -217,7 +226,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                 onPressed: () => _fetchPenarikanHistory(isRefresh: true),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: appPrimaryColor,
-                    foregroundColor: Colors.white), 
+                    foregroundColor: Colors.white),
               )
             ],
           ),
@@ -228,11 +237,44 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history_toggle_off_outlined,
-                size: 80, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            const Text('Belum ada riwayat penarikan.',
-                style: TextStyle(fontSize: 17, color: Colors.grey)),
+            Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.history_toggle_off_outlined,
+                size: 60,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Belum ada riwayat penarikan',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Penarikan yang Anda ajukan akan muncul di sini',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       );
@@ -242,7 +284,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       itemCount: _penarikanList.length + (_isLoadingMore ? 1 : 0),
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
       itemBuilder: (context, index) {
         if (index == _penarikanList.length) {
           return _buildLoadingMoreIndicator();
@@ -253,82 +295,210 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
         final String status = penarikan['status']?.toString() ?? 'unknown';
 
         return Card(
-          elevation: 2.0,
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
+          elevation: 3.0,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shadowColor: Colors.grey.withOpacity(0.3),
           child: InkWell(
             onTap: () => _showDetailPenarikanDialog(context, penarikan),
-            borderRadius: BorderRadius.circular(12.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        formatRupiah(penarikan['jumlahDiminta']),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: appPrimaryColorDark), 
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getColorForStatus(status).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white,
+                    Colors.grey.shade50,
+                  ],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                CurrencyFormatter.formatRupiah(
+                                    penarikan['jumlahDiminta']),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: appPrimaryColorDark,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'ID: ${penarikan['id']?.toString().substring(0, 8) ?? 'N/A'}...',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(_getIconForStatus(status),
-                                color: _getColorForStatus(status), size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatStatusPenarikan(status),
-                              style: TextStyle(
-                                  color: _getColorForStatus(status),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _getColorForStatus(status).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color:
+                                  _getColorForStatus(status).withOpacity(0.3),
+                              width: 1,
                             ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _getIconForStatus(status),
+                                color: _getColorForStatus(status),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _formatStatusPenarikan(status),
+                                style: TextStyle(
+                                  color: _getColorForStatus(status),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 1,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            Colors.grey.shade300,
+                            Colors.transparent,
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'ID Penarikan: ${penarikan['id']?.toString().substring(0, 8) ?? 'N/A'}...', 
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tujuan: ${rekeningData?['namaBank'] ?? '-'} (${rekeningData?['nomorRekening'] ?? '-'})',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-                  ),
-                  Text(
-                    'a.n ${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Tanggal Diajukan: ${formatTanggal(penarikan['tanggalRequest']?.toString())}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                  if (penarikan['tanggalProses'] != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        'Tanggal Diproses: ${formatTanggal(penarikan['tanggalProses']?.toString())}',
-                        style: TextStyle(
-                            fontSize: 12, color: Colors.grey.shade500),
-                      ),
                     ),
-                ],
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: appPrimaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.account_balance,
+                            color: appPrimaryColor,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${rekeningData?['namaBank'] ?? '-'}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${rekeningData?['nomorRekening'] ?? '-'}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                              Text(
+                                'a.n ${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          color: Colors.grey.shade500,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Diajukan: ${DateFormatter.formatTanggalSingkat(penarikan['tanggalRequest']?.toString())} ${DateFormatter.formatJam(penarikan['tanggalRequest']?.toString())}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (penarikan['tanggalProses'] != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    'Diproses: ${DateFormatter.formatTanggalSingkat(penarikan['tanggalProses']?.toString())} ${DateFormatter.formatJam(penarikan['tanggalProses']?.toString())}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.grey.shade400,
+                          size: 14,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -339,38 +509,68 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
 
   Widget _buildLoadingShimmerList() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[350]!,
-      highlightColor: Colors.grey[200]!,
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: 5,
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         itemBuilder: (_, __) => Card(
-          elevation: 1.0,
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
+          elevation: 3.0,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.grey.shade50,
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(width: 120, height: 20.0, color: Colors.white),
-                      Container(
-                          width: 80,
-                          height: 16.0,
-                          color: Colors.white,
-                          margin: const EdgeInsets.only(top: 4)),
-                    ]),
-                const SizedBox(height: 8),
-                Container(
-                    width: double.infinity, height: 12.0, color: Colors.white),
-                const SizedBox(height: 4),
-                Container(width: 150, height: 12.0, color: Colors.white),
-              ],
+                      Container(width: 140, height: 22.0, color: Colors.white),
+                      Container(width: 100, height: 20.0, color: Colors.white),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(height: 1, color: Colors.white),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(width: 40, height: 40, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                                width: double.infinity,
+                                height: 14.0,
+                                color: Colors.white),
+                            const SizedBox(height: 4),
+                            Container(
+                                width: 120, height: 12.0, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(width: 200, height: 12.0, color: Colors.white),
+                ],
+              ),
             ),
           ),
         ),
@@ -379,10 +579,45 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
   }
 
   Widget _buildLoadingMoreIndicator() {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
+    return Container(
+      padding: const EdgeInsets.all(20.0),
       child: Center(
-        child: CircularProgressIndicator(color: appPrimaryColor), 
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: appPrimaryColor,
+                  strokeWidth: 2,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Memuat lebih banyak...',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -398,83 +633,312 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Row(
-            children: [
-              Icon(_getIconForStatus(status),
-                  color: _getColorForStatus(status), size: 28),
-              const SizedBox(width: 10),
-              Text('Detail Penarikan',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18)),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                _buildDetailRow(
-                    'ID Penarikan', penarikan['id']?.toString() ?? '-'),
-                _buildDetailRow('Status', _formatStatusPenarikan(status),
-                    valueColor: _getColorForStatus(status)),
-                _buildDetailRow('Tanggal Diajukan',
-                    formatTanggal(penarikan['tanggalRequest']?.toString())),
-                if (penarikan['tanggalProses'] != null)
-                  _buildDetailRow('Tanggal Diproses',
-                      formatTanggal(penarikan['tanggalProses']?.toString())),
-                const SizedBox(height: 8),
-                _buildDetailRow(
-                    'Jumlah Diminta', formatRupiah(penarikan['jumlahDiminta'])),
-                _buildDetailRow(
-                    'Biaya Admin', formatRupiah(penarikan['biayaAdmin'])),
-                _buildDetailRow('Jumlah Diterima',
-                    formatRupiah(penarikan['jumlahDiterima']),
-                    valueColor: appPrimaryColorDark, isBold: true),
-                const SizedBox(height: 8),
-                Text("Rekening Tujuan",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade700)),
-                Padding(
-                  padding: const EdgeInsets.only(left: 0.0),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          elevation: 10,
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  appPrimaryColor.withOpacity(0.1),
+                  appPrimaryColorLight,
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _getColorForStatus(status).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getIconForStatus(status),
+                    color: _getColorForStatus(status),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${rekeningData?['namaBank'] ?? '-'}',
-                          style: const TextStyle(fontWeight: FontWeight.w500)),
-                      Text('${rekeningData?['nomorRekening'] ?? '-'}'),
+                      const Text(
+                        'Detail Penarikan',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
                       Text(
-                          'a.n ${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}'),
+                        _formatStatusPenarikan(status),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _getColorForStatus(status),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                if (penarikan['catatanAdmin'] != null &&
-                    penarikan['catatanAdmin'].toString().isNotEmpty)
-                  _buildDetailRow('Catatan Admin:',
-                      penarikan['catatanAdmin']?.toString() ?? '-'),
-                if (penarikan['buktiTransfer'] != null &&
-                    penarikan['buktiTransfer'].toString().isNotEmpty)
-                  TextButton(
-                      onPressed: () {
-                        _showBuktiTransferDialog(
-                            context, penarikan['buktiTransfer']);
-                      },
-                      child: Text(
-                        "Lihat Bukti Transfer",
-                        style: TextStyle(
-                            color: appPrimaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                      ))
               ],
             ),
           ),
+          content: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildDetailRow(
+                            'ID Penarikan', penarikan['id']?.toString() ?? '-'),
+                        _buildDetailRow(
+                            'Status', _formatStatusPenarikan(status),
+                            valueColor: _getColorForStatus(status)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade100),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.schedule,
+                                color: Colors.blue.shade600, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Waktu Transaksi',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        _buildDetailRow(
+                            'Tanggal Diajukan',
+                            DateFormatter.formatTanggal(
+                                penarikan['tanggalRequest']?.toString())),
+                        if (penarikan['tanggalProses'] != null)
+                          _buildDetailRow(
+                              'Tanggal Diproses',
+                              DateFormatter.formatTanggal(
+                                  penarikan['tanggalProses']?.toString())),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: appPrimaryColor.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: appPrimaryColor.withOpacity(0.2)),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildDetailRow(
+                            'Jumlah Diminta',
+                            CurrencyFormatter.formatRupiah(
+                                penarikan['jumlahDiminta'])),
+                        _buildDetailRow(
+                            'Biaya Admin',
+                            CurrencyFormatter.formatRupiah(
+                                penarikan['biayaAdmin'])),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            border: Border(
+                                top: BorderSide(color: Colors.grey.shade300)),
+                          ),
+                          child: _buildDetailRow(
+                              'Jumlah Diterima',
+                              CurrencyFormatter.formatRupiah(
+                                  penarikan['jumlahDiterima']),
+                              valueColor: appPrimaryColorDark,
+                              isBold: true),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.shade100),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.account_balance,
+                                color: Colors.orange.shade600, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Rekening Tujuan",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.orange.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${rekeningData?['namaBank'] ?? '-'}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${rekeningData?['nomorRekening'] ?? '-'}',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        Text(
+                          'a.n ${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (penarikan['catatanAdmin'] != null &&
+                      penarikan['catatanAdmin'].toString().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade100),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.note_alt,
+                                    color: Colors.red.shade600, size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Catatan Admin',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.red.shade700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              penarikan['catatanAdmin']?.toString() ?? '-',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (penarikan['buktiTransfer'] != null &&
+                      penarikan['buktiTransfer'].toString().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Container(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _showBuktiTransferDialog(
+                                context, penarikan['buktiTransfer']);
+                          },
+                          icon: const Icon(Icons.receipt_long),
+                          label: const Text("Lihat Bukti Transfer"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appPrimaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Tutup',
-                  style: TextStyle(color: appPrimaryColor)), 
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextButton(
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(
+                    color: appPrimaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
           ],
         );
@@ -485,24 +949,33 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
   Widget _buildDetailRow(String label, String value,
       {Color? valueColor, bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-              flex: 2,
-              child: Text(label,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600))),
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade600,
+                fontSize: 13,
+              ),
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
-              flex: 3,
-              child: Text(": $value",
-                  style: TextStyle(
-                      color: valueColor ?? Colors.black87,
-                      fontWeight:
-                          isBold ? FontWeight.bold : FontWeight.normal))),
+            flex: 3,
+            child: Text(
+              ": $value",
+              style: TextStyle(
+                color: valueColor ?? Colors.black87,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -514,26 +987,131 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Bukti Transfer',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          content: SingleChildScrollView(
-            child: Image.network(
-              penarikan,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Text('Gagal memuat gambar bukti transfer.',
-                    style: TextStyle(color: Colors.red));
-              },
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  appPrimaryColor.withOpacity(0.1),
+                  appPrimaryColorLight,
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: appPrimaryColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.receipt_long,
+                    color: appPrimaryColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Bukti Transfer',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
+            child: SingleChildScrollView(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  penarikan,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: appPrimaryColor,
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red.shade400,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Gagal memuat gambar bukti transfer',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Tutup',
-                  style: TextStyle(color: appPrimaryColor)), 
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextButton(
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(
+                    color: appPrimaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
           ],
         );

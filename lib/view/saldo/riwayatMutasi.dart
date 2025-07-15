@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:rfc_apps/service/saldo.dart';
+import 'package:rfc_apps/utils/date_formatter.dart';
+import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:shimmer/shimmer.dart';
+
+const Color appPrimaryColor = Color(0xFF4CAD73);
+const Color appPrimaryColorLight = Color(0xFFE8F5E9);
+const Color appPrimaryColorDark = Color(0xFF2E7D32);
 
 class RiwayatMutasiPage extends StatefulWidget {
   const RiwayatMutasiPage({super.key});
@@ -52,12 +57,12 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
 
     if (isRefresh) {
       _currentPage = 1;
-      _mutasiList = []; 
+      _mutasiList = [];
     }
 
     try {
-      final responseMap = await _saldoService.getMyMutasiSaldo(
-          page: _currentPage, limit: 15); 
+      final responseMap =
+          await _saldoService.getMyMutasiSaldo(page: _currentPage, limit: 15);
 
       final List<dynamic> newMutasiDynamic =
           responseMap['data'] as List<dynamic>? ?? [];
@@ -87,37 +92,6 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
     }
   }
 
-  String formatRupiah(dynamic amount,
-      {bool showSymbol = true, bool withSign = false}) {
-    double numericAmount = 0.0;
-    if (amount is String) {
-      numericAmount = double.tryParse(amount) ?? 0.0;
-    } else if (amount is num) {
-      numericAmount = amount.toDouble();
-    }
-
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: showSymbol ? 'Rp ' : '',
-      decimalDigits: 0,
-    );
-
-    String formatted = formatCurrency.format(numericAmount.abs());
-    if (withSign) {
-      return (numericAmount >= 0 ? '+ ' : '- ') + formatted;
-    }
-    return formatted;
-  }
-
-  String formatTanggal(String dateString) {
-    try {
-      final DateTime dateTime = DateTime.parse(dateString);
-      return DateFormat('EEEE, dd MMM yyyy - HH:mm', 'id_ID').format(dateTime);
-    } catch (e) {
-      return dateString; 
-    }
-  }
-
   Widget _getTransaksiIcon(String tipeTransaksi, double jumlah) {
     IconData icon;
     Color color;
@@ -133,11 +107,11 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
         icon = Icons.replay_circle_filled_rounded;
         color = Colors.blue.shade600;
         break;
-      case 'penarikan_dana': 
+      case 'penarikan_dana':
         icon = Icons.arrow_upward_rounded;
         color = Colors.red.shade600;
         break;
-      case 'penarikan_ditolak_dikembalikan': 
+      case 'penarikan_ditolak_dikembalikan':
         icon = Icons.undo_rounded;
         color = Colors.orange.shade700;
         break;
@@ -147,7 +121,24 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
             : Icons.remove_circle_outline_rounded;
         color = isKredit ? Colors.green.shade600 : Colors.red.shade600;
     }
-    return Icon(icon, color: color, size: 28);
+    return Icon(icon, color: color, size: 24);
+  }
+
+  Color _getIconBackgroundColor(String tipeTransaksi, double jumlah) {
+    bool isKredit = jumlah > 0;
+
+    switch (tipeTransaksi) {
+      case 'pendapatan_masuk_penjual':
+        return Colors.green.shade100;
+      case 'refund_pesanan_pembeli':
+        return Colors.blue.shade100;
+      case 'penarikan_dana':
+        return Colors.red.shade100;
+      case 'penarikan_ditolak_dikembalikan':
+        return Colors.orange.shade100;
+      default:
+        return isKredit ? Colors.green.shade100 : Colors.red.shade100;
+    }
   }
 
   String _getTransaksiLabel(String tipeTransaksi) {
@@ -175,115 +166,207 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
       appBar: AppBar(
         title: const Text('Riwayat Mutasi Saldo',
             style: TextStyle(
-                fontFamily: 'poppins',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 16)),
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 1,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'poppins',
+              fontSize: 16,
+              color: Colors.white,
+            )),
+        backgroundColor: appPrimaryColor,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                appPrimaryColor,
+                appPrimaryColorDark,
+              ],
+            ),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      backgroundColor: Colors.grey[100],
-      body: RefreshIndicator(
-        onRefresh: () => _fetchMutasi(isRefresh: true),
-        color: Theme.of(context).primaryColor,
-        child: _isFirstLoad &&
-                _isLoading
-            ? _buildMutasiListShimmer()
-            : _mutasiList.isEmpty && !_isLoading
-                ? _buildEmptyState()
-                : ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: _scrollController,
-                    itemCount: _mutasiList.length +
-                        (_isLoading && _currentPage <= _totalPages
-                            ? 1
-                            : 0), 
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 10.0),
-                    itemBuilder: (context, index) {
-                      if (index == _mutasiList.length) {
-                        return _buildLoadingIndicator();
-                      }
-                      final mutasi = _mutasiList[index];
-                      final double jumlah = double.tryParse(
-                              mutasi['jumlah']?.toString() ?? '0.0') ??
-                          0.0;
-                      final bool isKredit = jumlah > 0;
+      backgroundColor: Colors.grey[50],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.grey.shade50,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: RefreshIndicator(
+          onRefresh: () => _fetchMutasi(isRefresh: true),
+          color: appPrimaryColor,
+          backgroundColor: Colors.white,
+          child: _isFirstLoad && _isLoading
+              ? _buildMutasiListShimmer()
+              : _mutasiList.isEmpty && !_isLoading
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: _mutasiList.length +
+                          (_isLoading && _currentPage <= _totalPages ? 1 : 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 16.0),
+                      itemBuilder: (context, index) {
+                        if (index == _mutasiList.length) {
+                          return _buildLoadingIndicator();
+                        }
+                        final mutasi = _mutasiList[index];
+                        final double jumlah = double.tryParse(
+                                mutasi['jumlah']?.toString() ?? '0.0') ??
+                            0.0;
+                        final bool isKredit = jumlah > 0;
 
-                      return Card(
-                        elevation: 1.5,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 6.0, horizontal: 8.0),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0)),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12.0, horizontal: 16.0),
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                (isKredit ? Colors.green : Colors.red)
-                                    .withOpacity(0.1),
-                            child: _getTransaksiIcon(
-                                mutasi['tipeTransaksi'].toString(), jumlah),
-                          ),
-                          title: Text(
-                            _getTransaksiLabel(
-                                mutasi['tipeTransaksi'].toString()),
-                            style: TextStyle(
-                                fontFamily: 'poppins',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                                color: Colors.grey.shade800),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                formatTanggal(mutasi['createdAt'].toString()),
-                                style: TextStyle(
-                                    fontFamily: 'poppins',
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600),
+                        return Card(
+                          elevation: 3.0,
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0)),
+                          shadowColor: Colors.grey.withOpacity(0.3),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16.0),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white,
+                                  Colors.grey.shade50,
+                                ],
                               ),
-                              if (mutasi['keterangan'] != null &&
-                                  mutasi['keterangan']
-                                      .toString()
-                                      .isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  mutasi['keterangan'].toString(),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      fontFamily: 'poppins',
-                                      fontSize: 12.5,
-                                      color: Colors.grey.shade700),
-                                ),
-                              ]
-                            ],
-                          ),
-                          trailing: Text(
-                            formatRupiah(jumlah, withSign: true),
-                            style: TextStyle(
-                              fontFamily: 'poppins',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: isKredit
-                                  ? Colors.green.shade700
-                                  : Colors.red.shade700,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: _getIconBackgroundColor(
+                                          mutasi['tipeTransaksi'].toString(),
+                                          jumlah),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: _getTransaksiIcon(
+                                        mutasi['tipeTransaksi'].toString(),
+                                        jumlah),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _getTransaksiLabel(
+                                              mutasi['tipeTransaksi']
+                                                  .toString()),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.schedule,
+                                              color: Colors.grey.shade500,
+                                              size: 14,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${DateFormatter.formatTanggalSingkat(mutasi['createdAt']?.toString())} ${DateFormatter.formatJam(mutasi['createdAt']?.toString())}',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (mutasi['keterangan'] != null &&
+                                            mutasi['keterangan']
+                                                .toString()
+                                                .isNotEmpty) ...[
+                                          const SizedBox(height: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              mutasi['keterangan'].toString(),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade700,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: isKredit
+                                              ? Colors.green.shade50
+                                              : Colors.red.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: isKredit
+                                                ? Colors.green.shade200
+                                                : Colors.red.shade200,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          CurrencyFormatter
+                                              .formatRupiahWithSign(jumlah),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: isKredit
+                                                ? Colors.green.shade700
+                                                : Colors.red.shade700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          isThreeLine: (mutasi['keterangan'] != null &&
-                              mutasi['keterangan'].toString().isNotEmpty),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
+        ),
       ),
     );
   }
@@ -291,42 +374,75 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
   Widget _buildMutasiListShimmer() {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: 7,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
+      itemCount: 6,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: Card(
-            elevation: 1.5,
-            margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+            elevation: 3.0,
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0)),
-            child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              leading: CircleAvatar(backgroundColor: Colors.white, radius: 28),
-              title: Container(
-                  height: 16,
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  color: Colors.white),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 6),
-                  Container(
-                      height: 12,
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      color: Colors.white),
-                  const SizedBox(height: 4),
-                  Container(
-                      height: 12,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      color: Colors.white),
-                ],
+                borderRadius: BorderRadius.circular(16.0)),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white,
+                    Colors.grey.shade50,
+                  ],
+                ),
               ),
-              trailing: Container(height: 16, width: 60, color: Colors.white),
-              isThreeLine: true,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 16,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: 150,
+                            height: 12,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 200,
+                            height: 12,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 80,
+                      height: 20,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -335,12 +451,44 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
   }
 
   Widget _buildLoadingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      padding: const EdgeInsets.all(20.0),
       child: Center(
-        child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: appPrimaryColor,
+                  strokeWidth: 2,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Memuat lebih banyak...',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -353,25 +501,43 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long_outlined,
-                size: 80, color: Colors.grey.shade400),
-            const SizedBox(height: 20),
-            Text(
+            Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                size: 60,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
               'Belum Ada Riwayat Mutasi',
               style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Semua transaksi saldo Anda akan muncul di sini.',
+              'Semua transaksi saldo Anda akan muncul di sini',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 14,
-                  color: Colors.grey.shade500),
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
             ),
           ],
         ),

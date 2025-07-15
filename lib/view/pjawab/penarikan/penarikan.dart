@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:rfc_apps/service/saldo.dart';
+import 'package:rfc_apps/utils/date_formatter.dart';
+import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:rfc_apps/view/pjawab/penarikan/prosesPenarikan.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -113,7 +114,6 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
             _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         _currentPage <= _totalPages) {
-      
       _fetchRequests();
     }
   }
@@ -124,26 +124,6 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
         _selectedStatus = newStatus;
       });
       _fetchRequests(isRefresh: true);
-    }
-  }
-
-  String formatRupiah(dynamic amount) {
-    double numericAmount = 0.0;
-    if (amount is String)
-      numericAmount = double.tryParse(amount) ?? 0.0;
-    else if (amount is num) numericAmount = amount.toDouble();
-    final formatCurrency =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return formatCurrency.format(numericAmount);
-  }
-
-  String formatTanggal(String? dateString) {
-    if (dateString == null) return 'N/A';
-    try {
-      return DateFormat('dd MMMM yyyy, HH:mm', 'id_ID')
-          .format(DateTime.parse(dateString));
-    } catch (e) {
-      return dateString;
     }
   }
 
@@ -314,99 +294,167 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
         final String status = request['status']?.toString() ?? 'unknown';
 
         return Card(
-          color: Colors.white,
-          elevation: 2.5,
-          margin: const EdgeInsets.symmetric(vertical: 7.0),
+          elevation: 3.0,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: InkWell(
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AdminProsesPenarikanPage(
-                    requestData: request,
-                  ),
-                ),
-              );
-              if (result == true) {
-                _fetchRequests(isRefresh: true);
-              }
-            },
-            borderRadius: BorderRadius.circular(12.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              userData?['name'] ?? 'Nama Pengguna Tidak Ada',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              userData?['email'] ?? 'Email Tidak Ada',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.grey.shade600),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getColorForStatus(status).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(_getIconForStatus(status),
-                                color: _getColorForStatus(status), size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatStatusPenarikan(status),
-                              style: TextStyle(
-                                  color: _getColorForStatus(status),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 20),
-                  _buildInfoRow(Icons.payments_outlined, 'Jumlah Diminta:',
-                      formatRupiah(request['jumlahDiminta'])),
-                  _buildInfoRow(Icons.receipt_long_outlined, 'Jumlah Diterima:',
-                      formatRupiah(request['jumlahDiterima'])),
-                  _buildInfoRow(Icons.account_balance, 'Rekening:',
-                      '${rekeningData?['namaBank'] ?? '-'} (${rekeningData?['nomorRekening'] ?? '-'})'),
-                  _buildInfoRow(Icons.person_outline, 'Atas Nama:',
-                      '${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}'),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'Diajukan: ${formatTanggal(request['tanggalRequest']?.toString())}',
-                      style:
-                          TextStyle(fontSize: 11, color: Colors.grey.shade500),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shadowColor: Colors.grey.withOpacity(0.3),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.grey.shade50,
+                ],
+              ),
+            ),
+            child: InkWell(
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminProsesPenarikanPage(
+                      requestData: request,
                     ),
                   ),
-                ],
+                );
+                if (result == true) {
+                  _fetchRequests(isRefresh: true);
+                }
+              },
+              borderRadius: BorderRadius.circular(16.0),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userData?['name'] ?? 'Nama Pengguna Tidak Ada',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: Colors.black87),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.email_outlined,
+                                    color: Colors.grey.shade500,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      userData?['email'] ?? 'Email Tidak Ada',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _getColorForStatus(status).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  _getColorForStatus(status).withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_getIconForStatus(status),
+                                  color: _getColorForStatus(status), size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                _formatStatusPenarikan(status),
+                                style: TextStyle(
+                                    color: _getColorForStatus(status),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildInfoRow(
+                              Icons.payments_outlined,
+                              'Jumlah Diminta:',
+                              CurrencyFormatter.formatRupiah(
+                                  request['jumlahDiminta'])),
+                          const SizedBox(height: 8),
+                          _buildInfoRow(
+                              Icons.receipt_long_outlined,
+                              'Jumlah Diterima:',
+                              CurrencyFormatter.formatRupiah(
+                                  request['jumlahDiterima'])),
+                          const SizedBox(height: 8),
+                          _buildInfoRow(Icons.account_balance, 'Rekening:',
+                              '${rekeningData?['namaBank'] ?? '-'} (${rekeningData?['nomorRekening'] ?? '-'})'),
+                          const SizedBox(height: 8),
+                          _buildInfoRow(Icons.person_outline, 'Atas Nama:',
+                              '${rekeningData?['namaPemilikRekening'] ?? rekeningData?['namaPenerima'] ?? '-'}'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          color: Colors.grey.shade500,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Diajukan: ${DateFormatter.formatTanggalSingkat(request['tanggalRequest']?.toString())} ${DateFormatter.formatJam(request['tanggalRequest']?.toString())}',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -416,71 +464,87 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey.shade600),
-          const SizedBox(width: 8),
-          Text('$label ',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.end,
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: appPrimaryColor),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500)),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87),
+            textAlign: TextAlign.end,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildLoadingShimmerList() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: 5,
-        padding: const EdgeInsets.all(12.0),
-        itemBuilder: (_, __) => Card(
-          color: Colors.white,
-          elevation: 2.0,
-          margin: const EdgeInsets.symmetric(vertical: 7.0),
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: 5,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+      itemBuilder: (_, __) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Card(
+          elevation: 3.0,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(width: 150, height: 18.0, color: Colors.white),
-                      Container(width: 80, height: 14.0, color: Colors.white),
-                    ]),
-                const SizedBox(height: 6),
-                Container(width: 100, height: 12.0, color: Colors.white),
-                const Divider(height: 20),
-                Container(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.grey.shade50,
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                            width: 150, height: 18.0, color: Colors.white),
+                        Container(width: 80, height: 20.0, color: Colors.white),
+                      ]),
+                  const SizedBox(height: 8),
+                  Container(width: 200, height: 12.0, color: Colors.white),
+                  const SizedBox(height: 16),
+                  Container(
                     width: double.infinity,
-                    height: 12.0,
-                    color: Colors.white,
-                    margin: const EdgeInsets.only(bottom: 6)),
-                Container(
-                    width: double.infinity,
-                    height: 12.0,
-                    color: Colors.white,
-                    margin: const EdgeInsets.only(bottom: 6)),
-                Container(
-                    width: 200,
-                    height: 12.0,
-                    color: Colors.white,
-                    margin: const EdgeInsets.only(bottom: 6)),
-              ],
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(width: 180, height: 12.0, color: Colors.white),
+                ],
+              ),
             ),
           ),
         ),

@@ -37,8 +37,6 @@ class _UserListState extends State<UserList> {
               item['Toko'] != null && item['Toko']['tokoStatus'] == 'request')
           .length;
       final filtered = data.where((e) {
-        print(
-            "Toko status: ${e['Toko']?['tokoStatus']}");
         return e['Toko'] != null && e['Toko']['tokoStatus'] == 'active';
       }).toList();
       setState(() {

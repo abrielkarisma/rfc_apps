@@ -4,6 +4,7 @@ import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/model/keranjang.dart';
 import 'package:rfc_apps/service/keranjang.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
@@ -26,7 +27,7 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
   String deskripsiProduk = "";
   String hargaProduk = "";
   String kategoriProduk = "";
-  String stokProduk = "0"; 
+  String stokProduk = "0";
   String satuanProduk = "";
   int jumlahProduk = 1;
   Key _produkListKey = UniqueKey();
@@ -262,7 +263,6 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                 ),
                 Column(
                   children: [
-                    
                     if (_getStokValue() > 0)
                       Container(
                         width: double.infinity,
@@ -273,11 +273,8 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                           onQuantityChanged: _updateQuantity,
                         ),
                       ),
-
-                    
                     Row(
                       children: [
-                        
                         if (_getStokValue() > 0)
                           Container(
                             height: 48,
@@ -297,11 +294,7 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                               },
                             ),
                           ),
-
-                        
                         if (_getStokValue() > 0) SizedBox(width: 12),
-
-                        
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -407,70 +400,74 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
     }
   }
 
-  Future<void> _beliSekarang() async {
+Future<void> _beliSekarang() async {
+  try {
+    final stockResponse =
+        await ProdukService().getProdukStok(widget.idProduk);
+    final int stok = stockResponse['data']['stok'];
+    if (jumlahProduk > stok) {
+      ToastHelper.showErrorToast(
+          context, "Jumlah melebihi stok yang tersedia: $stok");
+      return;
+    }
+    final produkResponse =
+        await ProdukService().getProdukById(widget.idProduk);
+    if (produkResponse.message != "Successfully retrieved produk data") {
+      ToastHelper.showErrorToast(context, 'Gagal mendapatkan detail produk');
+      return;
+    }
+    final produk = produkResponse.data[0];
+    Store tokoInfo;
     try {
-      
-      final stockResponse =
-          await ProdukService().getProdukStok(widget.idProduk);
-      final int stok = stockResponse['data']['stok'];
-      if (jumlahProduk > stok) {
-        ToastHelper.showErrorToast(
-            context, "Jumlah melebihi stok yang tersedia: $stok");
-        return;
-      }
-
-      
-      final originalCartItems = await KeranjangService().getAllKeranjang();
-      final originalItem = originalCartItems
-          .where((item) => item.produk.id == widget.idProduk)
-          .firstOrNull;
-
-      
-      await KeranjangService().createKeranjang(widget.idProduk, jumlahProduk);
-
-      
-      final tempCartItems = await KeranjangService().getAllKeranjang();
-      final tempItem = tempCartItems
-          .where((item) => item.produk.id == widget.idProduk)
-          .firstOrNull;
-
-      if (tempItem == null) {
-        ToastHelper.showErrorToast(
-            context, 'Produk tidak ditemukan di keranjang');
-        return;
-      }
-
-      
-      final purchaseItem = CartItem(
-        id: tempItem.id,
-        jumlah: jumlahProduk,
-        produk: tempItem.produk,
-      );
-
-      
-      if (originalItem != null) {
-        
-        await KeranjangService()
-            .updateKeranjang(tempItem.id, originalItem.jumlah);
+      final tokoResponse = await tokoService().getTokoById(produk.tokoId);
+      if (tokoResponse.message == "Successfully retrieved toko data") {
+        final tokoData = tokoResponse.data[0];
+        tokoInfo = Store(
+          id: tokoData.id,
+          nama: tokoData.nama,
+          logoToko: tokoData.logoToko ?? "",
+          alamat: tokoData.alamat ?? "Alamat toko tidak tersedia",
+        );
       } else {
-        
-        await KeranjangService().deleteKeranjang(tempItem.id);
-      }
-
-      
-      final callback = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProsesPesananPage(items: [purchaseItem]),
-        ),
-      );
-
-      if (callback == "refresh") {
-        
-        _getDetailProduk();
+        throw Exception("Gagal mendapatkan data toko");
       }
     } catch (e) {
-      ToastHelper.showErrorToast(context, "Gagal memproses pesanan: $e");
+      
+      ToastHelper.showErrorToast(context, 'Gagal mendapatkan informasi toko');
+      return;
     }
+
+    
+    final product = Product(
+      id: produk.id,
+      nama: produk.nama,
+      satuan: produk.satuan,
+      harga: produk.harga,
+      gambar: produk.gambar,
+      toko: tokoInfo,
+    );
+
+    
+    final purchaseItem = CartItem(
+      id: "temp_${DateTime.now().millisecondsSinceEpoch}", 
+      jumlah: jumlahProduk,
+      produk: product,
+    );
+
+    
+    final callback = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProsesPesananPage(items: [purchaseItem]),
+      ),
+    );
+
+    if (callback == "refresh") {
+      
+      _getDetailProduk();
+    }
+  } catch (e) {
+    ToastHelper.showErrorToast(context, "Gagal memproses pesanan: $e");
   }
 }
+ }

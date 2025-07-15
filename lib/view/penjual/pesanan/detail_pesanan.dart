@@ -21,6 +21,7 @@ class DetailPesanan extends StatefulWidget {
 class _DetailPesananState extends State<DetailPesanan> {
   late String _profilePhoto = "";
   bool uloadedBukti = false;
+  bool _isProcessing = false;
   @override
   void initState() {
     super.initState();
@@ -164,82 +165,123 @@ class _DetailPesananState extends State<DetailPesanan> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text("Pesanan Sudah Diambil",
-              style: TextStyle(
-                fontFamily: "poppins",
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-                color: Colors.black87,
-              )),
-          content: Text("Apakah Anda yakin pesanan ini sudah diambil?",
-              style: TextStyle(
-                fontFamily: "poppins",
-                fontSize: 16,
-                color: Colors.black87,
-              )),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                "Batal",
-                style: TextStyle(
-                  fontFamily: "poppins",
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  final file = File(_profilePhoto);
-                  if (!file.existsSync()) {
-                    throw Exception('File gambar tidak ditemukan.');
-                  }
-
-                  final cloudinaryService = CloudinaryService();
-                  final uploadResult =
-                      await cloudinaryService.getUploadUrl(file);
-
-                  final uploadedPhotoUrl = uploadResult['url'];
-                  final buktiResult = await PesananService()
-                      .createBuktiPengambilan(
-                          widget.order['id'], uploadedPhotoUrl);
-                  final putStatus = await PesananService().putStatusPesanan(
-                    widget.order['id'],
-                    'selesai',
-                  );
-                  final pendapatan = await PesananService().addPendapatan(
-                      widget.order['id'], widget.order['totalHarga']);
-                  if (buktiResult['message'] ==
-                          "Bukti diterima berhasil dibuat" &&
-                      putStatus['message'] ==
-                          "Status pesanan berhasil diperbarui") {
-                    ToastHelper.showSuccessToast(
-                        context, "Pesanan Berhasil Diselesaikan");
-                  } else {
-                    ToastHelper.showErrorToast(context,
-                        "Gagal menyelesaikan pesanan: ${buktiResult['message']}");
-                  }
-                  Navigator.pop(context);
-                } catch (e) {
-                  Navigator.pop(context);
-                }
-                Navigator.pop(context, 'refresh');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-              ),
-              child: Text("Sudah",
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text("Pesanan Sudah Diambil",
                   style: TextStyle(
-                    color: Colors.white,
                     fontFamily: "poppins",
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    color: Colors.black87,
                   )),
-            ),
-          ],
+              content: Text("Apakah Anda yakin pesanan ini sudah diambil?",
+                  style: TextStyle(
+                    fontFamily: "poppins",
+                    fontSize: 16,
+                    color: Colors.black87,
+                  )),
+              actions: [
+                TextButton(
+                  onPressed:
+                      _isProcessing ? null : () => Navigator.pop(context),
+                  child: Text(
+                    "Batal",
+                    style: TextStyle(
+                      fontFamily: "poppins",
+                      fontSize: 14,
+                      color: _isProcessing ? Colors.grey[400] : Colors.grey,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _isProcessing
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isProcessing = true;
+                          });
+
+                          try {
+                            final file = File(_profilePhoto);
+                            if (!file.existsSync()) {
+                              throw Exception('File gambar tidak ditemukan.');
+                            }
+
+                            final cloudinaryService = CloudinaryService();
+                            final uploadResult =
+                                await cloudinaryService.getUploadUrl(file);
+
+                            final uploadedPhotoUrl = uploadResult['url'];
+                            final buktiResult = await PesananService()
+                                .createBuktiPengambilan(
+                                    widget.order['id'], uploadedPhotoUrl);
+                            final putStatus =
+                                await PesananService().putStatusPesanan(
+                              widget.order['id'],
+                              'selesai',
+                            );
+                            await PesananService().addPendapatan(
+                                widget.order['id'], widget.order['totalHarga']);
+                            if (buktiResult['message'] ==
+                                    "Bukti diterima berhasil dibuat" &&
+                                putStatus['message'] ==
+                                    "Status pesanan berhasil diperbarui") {
+                              ToastHelper.showSuccessToast(
+                                  context, "Pesanan Berhasil Diselesaikan");
+                            } else {
+                              ToastHelper.showErrorToast(context,
+                                  "Gagal menyelesaikan pesanan: ${buktiResult['message']}");
+                            }
+                            Navigator.pop(context);
+                            Navigator.pop(context, 'refresh');
+                          } catch (e) {
+                            Navigator.pop(context);
+                            Navigator.pop(context, 'refresh');
+                          } finally {
+                            setState(() {
+                              _isProcessing = false;
+                            });
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isProcessing
+                        ? Colors.grey
+                        : Theme.of(context).primaryColor,
+                  ),
+                  child: _isProcessing
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text("Memproses...",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: "poppins",
+                                  fontSize: 14,
+                                )),
+                          ],
+                        )
+                      : Text("Sudah",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "poppins",
+                            fontSize: 14,
+                          )),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -263,8 +305,7 @@ class _DetailPesananState extends State<DetailPesanan> {
       try {
         final DateTime dateTime = DateTime.parse(createdAt);
         formattedDate = DateFormat('dd MMMM HH:mm').format(dateTime.toLocal());
-      } catch (e) {
-      }
+      } catch (e) {}
     }
 
     return Scaffold(
@@ -436,7 +477,6 @@ class _DetailPesananState extends State<DetailPesanan> {
             bottom: 20,
             child: StatusPesanan == "menunggu"
                 ? Row(
-                    
                     children: [
                       Expanded(
                         child: ElevatedButton(
@@ -485,10 +525,8 @@ class _DetailPesananState extends State<DetailPesanan> {
                   )
                 : StatusPesanan == "diterima"
                     ? Row(
-                        
                         children: [
                           Expanded(
-                            
                             child: ElevatedButton(
                               onPressed: _siapDiambil,
                               style: ElevatedButton.styleFrom(

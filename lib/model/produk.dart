@@ -8,6 +8,7 @@ class Produk {
   final int harga;
   final bool isDeleted;
   final String createdAt;
+  final String tokoId;
 
   Produk({
     required this.id,
@@ -19,6 +20,7 @@ class Produk {
     required this.harga,
     required this.isDeleted,
     required this.createdAt,
+    required this.tokoId,
   });
 
   factory Produk.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Produk {
       harga: json['harga'],
       isDeleted: json['isDeleted'],
       createdAt: json['createdAt'],
+      tokoId: json['TokoId'],
     );
   }
 }

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:rfc_apps/service/cloudinary.dart';
-import 'package:intl/intl.dart';
+import 'package:rfc_apps/utils/date_formatter.dart';
+import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
-import 'package:rfc_apps/view/saldo/riwayatPenarikan.dart';
-
 
 const Color appPrimaryColor = Color(0xFF4CAD73);
+const Color appPrimaryColorLight = Color(0xFFE8F5E9);
+const Color appPrimaryColorDark = Color(0xFF2E7D32);
 const Color appPendingColor = Colors.orangeAccent;
-const Color appCompletedColor =
-    appPrimaryColor; 
+const Color appCompletedColor = appPrimaryColor;
 const Color appRejectedColor = Colors.redAccent;
 
 class AdminProsesPenarikanPage extends StatefulWidget {
@@ -32,7 +32,7 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
   File? _buktiTransferImage;
   late TextEditingController _referensiBankController;
   bool _isSubmitting = false;
-  late String _currentStatus; 
+  late String _currentStatus;
 
   @override
   void initState() {
@@ -49,26 +49,6 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
     _catatanAdminController.dispose();
     _referensiBankController.dispose();
     super.dispose();
-  }
-
-  String formatRupiah(dynamic amount) {
-    double numericAmount = 0.0;
-    if (amount is String)
-      numericAmount = double.tryParse(amount) ?? 0.0;
-    else if (amount is num) numericAmount = amount.toDouble();
-    final formatCurrency =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return formatCurrency.format(numericAmount);
-  }
-
-  String formatTanggal(String? dateString) {
-    if (dateString == null) return 'N/A';
-    try {
-      return DateFormat('dd MMMM yyyy, HH:mm', 'id_ID')
-          .format(DateTime.parse(dateString));
-    } catch (e) {
-      return dateString;
-    }
   }
 
   Future<void> _pickBuktiTransfer() async {
@@ -222,213 +202,535 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Proses Penarikan',
+        title: const Text('Proses Penarikan',
             style: TextStyle(
-                fontFamily: "poppins",
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'poppins',
+              fontSize: 16,
+            )),
         backgroundColor: appPrimaryColor,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                appPrimaryColor,
+                appPrimaryColorDark,
+              ],
+            ),
+          ),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle('Detail Permintaan'),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildInfoRow('ID Permintaan:',
-                          widget.requestData['id']?.toString() ?? 'N/A'),
-                      _buildInfoRow('Status Saat Ini:',
-                          _formatStatusDisplay(_currentStatus),
-                          valueColor: _getColorForStatus(_currentStatus),
-                          isValueBold: true),
-                      _buildInfoRow(
-                          'Tanggal Diajukan:',
-                          formatTanggal(widget.requestData['tanggalRequest']
-                              ?.toString())),
-                      if (widget.requestData['tanggalProses'] != null)
-                        _buildInfoRow(
-                            'Tanggal Diproses:',
-                            formatTanggal(widget.requestData['tanggalProses']
-                                ?.toString())),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Informasi Pengguna'),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                          'Nama Pengguna:', userData?['name'] ?? 'N/A'),
-                      _buildInfoRow('Email:', userData?['email'] ?? 'N/A'),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Detail Keuangan'),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildInfoRow('Jumlah Diminta:',
-                          formatRupiah(widget.requestData['jumlahDiminta'])),
-                      _buildInfoRow('Biaya Admin:',
-                          formatRupiah(widget.requestData['biayaAdmin'])),
-                      _buildInfoRow('Jumlah Diterima Pengguna:',
-                          formatRupiah(widget.requestData['jumlahDiterima']),
-                          isValueBold: true, valueColor: appPrimaryColorDark),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Rekening Tujuan'),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                          'Nama Bank:', rekeningData?['namaBank'] ?? 'N/A'),
-                      _buildInfoRow('Nomor Rekening:',
-                          rekeningData?['nomorRekening'] ?? 'N/A'),
-                      _buildInfoRow(
-                          'Atas Nama:',
-                          rekeningData?['namaPemilikRekening'] ??
-                              rekeningData?['namaPenerima'] ??
-                              'N/A'),
-                    ],
-                  ),
-                ),
-              ),
-              if (_currentStatus == 'pending') ...[
-                const SizedBox(height: 24),
-                _buildSectionTitle('Input Admin (Opsional)'),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _catatanAdminController,
-                  decoration: InputDecoration(
-                    labelText: 'Catatan Admin',
-                    hintText: 'Misal: Alasan penolakan, info tambahan',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Bukti Transfer',
-                        style: TextStyle(fontFamily: 'poppins')),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: _pickBuktiTransfer,
-                      child: Container(
-                        width: double.infinity,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.green),
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey[200],
-                        ),
-                        child: _buktiTransferImage == null
-                            ? const Icon(Icons.add_a_photo,
-                                size: 50, color: Colors.grey)
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.file(
-                                  _buktiTransferImage!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
-                              ),
+      backgroundColor: Colors.grey[50],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.grey.shade50,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Detail Permintaan'),
+                Card(
+                  elevation: 3.0,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0)),
+                  shadowColor: Colors.grey.withOpacity(0.3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.0),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          Colors.grey.shade50,
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-              ],
-              if (_isSubmitting)
-                const Center(
                     child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.0),
-                  child: CircularProgressIndicator(color: appPrimaryColor),
-                ))
-              else if (_currentStatus == 'pending')
-                Padding(
-                  padding: const EdgeInsets.only(top: 24.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.cancel_outlined),
-                          label: const Text('TOLAK'),
-                          onPressed: () => _submitProses('rejected'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: appRejectedColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            textStyle: const TextStyle(
-                                fontFamily: "poppins",
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                        ),
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          _buildInfoRow('ID Permintaan:',
+                              widget.requestData['id']?.toString() ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          _buildInfoRow('Status Saat Ini:',
+                              _formatStatusDisplay(_currentStatus),
+                              valueColor: _getColorForStatus(_currentStatus),
+                              isValueBold: true),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                              'Tanggal Diajukan:',
+                              DateFormatter.formatTanggal(widget
+                                  .requestData['tanggalRequest']
+                                  ?.toString())),
+                          if (widget.requestData['tanggalProses'] != null) ...[
+                            const SizedBox(height: 12),
+                            _buildInfoRow(
+                                'Tanggal Diproses:',
+                                DateFormatter.formatTanggal(widget
+                                    .requestData['tanggalProses']
+                                    ?.toString())),
+                          ],
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.check_circle_outline),
-                          label: const Text('SETUJUI'),
-                          onPressed: () => _submitProses('completed'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: appCompletedColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            textStyle: const TextStyle(
-                                fontFamily: "poppins",
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-            ],
+                const SizedBox(height: 20),
+                _buildSectionTitle('Informasi Pengguna'),
+                Card(
+                  elevation: 3.0,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0)),
+                  shadowColor: Colors.grey.withOpacity(0.3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.0),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          Colors.grey.shade50,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          _buildInfoRow(
+                              'Nama Pengguna:', userData?['name'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          _buildInfoRow('Email:', userData?['email'] ?? 'N/A'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildSectionTitle('Detail Keuangan'),
+                Card(
+                  elevation: 3.0,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0)),
+                  shadowColor: Colors.grey.withOpacity(0.3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.0),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          Colors.grey.shade50,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          _buildInfoRow(
+                              'Jumlah Diminta:',
+                              CurrencyFormatter.formatRupiah(
+                                  widget.requestData['jumlahDiminta'])),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                              'Biaya Admin:',
+                              CurrencyFormatter.formatRupiah(
+                                  widget.requestData['biayaAdmin'])),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: appPrimaryColorLight,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: appPrimaryColor.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: _buildInfoRow(
+                                'Jumlah Diterima Pengguna:',
+                                CurrencyFormatter.formatRupiah(
+                                    widget.requestData['jumlahDiterima']),
+                                isValueBold: true,
+                                valueColor: appPrimaryColorDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildSectionTitle('Rekening Tujuan'),
+                Card(
+                  elevation: 3.0,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0)),
+                  shadowColor: Colors.grey.withOpacity(0.3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.0),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          Colors.grey.shade50,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          _buildInfoRow(
+                              'Nama Bank:', rekeningData?['namaBank'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          _buildInfoRow('Nomor Rekening:',
+                              rekeningData?['nomorRekening'] ?? 'N/A'),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                              'Atas Nama:',
+                              rekeningData?['namaPemilikRekening'] ??
+                                  rekeningData?['namaPenerima'] ??
+                                  'N/A'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (_currentStatus == 'pending') ...[
+                  const SizedBox(height: 24),
+                  _buildSectionTitle('Input Admin'),
+                  Card(
+                    elevation: 3.0,
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0)),
+                    shadowColor: Colors.grey.withOpacity(0.3),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16.0),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white,
+                            Colors.grey.shade50,
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Catatan Admin',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _catatanAdminController,
+                              decoration: InputDecoration(
+                                hintText:
+                                    'Misal: Alasan penolakan, info tambahan...',
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: appPrimaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.all(16),
+                              ),
+                              maxLines: 3,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Bukti Transfer',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: _pickBuktiTransfer,
+                              child: Container(
+                                width: double.infinity,
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: _buktiTransferImage == null
+                                        ? Colors.grey.shade300
+                                        : appPrimaryColor,
+                                    width: 2,
+                                    style: BorderStyle.solid,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: _buktiTransferImage == null
+                                      ? Colors.grey.shade50
+                                      : Colors.white,
+                                ),
+                                child: _buktiTransferImage == null
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: appPrimaryColorLight,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.add_a_photo_rounded,
+                                              size: 40,
+                                              color: appPrimaryColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            'Tap untuk mengunggah bukti transfer',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.file(
+                                              _buktiTransferImage!,
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 8,
+                                            right: 8,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit_rounded,
+                                                  color: Colors.white,
+                                                  size: 20,
+                                                ),
+                                                onPressed: _pickBuktiTransfer,
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                constraints:
+                                                    const BoxConstraints(),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                if (_isSubmitting)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(
+                              color: appPrimaryColor,
+                              strokeWidth: 3,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Memproses permintaan...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else if (_currentStatus == 'pending')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 32.0, bottom: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  appRejectedColor,
+                                  appRejectedColor.withOpacity(0.8),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: appRejectedColor.withOpacity(0.3),
+                                  spreadRadius: 1,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.cancel_outlined, size: 20),
+                              label: const Text(
+                                'TOLAK',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              onPressed: () => _submitProses('rejected'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  appPrimaryColor,
+                                  appPrimaryColorDark,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: appPrimaryColor.withOpacity(0.4),
+                                  spreadRadius: 1,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.check_circle_outline,
+                                  size: 20),
+                              label: const Text(
+                                'SETUJUI',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              onPressed: () => _submitProses('completed'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -437,48 +739,57 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
-      child: Text(
-        title,
-        style: TextStyle(
-            fontFamily: "poppins",
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade700),
+      padding: const EdgeInsets.only(bottom: 12.0, top: 8.0),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              color: appPrimaryColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInfoRow(String label, String value,
       {Color? valueColor, bool isValueBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2, 
-            child: Text(label,
-                style: TextStyle(
-                    fontFamily: "poppins",
-                    color: Colors.grey.shade600,
-                    fontSize: 14)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 3, 
-            child: Text(
-              value,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(label,
               style: TextStyle(
-                fontFamily: "poppins",
-                fontWeight: isValueBold ? FontWeight.bold : FontWeight.normal,
-                fontSize: 14,
-                color: valueColor ?? Colors.black87,
-              ),
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontWeight: isValueBold ? FontWeight.bold : FontWeight.w600,
+              fontSize: 14,
+              color: valueColor ?? Colors.black87,
             ),
+            textAlign: TextAlign.end,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
