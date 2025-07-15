@@ -50,12 +50,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     ),
   );
 
-  print("📲 Handling a background message: ${message.messageId}");
-  print('   Data Pesan Background: ${message.data}');
-  if (message.notification != null) {
-    print(
-        '   Notifikasi Pesan Background: ${message.notification!.title} - ${message.notification!.body}');
-  }
 }
 
 void main() async {

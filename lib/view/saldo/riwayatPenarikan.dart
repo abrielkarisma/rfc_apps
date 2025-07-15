@@ -60,7 +60,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     try {
       final response = await _saldoService.getMyPenarikanSaldoHistory(
           page: _currentPage, limit: 10);
-      // Respons service: { message: "...", data: [...penarikan...], currentPage, totalPages, totalItems }
+      
       final List<dynamic> newPenarikan =
           response['data'] as List<dynamic>? ?? [];
 
@@ -174,7 +174,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       appBar: AppBar(
         title: const Text('Riwayat Penarikan',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: appPrimaryColor, // Warna baru
+        backgroundColor: appPrimaryColor, 
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
@@ -187,7 +187,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
         padding: const EdgeInsets.all(8.0),
         child: RefreshIndicator(
           onRefresh: () => _fetchPenarikanHistory(isRefresh: true),
-          color: appPrimaryColor, // Warna baru
+          color: appPrimaryColor, 
           child: _buildPenarikanList(),
         ),
       ),
@@ -217,7 +217,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                 onPressed: () => _fetchPenarikanHistory(isRefresh: true),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: appPrimaryColor,
-                    foregroundColor: Colors.white), // Warna baru
+                    foregroundColor: Colors.white), 
               )
             ],
           ),
@@ -273,7 +273,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
-                            color: appPrimaryColorDark), // Warna baru
+                            color: appPrimaryColorDark), 
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -302,7 +302,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'ID Penarikan: ${penarikan['id']?.toString().substring(0, 8) ?? 'N/A'}...', // Tampilkan sebagian ID
+                    'ID Penarikan: ${penarikan['id']?.toString().substring(0, 8) ?? 'N/A'}...', 
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 8),
@@ -382,7 +382,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     return const Padding(
       padding: EdgeInsets.all(16.0),
       child: Center(
-        child: CircularProgressIndicator(color: appPrimaryColor), // Warna baru
+        child: CircularProgressIndicator(color: appPrimaryColor), 
       ),
     );
   }
@@ -471,7 +471,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
           actions: <Widget>[
             TextButton(
               child: const Text('Tutup',
-                  style: TextStyle(color: appPrimaryColor)), // Warna baru
+                  style: TextStyle(color: appPrimaryColor)), 
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -530,7 +530,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
           actions: <Widget>[
             TextButton(
               child: const Text('Tutup',
-                  style: TextStyle(color: appPrimaryColor)), // Warna baru
+                  style: TextStyle(color: appPrimaryColor)), 
               onPressed: () {
                 Navigator.of(context).pop();
               },

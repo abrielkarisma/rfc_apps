@@ -105,7 +105,6 @@ class _ListArtikelState extends State<ListArtikel> {
                             Container(),
                             GestureDetector(
                               onTap: () {
-                                print(item.id);
                               },
                               child: Icon(
                                 LineIcons.arrowRight,

@@ -20,14 +20,11 @@ class _riwayatPenjualanState extends State<riwayatPenjualan> {
   void initState() {
     super.initState();
     fetchPendapatan();
-    print("Toko ID: ${widget.tokoId}");
   }
 
   Future<void> fetchPendapatan() async {
     final response = await PendapatanService().getPendapatan(widget.tokoId);
-    print(response);
     final List rawData = response['data'];
-    print(rawData);
 
     setState(() {
       allData = List<Map<String, dynamic>>.from(rawData);

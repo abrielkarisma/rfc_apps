@@ -70,7 +70,6 @@ class tokoService {
       return getTokoById(id);
     }
     if (response.statusCode == 200) {
-      print(response);
       return TokoResponse.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 404) {
       return TokoResponse.fromJson(jsonDecode(response.body));
@@ -104,8 +103,6 @@ class tokoService {
   Future<Map<String, dynamic>> UpdateToko(String id, String name, String phone,
       String alamat, String avatarUrl, String deskripsi) async {
     final token = await tokenService().getAccessToken();
-    print(token);
-    print("$baseUrl/toko/$id");
     final response = await http.put(
       headers: {
         'Content-Type': 'application/json',
@@ -120,7 +117,6 @@ class tokoService {
         'deskripsi': deskripsi,
       }),
     );
-    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return UpdateToko(id, name, phone, alamat, avatarUrl, deskripsi);
@@ -129,7 +125,6 @@ class tokoService {
       return jsonDecode(response.body);
     }
     if (response.statusCode == 200) {
-      print(response.body);
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to update toko data');
@@ -139,7 +134,6 @@ class tokoService {
   Future<Map<String, dynamic>> UpdateTokoGambar(
       String id, String avatarUrl) async {
     final token = await tokenService().getAccessToken();
-    print(token);
     final response = await http.put(
       headers: {
         'Content-Type': 'application/json',
@@ -150,7 +144,6 @@ class tokoService {
         'logoToko': avatarUrl,
       }),
     );
-    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return UpdateTokoGambar(id, avatarUrl);
@@ -174,7 +167,6 @@ class tokoService {
       },
       Uri.parse('$baseUrl/toko/ban/$id'),
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return deleteToko(id);
@@ -196,7 +188,6 @@ class tokoService {
       },
       Uri.parse('$baseUrl/toko/activate/$id'),
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return activateToko(id);
@@ -218,7 +209,6 @@ class tokoService {
       },
       Uri.parse('$baseUrl/toko/reject/$id'),
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return activateToko(id);

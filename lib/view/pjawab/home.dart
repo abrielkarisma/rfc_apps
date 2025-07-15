@@ -82,14 +82,19 @@ class _PjawabHomeState extends State<PjawabHome> {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: EdgeInsets.only(
+            left: 4.0,
+            right: 4.0,
+            top: 8.0,
+            bottom: MediaQuery.of(context).padding.bottom + 8.0,
+          ),
           child: GNav(
             rippleColor: Colors.grey[300]!,
             hoverColor: Colors.grey[100]!,
-            gap: 8,
+            gap: 4,
             activeColor: Colors.white,
             iconSize: 24,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             duration: Duration(milliseconds: 300),
             tabBackgroundColor: Color(0xFF6BC0CA),
             color: Color(0xFF6BC0CA),
@@ -99,7 +104,7 @@ class _PjawabHomeState extends State<PjawabHome> {
                 text: 'Kelola Penjual',
                 textStyle: TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontFamily: "poppins",
                   fontWeight: FontWeight.w500,
                 ),
@@ -109,7 +114,7 @@ class _PjawabHomeState extends State<PjawabHome> {
                 text: 'Penarikan',
                 textStyle: TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontFamily: "poppins",
                   fontWeight: FontWeight.w500,
                 ),

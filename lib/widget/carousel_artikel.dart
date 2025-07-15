@@ -96,7 +96,6 @@ class _ArtikelCarouselState extends State<ArtikelCarousel> {
                                       ),
                                       child: TextButton(
                                         onPressed: () {
-                                          print(artikel.id);
                                         },
                                         style: TextButton.styleFrom(
                                           backgroundColor: Colors.transparent,

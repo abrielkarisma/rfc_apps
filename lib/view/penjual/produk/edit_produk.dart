@@ -55,7 +55,7 @@ class _EditProdukState extends State<EditProduk> {
     editStokSatuan = false;
     editStatus();
     super.initState();
-    // Initialize form fields with current product data
+    
     _namaProdukController.text = widget.nama;
     _deskripsiProdukController.text = widget.deskripsi;
     _stokProdukController.text = widget.stok;
@@ -151,7 +151,6 @@ class _EditProdukState extends State<EditProduk> {
       }
     } catch (e) {
       ToastHelper.showErrorToast(context, "Terjadi kesalahan: ${e.toString()}");
-      print(e.toString());
     } finally {
       setState(() {
         _isLoading = false;

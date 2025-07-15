@@ -115,29 +115,10 @@ class PaymentSuccessPage extends StatelessWidget {
             ),
             SizedBox(height: context.getHeight(30)),
             Spacer(),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Download PDF action
-              },
-              icon: const Icon(Icons.download),
-              label: const Text(
-                "Download PDF",
-                style: TextStyle(
-                  fontFamily: "poppins",
-                  fontSize: 16,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Colors.black),
-                minimumSize: const Size(double.infinity, 50),
-              ),
-            ),
             SizedBox(height: context.getHeight(16)),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // back to home/order page
+                Navigator.pop(context); 
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,

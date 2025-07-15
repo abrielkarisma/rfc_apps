@@ -19,7 +19,7 @@ class ProdukResponse {
         data: produkList,
       );
     } else if (rawData is Map<String, dynamic>) {
-      // If data is a single object
+      
       return ProdukResponse(
         message: json['message'],
         data: [Produk.fromJson(rawData)],

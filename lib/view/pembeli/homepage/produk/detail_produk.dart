@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
+import 'package:rfc_apps/model/keranjang.dart';
 import 'package:rfc_apps/service/keranjang.dart';
 import 'package:rfc_apps/service/produk.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/pembeli/homepage/homepage.dart';
+import 'package:rfc_apps/view/pembeli/homepage/pesanan/prosesPesanan.dart';
 import 'package:rfc_apps/widget/produk_list.dart';
 import 'package:rfc_apps/widget/quantityCounter.dart';
 
@@ -24,7 +26,7 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
   String deskripsiProduk = "";
   String hargaProduk = "";
   String kategoriProduk = "";
-  String stokProduk = "0"; // Initialize with "0" instead of empty string
+  String stokProduk = "0"; 
   String satuanProduk = "";
   int jumlahProduk = 1;
   Key _produkListKey = UniqueKey();
@@ -33,7 +35,6 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
     jumlahProduk = newQuantity;
   }
 
-  // Helper function to safely parse stock
   int _getStokValue() {
     if (stokProduk.isEmpty) return 0;
     return int.tryParse(stokProduk) ?? 0;
@@ -259,51 +260,81 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                 SizedBox(
                   height: context.getHeight(8),
                 ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (_getStokValue() > 0)
-                        QuantityCounter(
+                Column(
+                  children: [
+                    
+                    if (_getStokValue() > 0)
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 12),
+                        child: QuantityCounter(
                           satuan: satuanProduk,
                           stok: stokProduk,
                           onQuantityChanged: _updateQuantity,
                         ),
-                      if (_getStokValue() == 0)
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              children: [],
+                      ),
+
+                    
+                    Row(
+                      children: [
+                        
+                        if (_getStokValue() > 0)
+                          Container(
+                            height: 48,
+                            width: 48,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                        ),
-                      if (_getStokValue() > 0) SizedBox(width: 20),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          backgroundColor:
-                              _getStokValue() == 0 ? Colors.grey : Colors.green,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                        ),
-                        label: Text(
-                          _getStokValue() == 0 ? 'Stok Habis' : 'Beli Sekarang',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontFamily: "Poppins",
-                              fontSize: 12,
-                              color: Colors.white),
-                        ),
-                        onPressed: _getStokValue() == 0
-                            ? null
-                            : () async {
-                                print('Selected quantity: $jumlahProduk');
+                            child: IconButton(
+                              icon: SvgPicture.asset(
+                                'assets/images/cart_white.svg',
+                                width: 20,
+                                height: 20,
+                              ),
+                              onPressed: () async {
                                 _addToKeranjang();
                               },
-                      ),
-                    ]),
+                            ),
+                          ),
+
+                        
+                        if (_getStokValue() > 0) SizedBox(width: 12),
+
+                        
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              backgroundColor: _getStokValue() == 0
+                                  ? Colors.grey
+                                  : Colors.green,
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              minimumSize: Size(double.infinity, 48),
+                            ),
+                            child: Text(
+                              _getStokValue() == 0
+                                  ? 'Stok Habis'
+                                  : 'Beli Sekarang',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Poppins",
+                                  fontSize: 14,
+                                  color: Colors.white),
+                            ),
+                            onPressed: _getStokValue() == 0
+                                ? null
+                                : () async {
+                                    _beliSekarang();
+                                  },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
                 SizedBox(
                   height: context.getHeight(8),
                 ),
@@ -363,7 +394,6 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
   Future<void> _addToKeranjang() async {
     final keranjangResponse =
         await KeranjangService().createKeranjang(widget.idProduk, jumlahProduk);
-    print(keranjangResponse['message']);
     if (keranjangResponse['message'] == "Successfully added to cart") {
       ToastHelper.showSuccessToast(
           context, 'Produk berhasil ditambahkan ke keranjang');
@@ -374,6 +404,73 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
     } else {
       ToastHelper.showErrorToast(
           context, 'Gagal menambahkan produk ke keranjang');
+    }
+  }
+
+  Future<void> _beliSekarang() async {
+    try {
+      
+      final stockResponse =
+          await ProdukService().getProdukStok(widget.idProduk);
+      final int stok = stockResponse['data']['stok'];
+      if (jumlahProduk > stok) {
+        ToastHelper.showErrorToast(
+            context, "Jumlah melebihi stok yang tersedia: $stok");
+        return;
+      }
+
+      
+      final originalCartItems = await KeranjangService().getAllKeranjang();
+      final originalItem = originalCartItems
+          .where((item) => item.produk.id == widget.idProduk)
+          .firstOrNull;
+
+      
+      await KeranjangService().createKeranjang(widget.idProduk, jumlahProduk);
+
+      
+      final tempCartItems = await KeranjangService().getAllKeranjang();
+      final tempItem = tempCartItems
+          .where((item) => item.produk.id == widget.idProduk)
+          .firstOrNull;
+
+      if (tempItem == null) {
+        ToastHelper.showErrorToast(
+            context, 'Produk tidak ditemukan di keranjang');
+        return;
+      }
+
+      
+      final purchaseItem = CartItem(
+        id: tempItem.id,
+        jumlah: jumlahProduk,
+        produk: tempItem.produk,
+      );
+
+      
+      if (originalItem != null) {
+        
+        await KeranjangService()
+            .updateKeranjang(tempItem.id, originalItem.jumlah);
+      } else {
+        
+        await KeranjangService().deleteKeranjang(tempItem.id);
+      }
+
+      
+      final callback = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProsesPesananPage(items: [purchaseItem]),
+        ),
+      );
+
+      if (callback == "refresh") {
+        
+        _getDetailProduk();
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Gagal memproses pesanan: $e");
     }
   }
 }

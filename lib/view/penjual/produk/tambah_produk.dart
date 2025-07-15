@@ -76,8 +76,6 @@ class _TambahProdukState extends State<TambahProduk> {
         deskripsiProduk,
         _produkgambar!,
       );
-      print("$response akay");
-      print(response);
       if (response['message'] == "Berhasil menambahkan produk") {
         ToastHelper.showSuccessToast(context, "Produk berhasil disimpan!");
         Navigator.pop(context, "refresh");
@@ -88,7 +86,6 @@ class _TambahProdukState extends State<TambahProduk> {
     } catch (e) {
       ToastHelper.showErrorToast(
           context, "Terjadi kesalahannnn: ${e.toString()}");
-      print(e.toString());
     }
   }
 

@@ -36,7 +36,6 @@ class tokenService {
 
   Future<void> refreshToken() async {
     final refreshToken = await _storage.read(key: 'refreshToken');
-    print(refreshToken);
 
     final response = await http.get(
       Uri.parse('$baseUrl/refresh'),

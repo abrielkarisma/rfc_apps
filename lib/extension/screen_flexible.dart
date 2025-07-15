@@ -5,12 +5,12 @@ extension ResponsiveExtension on BuildContext {
   double get screenHeight => MediaQuery.of(this).size.height;
 
   double getWidth(double size) {
-    const double designWidth = 440; // Ukuran desain (iPhone 16 Pro Max)
+    const double designWidth = 440; 
     return (size / designWidth) * screenWidth;
   }
 
   double getHeight(double size) {
-    const double designHeight = 956; // Ukuran desain (iPhone 16 Pro Max)
+    const double designHeight = 956; 
     return (size / designHeight) * screenHeight;
   }
 }

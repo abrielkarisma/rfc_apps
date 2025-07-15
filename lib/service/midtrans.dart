@@ -31,7 +31,6 @@ class MidtransService {
         await tokenService().refreshToken();
         return createTransaction(orderId, items);
       }
-      // print(response.body);
       if (response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
@@ -78,9 +77,6 @@ class MidtransService {
       },
       body: jsonEncode({'orderId': orderId, 'pesananId': pesananId}),
     );
-
-    print("Status code: ${response.statusCode}");
-    print("Response body: ${response.body}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return createTransactionForPesanan(orderId, pesananId);

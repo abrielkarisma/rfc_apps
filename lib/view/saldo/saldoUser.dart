@@ -62,7 +62,7 @@ class _SaldoPageState extends State<SaldoPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      backgroundColor: Colors.grey[100], // Latar belakang halaman yang lembut
+      backgroundColor: Colors.grey[100], 
       body: FutureBuilder<Map<String, dynamic>>(
         future: _saldoFuture,
         builder: (context, snapshot) {
@@ -125,7 +125,7 @@ class _SaldoPageState extends State<SaldoPage> {
 
   Widget _buildLoadingShimmer() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[350]!, // Warna shimmer lebih gelap sedikit
+      baseColor: Colors.grey[350]!, 
       highlightColor: Colors.grey[200]!,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -134,14 +134,14 @@ class _SaldoPageState extends State<SaldoPage> {
           children: [
             Container(
               width: double.infinity,
-              height: 150.0, // Kartu saldo lebih besar
+              height: 150.0, 
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius:
-                    BorderRadius.circular(16), // Border radius lebih besar
+                    BorderRadius.circular(16), 
               ),
             ),
-            const SizedBox(height: 30), // Jarak lebih besar
+            const SizedBox(height: 30), 
             _buildShimmerActionButton(),
             _buildShimmerActionButton(),
             _buildShimmerActionButton(),
@@ -155,7 +155,7 @@ class _SaldoPageState extends State<SaldoPage> {
   Widget _buildShimmerActionButton() {
     return Container(
         width: double.infinity,
-        height: 55, // Tinggi tombol shimmer
+        height: 55, 
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.only(bottom: 12));
@@ -173,7 +173,7 @@ class _SaldoPageState extends State<SaldoPage> {
       color: Theme.of(context).primaryColor,
       child: SingleChildScrollView(
         physics:
-            const AlwaysScrollableScrollPhysics(), // Agar selalu bisa di-scroll untuk refresh
+            const AlwaysScrollableScrollPhysics(), 
         padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -212,7 +212,7 @@ class _SaldoPageState extends State<SaldoPage> {
                   Text(
                     formatRupiah(saldoTersedia),
                     style: const TextStyle(
-                      fontSize: 40, // Font lebih besar
+                      fontSize: 40, 
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 1.1,
@@ -267,7 +267,7 @@ class _SaldoPageState extends State<SaldoPage> {
             ),
             _buildActionButton(
               context,
-              icon: Icons.history_toggle_off_rounded, // Ikon baru
+              icon: Icons.history_toggle_off_rounded, 
               label: 'Riwayat Penarikan',
               onPressed: () {
                 Navigator.push(
@@ -317,15 +317,15 @@ class _SaldoPageState extends State<SaldoPage> {
               isOutlined ? Colors.white : Theme.of(context).primaryColor,
           elevation: isOutlined ? 0 : 3,
           padding: const EdgeInsets.symmetric(
-              horizontal: 20, vertical: 16), // Padding lebih besar
+              horizontal: 20, vertical: 16), 
           shape: RoundedRectangleBorder(
             borderRadius:
-                BorderRadius.circular(12.0), // Border radius lebih besar
+                BorderRadius.circular(12.0), 
             side: isOutlined
                 ? BorderSide(color: Theme.of(context).primaryColor, width: 1.5)
                 : BorderSide.none,
           ),
-          alignment: Alignment.centerLeft, // Teks dan ikon rata kiri
+          alignment: Alignment.centerLeft, 
         ).copyWith(
           overlayColor: MaterialStateProperty.all(isOutlined
               ? Theme.of(context).primaryColor.withOpacity(0.1)

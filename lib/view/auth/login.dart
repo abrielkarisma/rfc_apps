@@ -27,26 +27,35 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _verifPhoneController = TextEditingController();
 
+  
+  String? _emailError;
+  String? _passwordError;
+
   void _handleLogin() async {
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+    });
     final email = _emailController.text;
     final password = _passwordController.text;
-
-    if (email.isEmpty) {
-      ToastHelper.showErrorToast(context, 'Masukkan email anda');
-      return;
-    }
+    bool hasError = false;
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!emailRegex.hasMatch(email)) {
-      ToastHelper.showErrorToast(context, 'Masukkan email yang valid');
-      return;
+    if (email.isEmpty) {
+      _emailError = 'Masukkan email anda';
+      hasError = true;
+    } else if (!emailRegex.hasMatch(email)) {
+      _emailError = 'Masukkan email yang valid';
+      hasError = true;
     }
-
     if (password.isEmpty) {
-      ToastHelper.showErrorToast(context, 'Masukkan password anda');
-      return;
+      _passwordError = 'Masukkan password anda';
+      hasError = true;
+    } else if (password.length < 8) {
+      _passwordError = 'Password minimal 8 karakter';
+      hasError = true;
     }
-    if (password.length < 8) {
-      ToastHelper.showErrorToast(context, 'Password minimal 8 karakter');
+    if (hasError) {
+      setState(() {});
       return;
     }
     try {
@@ -59,7 +68,6 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
             key: 'refreshToken', value: login.refreshToken);
         await tokenStorage.write(key: 'role', value: login.data?.role);
         final role = login.data?.role;
-        print("ini role $role");
         if (role == 'user') {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -235,42 +243,99 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: context.getWidth(400),
-            height: context.getHeight(130),
-            child: Text(
-              "Masuk ke Akun Anda",
-              style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 28,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w700),
-              textAlign: TextAlign.start,
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: context.getWidth(400),
+              height: context.getHeight(130),
+              child: Text(
+                "Masuk ke Akun Anda",
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 28,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w700),
+                textAlign: TextAlign.start,
+              ),
             ),
-          ),
-          Padding(padding: EdgeInsets.only(top: context.getHeight(36))),
-          Container(
-            child: Text(
-              "email",
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500),
+            Padding(padding: EdgeInsets.only(top: context.getHeight(36))),
+            Container(
+              child: Text(
+                "email",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500),
+              ),
             ),
-          ),
-          Container(
+            Container(
+                margin: EdgeInsets.only(top: context.getHeight(7)),
+                height: context.getHeight(46),
+                child: TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    hintText: "yourmail@mail.com",
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontFamily: "poppins",
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10), 
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                )),
+            if (_emailError != null)
+              Padding(
+                padding: EdgeInsets.only(left: 8, top: 2),
+                child: Text(
+                  _emailError!,
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+            Container(
+              margin: EdgeInsets.only(top: context.getHeight(7)),
+              child: Text(
+                "password",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: "poppins",
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+            Container(
               margin: EdgeInsets.only(top: context.getHeight(7)),
               height: context.getHeight(46),
               child: TextFormField(
-                controller: _emailController,
+                controller: _passwordController,
+                obscureText: _isObscure,
                 decoration: InputDecoration(
-                  hintText: "yourmail@mail.com",
+                  hintText: "Enter password",
                   hintStyle: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
@@ -278,7 +343,7 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
                     fontWeight: FontWeight.w500,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), // 10 radius
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(
                       color: Colors.grey,
                       width: 1.0,
@@ -298,142 +363,103 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
                       width: 2.0,
                     ),
                   ),
-                ),
-              )),
-          Container(
-            margin: EdgeInsets.only(top: context.getHeight(7)),
-            child: Text(
-              "password",
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: context.getHeight(7)),
-            height: context.getHeight(46),
-            child: TextFormField(
-              controller: _passwordController,
-              obscureText: _isObscure,
-              decoration: InputDecoration(
-                hintText: "Enter password",
-                hintStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Colors.grey,
-                    width: 1.0,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isObscure ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
                   ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Colors.grey,
-                    width: 1.0,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                    width: 2.0,
-                  ),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isObscure ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscure = !_isObscure;
-                    });
-                  },
                 ),
               ),
             ),
-          ),
-          Container(
-            height: context.getHeight(33),
-            margin: EdgeInsets.only(
-                top: context.getHeight(7), bottom: context.getHeight(14)),
-            width: double.infinity,
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/lupa_password',
-                    arguments: 'login');
-              },
-              child: Text("Lupa Password?",
+            if (_passwordError != null)
+              Padding(
+                padding: EdgeInsets.only(left: 8, top: 2),
+                child: Text(
+                  _passwordError!,
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+            Container(
+              height: context.getHeight(33),
+              margin: EdgeInsets.only(
+                  top: context.getHeight(7), bottom: context.getHeight(14)),
+              width: double.infinity,
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/lupa_password',
+                      arguments: 'login');
+                },
+                child: Text("Lupa Password?",
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 12,
+                      fontFamily: "poppins",
+                      fontWeight: FontWeight.w500,
+                    )),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: context.getHeight(54),
+              child: TextButton(
+                onPressed: () {
+                  _handleLogin();
+                },
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
+                child: Text(
+                  'Login',
                   style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 12,
+                    fontSize: 18,
+                    color: Colors.white,
                     fontFamily: "poppins",
                     fontWeight: FontWeight.w500,
-                  )),
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            height: context.getHeight(54),
-            child: TextButton(
-              onPressed: () {
-                _handleLogin();
-              },
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Theme.of(context).primaryColor,
-              ),
-              child: Text(
-                'Login',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontFamily: "poppins",
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.only(top: context.getHeight(24)),
-              child: RichText(
-                text: TextSpan(
-                  text: "Belum punya akun? ",
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 12,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w300,
                   ),
-                  children: [
-                    TextSpan(
-                      text: "Register",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          widget.pageController.jumpToPage(2);
-                        },
-                    ),
-                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            Center(
+              child: Container(
+                margin: EdgeInsets.only(top: context.getHeight(24)),
+                child: RichText(
+                  text: TextSpan(
+                    text: "Belum punya akun? ",
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 12,
+                      fontFamily: "poppins",
+                      fontWeight: FontWeight.w300,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: "Register",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            widget.pageController.jumpToPage(2);
+                          },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

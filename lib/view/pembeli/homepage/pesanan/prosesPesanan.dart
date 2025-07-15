@@ -150,9 +150,9 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
         child: ElevatedButton(
           onPressed: () {
             _handlePesanan();
-            // _handlePembayaran(context);
+            
           },
-          // => _handlePembayaran(context),
+          
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
@@ -180,10 +180,8 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
     try {
       final response =
           await PesananService().createPesanan(generateOrderId, widget.items);
-      print(response);
       if (response['message'] == "Pesanan berhasil dibuat") {
         for (var item in widget.items) {
-          print(item.id);
           await KeranjangService().deleteKeranjang(item.id);
         }
         final response = await MidtransService()

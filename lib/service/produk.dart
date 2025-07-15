@@ -113,7 +113,6 @@ class ProdukService {
     }
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      print(responseData);
       final List<dynamic> data = responseData['data'];
       final filteredData =
           data.where((item) => item['isDeleted'] == false).toList();
@@ -161,7 +160,6 @@ class ProdukService {
       return getProdukById(id);
     }
     if (response.statusCode == 200) {
-      print(response.body);
       return ProdukResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load produk data');
@@ -254,7 +252,7 @@ class ProdukService {
       );
     }
     if (response.statusCode == 200) {
-      print(response.body);
+      
       return ProdukResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to update produk data');
@@ -275,7 +273,6 @@ class ProdukService {
       return deleteProduk(id);
     }
     if (response.statusCode == 200) {
-      print(response.body);
       return ProdukResponse.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 404) {
       return ProdukResponse.fromJson(jsonDecode(response.body));
@@ -294,8 +291,6 @@ class ProdukService {
       },
       Uri.parse('$baseUrl/produk/stok/$id'),
     );
-    print(response.statusCode);
-    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getProdukStok(id);

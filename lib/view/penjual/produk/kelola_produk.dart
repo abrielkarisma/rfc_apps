@@ -14,7 +14,7 @@ class _KelolaProdukState extends State<KelolaProduk> {
   Key _produkListKey = UniqueKey();
   void _refreshProduk() {
     setState(() {
-      _produkListKey = UniqueKey(); // trigger rebuild ProdukList
+      _produkListKey = UniqueKey(); 
     });
   }
 
@@ -83,7 +83,6 @@ class _KelolaProdukState extends State<KelolaProduk> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final typetoko = await tokoService().getTokoByUserId();
-          print(typetoko.data[0].TypeToko);
           if (typetoko.data[0].TypeToko == "rfc") {
             final result = await Navigator.pushNamed(
               context,

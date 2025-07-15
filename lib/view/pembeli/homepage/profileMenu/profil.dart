@@ -33,7 +33,6 @@ class _ProfilState extends State<Profil> {
       final email = user.data?['email'] ?? '';
       final phone = user.data?['phone'] ?? '';
       final avatarUrl = user.data?['avatarUrl'] ?? '';
-      print(avatarUrl);
 
       setState(() {
         $name = name;
@@ -43,7 +42,9 @@ class _ProfilState extends State<Profil> {
         $avatarUrl = avatarUrl;
       });
     } catch (e) {
-      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat data pengguna: $e')),
+      );
     }
   }
 
@@ -67,142 +68,148 @@ class _ProfilState extends State<Profil> {
                 textAlign: TextAlign.start),
           ),
           Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        width: context.getWidth(100),
-                        height: context.getHeight(100),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey[200]!,
-                              blurRadius: 4,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
-                          border: Border.all(
-                            color: Colors.grey[200]!,
-                            width: 2,
-                          ),
-                        ),
-                        child: ClipOval(
-                            child: $avatarUrl.endsWith('.svg')
-                                ? SvgPicture.network(
-                                    $avatarUrl,
-                                    fit: BoxFit.cover,
-                                    placeholderBuilder:
-                                        (BuildContext context) => Container(
-                                      padding: const EdgeInsets.all(20),
-                                      child: const CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : Image.network(
-                                    $avatarUrl,
-                                    fit: BoxFit.cover,
-                                  )),
-                      ),
-                      SizedBox(height: context.getHeight(7)),
-                      Text(
-                        $name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                      SizedBox(height: context.getHeight(1)),
-                      Text(
-                        $email,
-                        style: TextStyle(
-                          color: Color(0xFF979797),
-                          fontFamily: "Poppins",
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: context.getHeight(22)),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final result = await Navigator.pushNamed(
-                            context,
-                            '/edit_profile',
-                            arguments: {
-                              'name': $name,
-                              'email': $email,
-                              'phone': $phone,
-                              'userId': userId,
-                              'avatarUrl': $avatarUrl,
-                            },
-                          );
-                          if (result == 'refresh') {
-                            _getUserDatabyId();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                        ),
-                        child: const Text(
-                          'Edit Profil',
-                          style: TextStyle(
-                            fontFamily: "Poppins",
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: context.getHeight(27)),
-                  Container(
-                    width: double.infinity,
-                    height: context.getHeight(464),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Column(
                       children: [
-                        _buildMenuItem('assets/images/menuIcon/profile.png',
-                            'Saldo Pengguna',
-                            onTapRoute: '/saldo', context: context),
-                        _buildMenuItem(
-                            'assets/images/menuIcon/lock.png', 'Ubah Password',
-                            onTapRoute: '/lupa_password',
-                            routeArguments: 'ganti',
-                            context: context),
-                        _buildMenuItem('assets/images/menuIcon/star.png',
-                            'Beri Rating Kami',
-                            onTapRoute: '/tnc', context: context),
-                        _buildMenuItem('assets/images/menuIcon/docs.png',
-                            'Syarat & Ketentuan',
-                            onTapRoute: '/tnc', context: context),
-                        _buildMenuItem('assets/images/menuIcon/docs.png',
-                            'Kebijakan Privasi',
-                            onTapRoute: '/privacy_policy', context: context),
-                        _buildLogoutItem(context),
+                        Container(
+                          width: context.getWidth(100),
+                          height: context.getHeight(100),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey[200]!,
+                                blurRadius: 4,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Colors.grey[200]!,
+                              width: 2,
+                            ),
+                          ),
+                          child: ClipOval(
+                              child: $avatarUrl.endsWith('.svg')
+                                  ? SvgPicture.network(
+                                      $avatarUrl,
+                                      fit: BoxFit.cover,
+                                      placeholderBuilder:
+                                          (BuildContext context) => Container(
+                                        padding: const EdgeInsets.all(20),
+                                        child:
+                                            const CircularProgressIndicator(),
+                                      ),
+                                    )
+                                  : Image.network(
+                                      $avatarUrl,
+                                      fit: BoxFit.cover,
+                                    )),
+                        ),
+                        SizedBox(height: context.getHeight(7)),
+                        Text(
+                          $name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                        SizedBox(height: context.getHeight(1)),
+                        Text(
+                          $email,
+                          style: TextStyle(
+                            color: Color(0xFF979797),
+                            fontFamily: "Poppins",
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: context.getHeight(22)),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final result = await Navigator.pushNamed(
+                              context,
+                              '/edit_profile',
+                              arguments: {
+                                'name': $name,
+                                'email': $email,
+                                'phone': $phone,
+                                'userId': userId,
+                                'avatarUrl': $avatarUrl,
+                              },
+                            );
+                            if (result == 'refresh') {
+                              _getUserDatabyId();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                          ),
+                          child: const Text(
+                            'Edit Profil',
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  )
-                ],
+                    SizedBox(height: context.getHeight(27)),
+                    Container(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildMenuItem('assets/images/menuIcon/profile.png',
+                              'Saldo Pengguna',
+                              onTapRoute: '/saldo', context: context),
+                          SizedBox(height: 16),
+                          _buildMenuItem('assets/images/menuIcon/lock.png',
+                              'Ubah Password',
+                              onTapRoute: '/lupa_password',
+                              routeArguments: 'ganti',
+                              context: context),
+                          SizedBox(height: 16),
+                          _buildMenuItem('assets/images/menuIcon/star.png',
+                              'Beri Rating Kami',
+                              onTapRoute: '/tnc', context: context),
+                          SizedBox(height: 16),
+                          _buildMenuItem('assets/images/menuIcon/docs.png',
+                              'Syarat & Ketentuan',
+                              onTapRoute: '/tnc', context: context),
+                          SizedBox(height: 16),
+                          _buildMenuItem('assets/images/menuIcon/docs.png',
+                              'Kebijakan Privasi',
+                              onTapRoute: '/privacy_policy', context: context),
+                          SizedBox(height: 16),
+                          _buildLogoutItem(context),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
   }
 
   Widget _buildMenuItem(String assetPath, String title,
-      {Color? iconColor,
-      required String onTapRoute,
+      {required String onTapRoute,
       String? routeArguments,
       required BuildContext context}) {
     return Container(

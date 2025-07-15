@@ -46,7 +46,9 @@ class _UserListState extends State<UserList> {
         requestCount = inactiveCount;
       });
     } catch (e) {
-      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat data penjual')),
+      );
     }
   }
 

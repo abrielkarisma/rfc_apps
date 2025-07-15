@@ -13,7 +13,6 @@ class UserService {
       Uri.parse('$baseUrl/user/id/$id'),
     );
     if (response.statusCode == 200) {
-      print(response.body);
       return UserResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load user data');
@@ -32,7 +31,6 @@ class UserService {
     );
     final result = UserResponse.fromJson(jsonDecode(response.body));
     if (result.message == 'Successfully updated user data') {
-      print(response.body);
       return UserResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to update user data');
@@ -44,7 +42,6 @@ class UserService {
       headers: {'Content-Type': 'application/json'},
       Uri.parse('$baseUrl/user/seller'),
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -57,7 +54,6 @@ class UserService {
       headers: {'Content-Type': 'application/json'},
       Uri.parse('$baseUrl/user/seller/$id'),
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

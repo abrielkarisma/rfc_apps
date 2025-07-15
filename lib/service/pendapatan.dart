@@ -15,8 +15,6 @@ class PendapatanService {
         'Content-Type': 'application/json',
       },
     );
-    print("Status codeeeeee: ${response.statusCode}");
-    print("Response body: ${response.body}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getPendapatan(id);

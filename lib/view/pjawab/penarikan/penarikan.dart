@@ -113,7 +113,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
             _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         _currentPage <= _totalPages) {
-      // Pastikan _currentPage tidak melebihi _totalPages sebelum fetch
+      
       _fetchRequests();
     }
   }

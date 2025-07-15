@@ -89,7 +89,7 @@ class ImagePickerHelper {
         }
       }
     } catch (e) {
-      print('Error picking or cropping image: $e');
+      
     }
   }
 

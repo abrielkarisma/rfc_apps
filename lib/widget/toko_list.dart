@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/model/toko.dart';
 import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/widget/toko_card.dart';
-import 'package:shimmer/shimmer.dart'; // Add shimmer import
+import 'package:shimmer/shimmer.dart'; 
 
 class TokoListWidget extends StatefulWidget {
   final String searchQuery;
@@ -24,12 +24,12 @@ class _TokoListWidgetState extends State<TokoListWidget> {
     return await tokoService().getToko();
   }
 
-  // Add shimmer loading widget for toko list
+  
   Widget _buildShimmerLoading() {
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
-      itemCount: 5, // Show 5 shimmer placeholders
+      itemCount: 5, 
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
@@ -38,7 +38,7 @@ class _TokoListWidgetState extends State<TokoListWidget> {
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Row(
               children: [
-                // Circle for toko logo
+                
                 Container(
                   width: 50,
                   height: 50,
@@ -48,7 +48,7 @@ class _TokoListWidgetState extends State<TokoListWidget> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Toko name
+                
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +81,7 @@ class _TokoListWidgetState extends State<TokoListWidget> {
       future: _tokoFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildShimmerLoading(); // Use shimmer loading instead of CircularProgressIndicator
+          return _buildShimmerLoading(); 
         } else if (snapshot.hasError) {
           return Center(
             child: Column(

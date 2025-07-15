@@ -14,7 +14,6 @@ class KeranjangService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'
     }, Uri.parse('$baseUrl/keranjang/id/'));
-    print(jsonDecode(response.body));
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getAllKeranjang();
@@ -42,9 +41,6 @@ class KeranjangService {
         'jumlah': jumlah,
       }),
     );
-    print(produkId);
-    print(response.statusCode);
-    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return createKeranjang(produkId, jumlah);
@@ -92,11 +88,6 @@ class KeranjangService {
         'Content-Type': 'application/json',
       },
     );
-
-    print('DELETE ID: $id');
-    print('Status Code: ${response.statusCode}');
-    print('Response: ${response.body}');
-
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return deleteKeranjang(id);

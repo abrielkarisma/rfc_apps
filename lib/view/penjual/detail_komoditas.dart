@@ -41,7 +41,12 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
         data = komoditas;
       });
     } catch (e) {
-      print(e);
+      if (mounted) {
+        ToastHelper.showErrorToast(
+          context,
+          'Gagal memuat data komoditas: ${e.toString()}',
+        );
+      }
     }
   }
 
@@ -86,32 +91,54 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
     }
   }
 
-  Widget _buildRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _buildInfoCard(String label, String value, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: Theme.of(context).primaryColor,
             ),
           ),
-          const Text(' : ',
-              style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -176,9 +203,9 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
         title: Text('Detail Komoditas',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
-              fontFamily: 'Monserrat_Alternates',
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
             )),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -267,62 +294,154 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
                             ),
                           ),
                           SizedBox(height: context.getHeight(20)),
+
+                          
                           Container(
                             width: double.infinity,
-                            child: Text("Informasi Komoditas",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                )),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        color: Theme.of(context).primaryColor,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      "Informasi Komoditas",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _buildInfoCard('Nama Komoditas', data!.nama,
+                                    Icons.label_outline),
+                                _buildInfoCard(
+                                    'Jumlah',
+                                    '${data!.jumlah.toInt()} ${data!.satuan.lambang}',
+                                    Icons.inventory_outlined),
+                                _buildInfoCard('Tipe', data!.tipeKomoditas,
+                                    Icons.category_outlined),
+                                _buildInfoCard('Satuan', data!.satuan.nama,
+                                    Icons.straighten_outlined),
+                                _buildInfoCard(
+                                    'Jenis Budidaya',
+                                    data!.jenisBudidaya.nama,
+                                    Icons.eco_outlined),
+                              ],
+                            ),
                           ),
-                          _buildRow('Nama Komoditas', data!.nama),
-                          _buildRow('Jumlah', data!.jumlah.toString()),
-                          _buildRow('Tipe', data!.tipeKomoditas),
-                          _buildRow('Satuan', data!.satuan.nama),
-                          _buildRow('Jenis Budidaya', data!.jenisBudidaya.nama),
+
                           SizedBox(height: context.getHeight(30)),
+
+                          
                           Container(
                             width: double.infinity,
-                            child: Text("Tambah Produk",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                )),
-                          ),
-                          _buildFormField(
-                            label: 'Harga per ${data!.satuan.nama}',
-                            controller: _hargaController,
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Harga tidak boleh kosong';
-                              }
-                              if (int.tryParse(value) == null) {
-                                return 'Harga harus berupa angka';
-                              }
-                              if (int.parse(value) <= 0) {
-                                return 'Harga harus lebih dari 0';
-                              }
-                              return null;
-                            },
-                          ),
-                          _buildFormField(
-                            label: 'Deskripsi Produk',
-                            controller: _deskripsiController,
-                            maxLines: 4,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Deskripsi tidak boleh kosong';
-                              }
-                              if (value.length < 10) {
-                                return 'Deskripsi minimal 10 karakter';
-                              }
-                              return null;
-                            },
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.add_shopping_cart,
+                                        color: Theme.of(context).primaryColor,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      "Tambah Produk",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _buildFormField(
+                                  label: 'Harga per ${data!.satuan.nama}',
+                                  controller: _hargaController,
+                                  keyboardType: TextInputType.number,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Harga tidak boleh kosong';
+                                    }
+                                    if (int.tryParse(value) == null) {
+                                      return 'Harga harus berupa angka';
+                                    }
+                                    if (int.parse(value) <= 0) {
+                                      return 'Harga harus lebih dari 0';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                _buildFormField(
+                                  label: 'Deskripsi Produk',
+                                  controller: _deskripsiController,
+                                  maxLines: 4,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Deskripsi tidak boleh kosong';
+                                    }
+                                    if (value.length < 10) {
+                                      return 'Deskripsi minimal 10 karakter';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                           SizedBox(height: context.getHeight(100)),
                         ],
@@ -332,26 +451,91 @@ class _DetailKomoditasPageState extends State<DetailKomoditasPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Material(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withOpacity(0.8),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
             borderRadius: BorderRadius.circular(16),
-            onTap: _isLoading ? null : _createProduct,
-            child: Container(
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Center(
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Tambahkan Produk",
-                        style: TextStyle(
-                            fontFamily: 'poppins',
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18)),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: _isLoading ? null : _createProduct,
+              child: Container(
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Center(
+                  child: _isLoading
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              "Menambahkan...",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.add_shopping_cart,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Tambahkan Produk",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
               ),
             ),
           ),

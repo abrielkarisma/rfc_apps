@@ -19,31 +19,49 @@ class _ProdukPageState extends State<ProdukPage> {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(height: context.getHeight(50)),
+        SizedBox(height: context.getHeight(120)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: context.getWidth(300), // Set your desired width
-              height: context.getHeight(50), // Set your desired height
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Cari produk...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: Colors.grey, width: 0.5),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Cari produk yang kamu inginkan...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 14,
+                      fontFamily: "Inter",
+                    ),
+                    prefixIcon: Container(
+                      padding: EdgeInsets.all(12),
+                      child: Icon(
+                        Icons.search_rounded,
+                        color: Theme.of(context).primaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
               ),
             ),
             SizedBox(width: context.getWidth(16)),
@@ -51,15 +69,25 @@ class _ProdukPageState extends State<ProdukPage> {
               onTap: () {
                 Navigator.pushNamed(context, "/keranjang");
               },
-              child: SizedBox(
-                width: 30,
-                height: 30,
-                child: SvgPicture.asset("assets/images/cart_white.svg"),
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: SvgPicture.asset(
+                    "assets/images/cart_white.svg",
+                    color: Colors.white,
+                  ),
+                ),
               ),
             )
           ],
         ),
-        SizedBox(height: context.getHeight(50)),
+        SizedBox(height: context.getHeight(20)),
         Expanded(
             child: ProdukGrid(
                 key: _produkListKey,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:rfc_apps/utils/ShimmerImage.dart';
-import 'package:rfc_apps/widget/badge_status.dart'; 
+import 'package:rfc_apps/widget/badge_status.dart';
 
 class OrderListCard extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -29,7 +29,7 @@ class OrderListCard extends StatelessWidget {
         formattedDate =
             DateFormat('dd MMMM yyyy HH:mm').format(dateTime.toLocal());
       } catch (e) {
-        print('Error parsing date in OrderListCard: $e');
+        formattedDate = 'Invalid Date';
       }
     }
 
@@ -58,7 +58,7 @@ class OrderListCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: Colors.grey.withOpacity(0.2), 
+          color: Colors.grey.withOpacity(0.2),
           width: 1, // Optional border width
         ),
       ),

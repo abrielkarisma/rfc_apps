@@ -172,154 +172,155 @@ class _HomeState extends State<Home> {
                   fontWeight: FontWeight.w700),
               textAlign: TextAlign.start),
         ),
-        Padding(padding: EdgeInsets.only(top: context.getHeight(59))),
-        Container(
-          height: context.getHeight(670),
+        Padding(padding: EdgeInsets.only(top: context.getHeight(20))),
+        Expanded(
           child: RefreshIndicator(
             onRefresh: _refreshHome,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
-              children: [
-                FutureBuilder<Map<String, dynamic>>(
-                  future: _saldoFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Container(
-                        width: double.infinity,
-                        height: context.getHeight(120),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return GestureDetector(
-                        onTap: _loadSaldo,
-                        child: Container(
+                children: [
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _saldoFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(20),
+                          height: context.getHeight(120),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
+                            color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text(
-                            'Gagal memuat saldo',
-                            style: TextStyle(
-                                color: Colors.redAccent, fontFamily: 'poppins'),
+                        );
+                      } else if (snapshot.hasError) {
+                        return GestureDetector(
+                          onTap: _loadSaldo,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              'Gagal memuat saldo',
+                              style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontFamily: 'poppins'),
+                            ),
                           ),
-                        ),
-                      );
-                    } else if (snapshot.hasData && snapshot.data != null) {
-                      final saldoTersedia =
-                          snapshot.data!['saldoTersedia']?.toString() ?? '0';
+                        );
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        final saldoTersedia =
+                            snapshot.data!['saldoTersedia']?.toString() ?? '0';
 
-                      return _buildSaldoCard(saldoTersedia);
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
-                ),
-                SizedBox(height: context.getHeight(20)),
-                Padding(padding: EdgeInsets.only(top: context.getHeight(26))),
-                Container(
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Baru Saja Ditambahkan",
-                              style: TextStyle(
-                                  fontFamily: "poppins",
-                                  color: Colors.black,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.start),
-                          GestureDetector(
-                            onTap: () {
-                              widget.onSeeMoreProducts();
-                            },
-                            child: Row(
-                              children: [
-                                Text("Lihat lebih",
-                                    style: TextStyle(
-                                        fontFamily: "poppins",
-                                        color: Theme.of(context).primaryColor,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500),
-                                    textAlign: TextAlign.start),
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 12,
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: context.getHeight(6),
-                      ),
-                      Container(
-                          child: ProdukCarousel(
-                        key: _produkListKey,
-                        cardType: "rfc",
-                        id: "",
-                      )),
-                      SizedBox(
-                        height: context.getHeight(8),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Lihat Produk UMKM",
-                              style: TextStyle(
-                                  fontFamily: "poppins",
-                                  color: Colors.black,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.start),
-                          GestureDetector(
-                            onTap: () {
-                              widget.onSeeMoreProducts();
-                            },
-                            child: Row(
-                              children: [
-                                Text("Lihat lebih",
-                                    style: TextStyle(
-                                        fontFamily: "poppins",
-                                        color: Theme.of(context).primaryColor,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500),
-                                    textAlign: TextAlign.start),
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 12,
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: context.getHeight(8),
-                      ),
-                      Container(
-                          child: ProdukCarousel(
-                        key: _produkListKey,
-                        cardType: "umkm",
-                        id: "",
-                      )),
-                    ],
+                        return _buildSaldoCard(saldoTersedia);
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
                   ),
-                ),
-              ],
+                  SizedBox(height: context.getHeight(20)),
+                  Padding(padding: EdgeInsets.only(top: context.getHeight(26))),
+                  Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Baru Saja Ditambahkan",
+                                style: TextStyle(
+                                    fontFamily: "poppins",
+                                    color: Colors.black,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600),
+                                textAlign: TextAlign.start),
+                            GestureDetector(
+                              onTap: () {
+                                widget.onSeeMoreProducts();
+                              },
+                              child: Row(
+                                children: [
+                                  Text("Lihat lebih",
+                                      style: TextStyle(
+                                          fontFamily: "poppins",
+                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
+                                      textAlign: TextAlign.start),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 12,
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: context.getHeight(6),
+                        ),
+                        Container(
+                            child: ProdukCarousel(
+                          key: _produkListKey,
+                          cardType: "rfc",
+                          id: "",
+                        )),
+                        SizedBox(
+                          height: context.getHeight(8),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Lihat Produk UMKM",
+                                style: TextStyle(
+                                    fontFamily: "poppins",
+                                    color: Colors.black,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600),
+                                textAlign: TextAlign.start),
+                            GestureDetector(
+                              onTap: () {
+                                widget.onSeeMoreProducts();
+                              },
+                              child: Row(
+                                children: [
+                                  Text("Lihat lebih",
+                                      style: TextStyle(
+                                          fontFamily: "poppins",
+                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
+                                      textAlign: TextAlign.start),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 12,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: context.getHeight(8),
+                        ),
+                        Container(
+                            child: ProdukCarousel(
+                          key: _produkListKey,
+                          cardType: "umkm",
+                          id: "",
+                        )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-     ) ]),
+        )
+      ]),
     );
   }
 }

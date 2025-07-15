@@ -264,7 +264,6 @@ class _DetailPesananState extends State<DetailPesanan> {
         final DateTime dateTime = DateTime.parse(createdAt);
         formattedDate = DateFormat('dd MMMM HH:mm').format(dateTime.toLocal());
       } catch (e) {
-        print('Error parsing date in DetailPesanan: $e');
       }
     }
 
@@ -437,7 +436,7 @@ class _DetailPesananState extends State<DetailPesanan> {
             bottom: 20,
             child: StatusPesanan == "menunggu"
                 ? Row(
-                    // This part remains the same
+                    
                     children: [
                       Expanded(
                         child: ElevatedButton(
@@ -486,10 +485,10 @@ class _DetailPesananState extends State<DetailPesanan> {
                   )
                 : StatusPesanan == "diterima"
                     ? Row(
-                        // Changed from Container to Row
+                        
                         children: [
                           Expanded(
-                            // Now Expanded is a child of Row
+                            
                             child: ElevatedButton(
                               onPressed: _siapDiambil,
                               style: ElevatedButton.styleFrom(

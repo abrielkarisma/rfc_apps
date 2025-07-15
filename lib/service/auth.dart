@@ -28,8 +28,6 @@ class AuthService {
         'role': role,
       }),
     );
-    print(name);
-    print(jsonEncode(response.body));
 
     return AuthResponse.fromJson(jsonDecode(response.body));
   }
@@ -103,7 +101,6 @@ class AuthService {
         );
       }
     } catch (e) {
-      print('Error: $e');
       return OtpResponse(
         status: false,
         message: 'Terjadi kesalahan, periksa koneksi Anda.',

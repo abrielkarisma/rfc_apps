@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Untuk TextInputFormatter
+import 'package:flutter/services.dart'; 
 import 'package:intl/intl.dart';
 import 'package:rfc_apps/service/rekening.dart';
 import 'package:rfc_apps/service/saldo.dart';
@@ -111,7 +111,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       try {
         final jumlahDiminta =
             double.parse(_jumlahController.text.replaceAll('.', ''));
-        // ignore: unused_local_variable
+        
         final result = await _saldoService.createPenarikanSaldo(
             jumlahDiminta: jumlahDiminta);
 
@@ -138,7 +138,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       appBar: AppBar(
         title: const Text('Tarik Saldo',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: primaryColor, // Warna baru
+        backgroundColor: primaryColor, 
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
@@ -230,7 +230,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                           ? _submitPenarikan
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor, // Warna baru
+                        backgroundColor: primaryColor, 
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         textStyle: const TextStyle(
@@ -250,22 +250,22 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: primaryColorLight, // Warna baru
+          color: primaryColorLight, 
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: primaryColor.withOpacity(0.3)) // Warna baru
+          border: Border.all(color: primaryColor.withOpacity(0.3)) 
           ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('Saldo Anda Saat Ini:',
               style: TextStyle(
-                  fontSize: 16, color: primaryColorDark)), // Warna baru
+                  fontSize: 16, color: primaryColorDark)), 
           Text(
             formatRupiah(widget.saldoTersedia),
             style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: primaryColorText), // Warna baru
+                color: primaryColorText), 
           ),
         ],
       ),
@@ -290,14 +290,14 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: primaryColor.withOpacity(0.15), // Warna baru
+          backgroundColor: primaryColor.withOpacity(0.15), 
           child: const Icon(Icons.account_balance_rounded,
-              color: primaryColor), // Warna baru
+              color: primaryColor), 
         ),
         title: Text(rekening['namaBank']?.toString() ?? 'Nama Bank Tidak Ada',
             style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(
-          '${rekening['nomorRekening']?.toString() ?? 'No. Rekening Tidak Ada'}\na.n ${rekening['namaPenerima']?.toString() ?? 'Nama Pemilik Tidak Ada'}', // Menggunakan 'namaPenerima' dari model Rekening Anda
+          '${rekening['nomorRekening']?.toString() ?? 'No. Rekening Tidak Ada'}\na.n ${rekening['namaPenerima']?.toString() ?? 'Nama Pemilik Tidak Ada'}', 
         ),
       ),
     );
@@ -328,7 +328,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
               child: const Text('Tambahkan Rekening Sekarang',
                   style: TextStyle(
                       color: primaryColorDark,
-                      fontWeight: FontWeight.bold)), // Warna baru
+                      fontWeight: FontWeight.bold)), 
             ),
           ],
         ),
@@ -339,7 +339,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   Widget _buildRingkasanPenarikan() {
     return Card(
       elevation: 0,
-      color: Colors.grey.shade100, // Warna netral untuk ringkasan
+      color: Colors.grey.shade100, 
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(color: Colors.grey.shade300)),
@@ -368,7 +368,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: primaryColorDark), // Warna baru
+                      color: primaryColorDark), 
                 ),
               ],
             ),
@@ -379,7 +379,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   }
 }
 
-// Formatter kustom untuk input mata uang dengan titik ribuan (tetap sama)
+
 class CurrencyInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -396,7 +396,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
     try {
       double value = double.parse(cleanText);
-      // Menggunakan NumberFormat standar untuk ribuan tanpa simbol mata uang di input
+      
       final formatter = NumberFormat("#,###", "id_ID");
       String newText = formatter.format(value);
 

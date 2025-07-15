@@ -24,7 +24,7 @@ class _QuantityCounterState extends State<QuantityCounter> {
   void initState() {
     super.initState();
     jumlahProduk = widget.satuan == "gr" ? 100 : 1;
-    // Notify parent of initial value
+    
     if (widget.onQuantityChanged != null) {
       widget.onQuantityChanged!(jumlahProduk);
     }
@@ -76,7 +76,7 @@ class _QuantityCounterState extends State<QuantityCounter> {
       }
     });
 
-    // Notify parent if value changed
+    
     if (oldValue != jumlahProduk && widget.onQuantityChanged != null) {
       widget.onQuantityChanged!(jumlahProduk);
     }

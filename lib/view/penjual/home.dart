@@ -69,7 +69,6 @@ class _homeSellerState extends State<homeSeller> {
   }
 
   void _getPendapatan() async {
-    print("Fetching pendapatan for toko ID: ${$tokoId}");
     final response = await PendapatanService().getPendapatan($tokoId);
     final List rawData = response['data'];
     setState(() {
@@ -90,7 +89,6 @@ class _homeSellerState extends State<homeSeller> {
   void _getTokoDatabyId() async {
     try {
       final toko = await tokoService().getTokoByUserId();
-      print(toko.message);
       if (toko.message == "Toko not found for this user") {
         setState(() {
           $tokoRegistered = false;
@@ -138,7 +136,6 @@ class _homeSellerState extends State<homeSeller> {
         $tokoId = tokoId;
       });
     } catch (e) {
-      print('Error: $e');
       setState(() {});
     }
   }
@@ -184,7 +181,7 @@ class _homeSellerState extends State<homeSeller> {
         });
       }
     } catch (e) {
-      print('Error: $e');
+      
     }
   }
 
@@ -618,7 +615,7 @@ class _homeSellerState extends State<homeSeller> {
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Review Icon
+                                        
                                         Container(
                                           width: 100,
                                           height: 100,
@@ -667,7 +664,7 @@ class _homeSellerState extends State<homeSeller> {
                                           ),
                                         ),
                                         const SizedBox(height: 24),
-                                        // Title
+                                        
                                         Text(
                                           $typeUnlock == 2
                                               ? "Dalam Proses Review"
@@ -685,7 +682,7 @@ class _homeSellerState extends State<homeSeller> {
                                           textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 16),
-                                        // Message
+                                        
                                         Text(
                                           $typeUnlock == 2
                                               ? "Akun anda masih dalam proses review, Lengkapi informasi toko anda dan tunggu beberapa saat agar bisa digunakan."
@@ -703,7 +700,7 @@ class _homeSellerState extends State<homeSeller> {
                                           textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 24),
-                                        // Progress Indicator
+                                        
                                         Container(
                                           height: 6,
                                           decoration: BoxDecoration(

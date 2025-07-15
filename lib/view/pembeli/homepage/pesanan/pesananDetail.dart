@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/midtrans.dart';
+import 'package:rfc_apps/service/pesanan.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/midtransView.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/nota.dart';
 import 'package:rfc_apps/widget/badge_status.dart';
@@ -19,6 +20,7 @@ class PesananDetailPage extends StatelessWidget {
     final totalHarga = rawData['totalHarga'];
     final transactionStatus = rawData['MidtransOrder']['transaction_status'];
     final orderStatus = rawData['status'];
+    final buktiPesanan = rawData['buktiDiterimaId'] ?? '';
 
     return {
       'detailList': detailList,
@@ -27,6 +29,7 @@ class PesananDetailPage extends StatelessWidget {
       'totalHarga': totalHarga,
       'transactionStatus': transactionStatus,
       'orderStatus': orderStatus,
+      'buktiPesanan': buktiPesanan,
     };
   }
 
@@ -67,6 +70,236 @@ class PesananDetailPage extends StatelessWidget {
     }
   }
 
+  void _showBuktiPesananModal(BuildContext context, String buktiId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Bukti Pesanan Diambil",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                FutureBuilder<Map<String, dynamic>>(
+                  future: PesananService().getBuktiPesanan(buktiId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Gagal memuat bukti pesanan",
+                                style: const TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: 14,
+                                  color: Colors.red,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final buktiData = snapshot.data!['data'];
+                      final fotoUrl = buktiData['fotoBukti'];
+                      final createdAt = DateTime.parse(buktiData['createdAt']);
+                      final formattedDate =
+                          DateFormat('dd MMMM yyyy, HH:mm').format(createdAt);
+
+                      return Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              fotoUrl,
+                              height: 300,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return SizedBox(
+                                  height: 300,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 300,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.broken_image_outlined,
+                                          size: 48,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          "Gagal memuat gambar",
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green[200]!),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green[600],
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Pesanan telah diambil",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Pada: $formattedDate",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return const SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          "Tidak ada data bukti pesanan",
+                          style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Tutup",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final processedData = _processOrderData(data);
@@ -76,6 +309,7 @@ class PesananDetailPage extends StatelessWidget {
     final totalHarga = processedData['totalHarga'];
     final transactionStatus = processedData['transactionStatus'];
     final orderStatus = processedData['orderStatus'];
+    final buktiPesanan = processedData['buktiPesanan'];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -312,20 +546,40 @@ class PesananDetailPage extends StatelessWidget {
                           color: Colors.red,
                         ),
                       )
-                    : TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => PaymentSuccessPage(
-                                        data: data,
-                                      )));
-                        },
-                        child: Text("Lihat Bukti Pembayaran",
-                            style: TextStyle(
-                                fontFamily: "poppins",
-                                fontSize: 12,
-                                color: Theme.of(context).primaryColor))),
+                    : transactionStatus == "settlement" &&
+                            orderStatus == "selesai"
+                        ? TextButton(
+                            onPressed: () {
+                              if (buktiPesanan.isNotEmpty) {
+                                _showBuktiPesananModal(context, buktiPesanan);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("Bukti pesanan tidak tersedia"),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Text("Lihat Bukti Pesanan Telah Diambil",
+                                style: TextStyle(
+                                    fontFamily: "poppins",
+                                    fontSize: 12,
+                                    color: Theme.of(context).primaryColor)))
+                        : TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => PaymentSuccessPage(
+                                            data: data,
+                                          )));
+                            },
+                            child: Text("Lihat Bukti Pembayaran",
+                                style: TextStyle(
+                                    fontFamily: "poppins",
+                                    fontSize: 12,
+                                    color: Theme.of(context).primaryColor))),
             SizedBox(height: context.getHeight(24)),
             const Text(
               "Alamat Pengambilan",

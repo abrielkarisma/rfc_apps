@@ -20,7 +20,6 @@ class rekeningService {
       return getRekeningByUserId();
     }
     if (response.statusCode == 200) {
-      print(response.body);
       return RekeningResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load Rekening data');
@@ -71,8 +70,6 @@ Future<Map<String, dynamic>?> getRekeningBytoken() async {
       return CreateRekening(namaPenerima, namaBank, nomorRekening);
     }
     if (response.statusCode == 201) {
-      print(response.body);
-      print(jsonDecode(response.body));
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to create rekening data');

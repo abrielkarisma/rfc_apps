@@ -32,7 +32,6 @@ class _UserRequestState extends State<UserRequest> {
       final data = response['data'] ?? [];
 
       final filtered = data.where((e) {
-        print("Toko status: ${e['Toko']?['tokoStatus']}");
         return e['Toko'] != null && e['Toko']['tokoStatus'] == 'request';
       }).toList();
 
@@ -40,7 +39,9 @@ class _UserRequestState extends State<UserRequest> {
         _penjualList = filtered;
       });
     } catch (e) {
-      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat data penjual')),
+      );
     }
   }
 

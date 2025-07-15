@@ -63,7 +63,6 @@ class _DaftarPesananState extends State<DaftarPesanan> {
         _filterOrders(fetchedOrders);
       }
     } catch (e) {
-      print('Error fetching orders in DaftarPesanan: $e');
     }
   }
 

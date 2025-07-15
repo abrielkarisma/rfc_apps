@@ -55,7 +55,6 @@ class _SellerstoreregState extends State<Sellerstorereg> {
       );
       ToastHelper.showSuccessToast(context, "Berhasil membuat toko");
       Navigator.pop(context, 'refresh');
-      print(response["message"]);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal membuat toko: $e')),

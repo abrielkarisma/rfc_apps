@@ -27,7 +27,12 @@ class _HistoriState extends State<Histori> {
         _pesananList = data;
       });
     } catch (e) {
-      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memuat riwayat pesanan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

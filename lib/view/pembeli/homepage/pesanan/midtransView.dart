@@ -19,7 +19,6 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   @override
   void initState() {
     super.initState();
-    print(widget.orderId);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(

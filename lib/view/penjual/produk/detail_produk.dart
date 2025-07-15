@@ -39,7 +39,9 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
         $id_produk = response.data[0].id;
       });
     } catch (e) {
-      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil data produk')),
+      );
     }
   }
 
@@ -67,7 +69,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
       ),
       body: Stack(
         children: [
-          // Background
+          
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -77,7 +79,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
             ),
           ),
 
-          // Content with RefreshIndicator
+          
           RefreshIndicator(
             onRefresh: _getDataProduk,
             child: SingleChildScrollView(
@@ -89,7 +91,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with title
+                    
                     Container(
                       padding: EdgeInsets.only(
                           left: 20,
@@ -190,7 +192,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
 
                           SizedBox(height: context.getHeight(40)),
 
-                          // Action buttons
+                          
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Row(
@@ -262,7 +264,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                             ),
                           ),
 
-                          // Bottom indicator line
+                          
                           Container(
                             width: 100,
                             height: 4,
@@ -357,23 +359,24 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
             ElevatedButton(
               onPressed: () async {
                 final navigator = Navigator.of(context);
-                navigator.pop(); // Close dialog first
+                navigator.pop(); 
 
                 try {
                   final response =
                       await ProdukService().deleteProduk($id_produk);
-                  print(response);
                   if (response.message == "Successfully deleted produk data") {
                     if (mounted) {
-                      // Return to previous page with refresh signal
                       navigator.pop('refresh');
-                      print("Navigating back with refresh signal");
                     }
                   } else {
-                    print("Failed to delete product: ${response.message}");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Gagal menghapus produk')),
+                    );
                   }
                 } catch (e) {
-                  print("Error deleting product: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Terjadi kesalahan: $e')),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(

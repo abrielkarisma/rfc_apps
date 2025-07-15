@@ -43,286 +43,378 @@ class _TokoInformationState extends State<TokoInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Padding(
-        padding: const EdgeInsets.all(0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: context.getHeight(10)),
-            SizedBox(
-              width: double.infinity,
-              height: context.getHeight(500),
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: context.getHeight(115)),
-                    width: double.infinity,
-                    height: context.getHeight(500),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+      backgroundColor: Colors.grey[100],
+      body: CustomScrollView(
+        slivers: [
+          
+          SliverAppBar(
+            expandedHeight: context.getHeight(280),
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Theme.of(context).primaryColor,
+            leading: Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.0),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.8),
+                    ],
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: context.getHeight(40)),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: context.getHeight(60)),
+                    
+                    Hero(
+                      tag: 'store_logo_${widget.tokoId}',
                       child: Container(
-                        width: context.getWidth(150),
-                        height: context.getHeight(150),
+                        width: context.getWidth(120),
+                        height: context.getHeight(120),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 8,
-                          ),
                           shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white,
+                              Colors.grey[50]!,
+                            ],
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withAlpha(76),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(2, 3),
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 15,
+                              offset: Offset(0, 8),
                             ),
                           ],
                         ),
-                        child: ShimmerImage(
-                          imageUrl: $gambar,
-                          fit: BoxFit.cover,
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(60),
+                            child: ShimmerImage(
+                              imageUrl: $gambar,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    SizedBox(height: context.getHeight(20)),
+                    
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        $nama,
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.3),
+                              offset: Offset(0, 2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.grey[100],
+              child: Column(
+                children: [
+                  
                   Container(
-                    margin: EdgeInsets.only(top: context.getHeight(200)),
-                    width: double.infinity,
-                    height: context.getHeight(300),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: context.getHeight(60),
-                          child: Center(
-                            child: Text(
-                              $nama,
-                              style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Container(
-                            width: context.getWidth(300),
-                            height: context.getHeight(100),
-                            child: Text(
-                              $deskripsi,
-                              style: TextStyle(
-                                fontFamily: "Inter",
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: context.getHeight(8),
-                        ),
-                        Container(
-                          width: context.getWidth(320),
-                          height: context.getHeight(120),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                  height: context.getHeight(50),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: context.getWidth(50),
-                                        height: context.getHeight(50),
-                                        child: Icon(
-                                          Icons.location_on_rounded,
-                                          color: Theme.of(context).primaryColor,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: context.getWidth(16),
-                                      ),
-                                      Container(
-                                        width: context.getWidth(250),
-                                        height: context.getHeight(50),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            $alamat,
-                                            style: TextStyle(
-                                              fontFamily: "Inter",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.normal,
-                                              color: Colors.black,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  )),
-                              Divider(
-                                color: Colors.grey,
-                                height: 1,
-                                thickness: 1,
-                              ),
-                              Container(
-                                  height: context.getHeight(50),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: context.getWidth(50),
-                                        height: context.getHeight(50),
-                                        child: Icon(
-                                          Icons.phone_rounded,
-                                          color: Theme.of(context).primaryColor,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: context.getWidth(16),
-                                      ),
-                                      Container(
-                                        width: context.getWidth(250),
-                                        height: context.getHeight(50),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            $noTelp,
-                                            style: TextStyle(
-                                              fontFamily: "Inter",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.normal,
-                                              color: Colors.black,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ))
-                            ],
-                          ),
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 0,
+                          blurRadius: 20,
+                          offset: Offset(0, 4),
                         ),
                       ],
                     ),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: context.getHeight(20),
-            ),
-            Container(
-              padding: EdgeInsets.all(16),
-              width: double.infinity,
-              height: context.getHeight(400),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: context.getHeight(20),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Produk yang Baru Saja Ditambahkan",
-                          style: TextStyle(
-                              fontFamily: "poppins",
-                              color: Colors.black,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.start),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, "/toko_produk",
-                              arguments: widget.tokoId);
-                        },
-                        child: Row(
-                          children: [
-                            Text("Lihat lebih",
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          
+                          if ($deskripsi.isNotEmpty) ...[
+                            Text(
+                              "Tentang Toko",
+                              style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[200]!),
+                              ),
+                              child: Text(
+                                $deskripsi,
                                 style: TextStyle(
-                                    fontFamily: "poppins",
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500),
-                                textAlign: TextAlign.start),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: Theme.of(context).primaryColor,
-                              size: 12,
-                            )
+                                  fontFamily: "Inter",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey[700],
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
                           ],
+
+                          
+                          Text(
+                            "Informasi Kontak",
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          SizedBox(height: 12),
+
+                          
+                          _buildContactCard(
+                            context,
+                            icon: Icons.location_on_rounded,
+                            title: "Alamat",
+                            content: $alamat,
+                            onTap: () {
+                              
+                            },
+                          ),
+                          SizedBox(height: 12),
+
+                          
+                          _buildContactCard(
+                            context,
+                            icon: Icons.phone_rounded,
+                            title: "Telepon",
+                            content: $noTelp,
+                            onTap: () {
+                              
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 0,
+                          blurRadius: 20,
+                          offset: Offset(0, 4),
                         ),
-                      )
-                    ],
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Produk Terbaru",
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                  Text(
+                                    "Produk yang baru saja ditambahkan",
+                                    style: TextStyle(
+                                      fontFamily: "Inter",
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, "/toko_produk",
+                                      arguments: widget.tokoId);
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "Lihat Semua",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        color: Theme.of(context).primaryColor,
+                                        size: 12,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                          
+                          ProdukCarousel(
+                            key: _produkListKey,
+                            cardType: "byToko",
+                            id: widget.tokoId,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(
-                    height: context.getHeight(16),
-                  ),
-                  ProdukCarousel(
-                    key: _produkListKey,
-                    cardType: "byToko",
-                    id: widget.tokoId,
-                  )
+
+                  
+                  SizedBox(height: 20),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String content,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    content,
+                    style: TextStyle(
+                      fontFamily: "Inter",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[800],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.grey[400],
+                size: 16,
+              ),
           ],
         ),
       ),

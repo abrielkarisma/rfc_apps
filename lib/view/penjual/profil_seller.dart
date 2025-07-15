@@ -45,7 +45,6 @@ class _profileSellerState extends State<profileSeller> {
   void _getTokoDatabyId() async {
     try {
       final toko = await tokoService().getTokoByUserId();
-      print("yang ini gess ${toko.data[0].userId}");
       final String name = toko.data[0].nama ?? "";
       final String tokoAvatar = toko.data[0].logoToko ?? "";
       final String phone = toko.data[0].phone ?? "";
@@ -62,7 +61,6 @@ class _profileSellerState extends State<profileSeller> {
         $idUser = idUser;
       });
     } catch (e) {
-      print('Error: $e');
       setState(() {});
     }
   }
@@ -84,7 +82,6 @@ class _profileSellerState extends State<profileSeller> {
         });
       }
     } catch (e) {
-      print('Error: $e');
       setState(() {});
     }
   }
@@ -107,7 +104,6 @@ class _profileSellerState extends State<profileSeller> {
     final _alamatTokoController = TextEditingController(text: $address);
     final _deskripsiTokoController = TextEditingController(text: $description);
     Future<void> updateToko() async {
-      print(_namaTokoController.text);
       try {
         final response = await tokoService().UpdateToko(
           $idUser,
@@ -125,7 +121,6 @@ class _profileSellerState extends State<profileSeller> {
           ToastHelper.showErrorToast(context, 'Gagal memperbarui data toko!');
         }
       } catch (e) {
-        print('Error: $e');
         ToastHelper.showErrorToast(context, 'Gagal memperbarui data toko!');
       }
     }
@@ -248,7 +243,6 @@ class _profileSellerState extends State<profileSeller> {
     final TextEditingController noRekController =
         TextEditingController(text: $noRek);
     Future<void> updateRekening() async {
-      print(nameController.text);
       try {
         final response = await rekeningService().updateRekening(
           $idUser,
@@ -265,7 +259,6 @@ class _profileSellerState extends State<profileSeller> {
               context, "Gagal memperbarui data rekening!");
         }
       } catch (e) {
-        print('Error: $e');
         ToastHelper.showErrorToast(context, 'Gagal memperbarui data rekening!');
       }
     }
@@ -459,9 +452,6 @@ class _profileSellerState extends State<profileSeller> {
       return;
     }
 
-    print(rekeningName);
-    print(jenisRekening);
-    print(noRekening);
     try {
       final response = await rekeningService().CreateRekening(
         rekeningName,
@@ -477,7 +467,6 @@ class _profileSellerState extends State<profileSeller> {
             'Gagal menambahkan rekening, coba lagi dalam beberapa saat');
       }
     } catch (e) {
-      print('Error: $e');
       ToastHelper.showErrorToast(context, 'Gagal menambahkan rekening');
     }
   }
@@ -545,7 +534,7 @@ class _profileSellerState extends State<profileSeller> {
                           child: buttonSaveImage == 1
                               ? Image(
                                   image: FileImage(
-                                      File($avatarUrl)), // Use FileImage here
+                                      File($avatarUrl)), 
                                   fit: BoxFit.cover,
                                 )
                               : ShimmerImage(
@@ -836,7 +825,6 @@ class _profileSellerState extends State<profileSeller> {
       }
       final response =
           await tokoService().UpdateTokoGambar($idUser, uploadedPhotoUrl);
-      print(response);
       if (response["message"] == "Successfully updated toko") {
         ToastHelper.showSuccessToast(context, 'Gambar berhasil diperbarui!');
         setState(() {
@@ -847,7 +835,6 @@ class _profileSellerState extends State<profileSeller> {
         ToastHelper.showErrorToast(context, 'Gagal memperbarui gambar!');
       }
     } catch (e) {
-      print('Error: $e');
       ToastHelper.showErrorToast(context, 'Gagal memperbarui gambar!');
     }
   }

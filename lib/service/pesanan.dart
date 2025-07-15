@@ -30,8 +30,6 @@ class PesananService {
       },
       body: jsonEncode(payload),
     );
-    print("Status code: ${response.statusCode}");
-    print("Response body: ${response.body}");
     final result = jsonDecode(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
@@ -55,8 +53,6 @@ class PesananService {
         "Content-Type": "application/json"
       },
     );
-    print("Status code: ${response.statusCode}");
-    print("Response body: ${response.body}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getPesananUser();
@@ -80,7 +76,6 @@ class PesananService {
         "Content-Type": "application/json"
       },
     );
-    print("Status code: ${response.statusCode}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getPesananByTokoId(id);
@@ -108,7 +103,6 @@ class PesananService {
         "status": status,
       }),
     );
-    print("Response body: ${response.body}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return putStatusPesanan(pesananId, status);
@@ -136,7 +130,6 @@ class PesananService {
         "buktiDiterima": image,
       }),
     );
-    print("Status code: ${response.statusCode}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return createBuktiPengambilan(pesananId, image);
@@ -165,7 +158,6 @@ class PesananService {
       }),
     );
 
-    print("Status code: ${response.statusCode}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return addPendapatan(pesananId, jumlahPendapatan);
@@ -188,7 +180,6 @@ class PesananService {
         "Content-Type": "application/json"
       },
     );
-    print("Status code: ${response.statusCode}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getPendapatanByPesananId(id);
@@ -197,6 +188,27 @@ class PesananService {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception("Gagal memuat pendapatan");
+    }
+  }
+  Future<Map<String, dynamic>> getBuktiPesanan(String buktiId) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/pesanan/bukti/$buktiId');
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getBuktiPesanan(buktiId);
+    }
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("Gagal memuat bukti pesanan");
     }
   }
 }

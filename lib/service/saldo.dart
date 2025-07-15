@@ -82,9 +82,6 @@ class SaldoService {
       body: json.encode(payload),
     );
 
-    print("[SaldoService] createPenarikanSaldo Status: ${response.statusCode}");
-    print("[SaldoService] createPenarikanSaldo Body: ${response.body}");
-
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return createPenarikanSaldo(jumlahDiminta: jumlahDiminta);
@@ -143,9 +140,6 @@ class SaldoService {
       },
     );
 
-    print(
-        "[SaldoService] getAllPenarikanSaldoRequests Status: ${response.statusCode}");
-    print("[SaldoService] getAllPenarikanSaldoRequests Body: ${response.body}");
 
     if (response.statusCode == 401) {
       await tokenService().refreshToken();

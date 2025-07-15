@@ -18,7 +18,7 @@ class AuthResponse {
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(
-      status: json.containsKey('data'), // Respons sukses jika ada data
+      status: json.containsKey('data'), 
       message: json['message'] ?? '',
       data: json['data'] != null ? User.fromJson(json['data']) : null,
       token: json['token'] ?? "",

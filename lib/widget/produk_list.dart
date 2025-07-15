@@ -5,7 +5,7 @@ import 'package:rfc_apps/widget/product_card_umkm.dart';
 import 'package:rfc_apps/widget/produk_card_rfc.dart';
 import 'package:rfc_apps/widget/produk_card_seller.dart';
 import 'package:rfc_apps/model/produk.dart';
-import 'package:shimmer/shimmer.dart'; // Add shimmer import
+import 'package:shimmer/shimmer.dart'; 
 
 class ProdukCarousel extends StatefulWidget {
   const ProdukCarousel({super.key, required this.cardType, required this.id});
@@ -48,14 +48,14 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
   Future<List<Produk>> _selectedProduk() async {
     List<Produk> allProducts;
     if (index == 0) {
-      allProducts = await ProdukService().getProdukByUserId(); // Kelola
+      allProducts = await ProdukService().getProdukByUserId(); 
     } else if (index == 1) {
-      allProducts = await ProdukService().getRFCProduk(); // RFC
+      allProducts = await ProdukService().getRFCProduk(); 
     } else if (index == 2) {
-      allProducts = await ProdukService().getUMKMProduk(); // UMKM
+      allProducts = await ProdukService().getUMKMProduk(); 
     } else if (index == 3) {
       allProducts =
-          await ProdukService().getProdukByTokoId(widget.id); // By Toko
+          await ProdukService().getProdukByTokoId(widget.id); 
     } else {
       allProducts = [];
     }
@@ -78,7 +78,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
     return Container();
   }
 
-  // Add shimmer loading widget for carousel
+  
   Widget _buildShimmerLoading(BuildContext context) {
     return SizedBox(
       height: context.getHeight(210),
@@ -86,7 +86,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.only(right: 20),
-        itemCount: 5, // Show 5 shimmer placeholders
+        itemCount: 5, 
         itemBuilder: (context, index) {
           return Container(
             width: 150,
@@ -159,7 +159,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildShimmerLoading(
-              context); // Use shimmer loading instead of CircularProgressIndicator
+              context); 
         }
 
         if (snapshot.hasError) {

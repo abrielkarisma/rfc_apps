@@ -162,7 +162,7 @@ class ProdukCardRFC extends StatelessWidget {
                 top: context.getHeight(0),
                 right: context.getWidth(0),
                 child: Container(
-                  // color: Colors.red,
+                  
                   width: context.getWidth(50),
                   height: context.getHeight(50),
                   child: Image(

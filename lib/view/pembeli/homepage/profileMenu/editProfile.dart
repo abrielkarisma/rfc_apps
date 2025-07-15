@@ -59,7 +59,6 @@ class _EditProfileState extends State<EditProfile> {
       } else {
         uploadedPhotoUrl = _profilePhoto;
       }
-      print(uploadedPhotoUrl);
       await UserService().UpdateUser(
         widget.userId,
         _nameController.text,
@@ -67,7 +66,6 @@ class _EditProfileState extends State<EditProfile> {
       );
       Navigator.pop(context, "refresh");
     } catch (e) {
-      print('Error saat update: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal update profile: $e')),
       );
@@ -184,7 +182,7 @@ class _EditProfileState extends State<EditProfile> {
                                           )
                                     : Image(
                                         image: FileImage(File(
-                                            _profilePhoto)), // Use FileImage here
+                                            _profilePhoto)), 
                                         fit: BoxFit.cover,
                                       ),
                               ),

@@ -24,20 +24,36 @@ class _ProdukUMKMState extends State<ProdukUMKM> {
     return Column(
       children: [
         Container(
-          width: double.infinity,
-          height: context.getHeight(50),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Cari produk UMKM',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide(color: Colors.grey, width: 0.5),
+              hintText: 'Cari produk yang kamu inginkan...',
+              hintStyle: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 14,
+                fontFamily: "Inter",
               ),
-              filled: true,
-              fillColor: Colors.white,
+              prefixIcon: Container(
+                padding: EdgeInsets.all(12),
+                child: Icon(
+                  Icons.search_rounded,
+                  color: Theme.of(context).primaryColor,
+                  size: 20,
+                ),
+              ),
+              border: InputBorder.none,
               contentPadding:
-                  EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  EdgeInsets.symmetric(vertical: 16, horizontal: 20),
             ),
             onChanged: (value) {
               setState(() {

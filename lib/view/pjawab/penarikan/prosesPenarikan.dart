@@ -7,11 +7,11 @@ import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/saldo/riwayatPenarikan.dart';
 
-// Definisikan warna utama Anda di sini atau dari file tema
+
 const Color appPrimaryColor = Color(0xFF4CAD73);
 const Color appPendingColor = Colors.orangeAccent;
 const Color appCompletedColor =
-    appPrimaryColor; // Bisa juga Colors.green atau shade dari primary
+    appPrimaryColor; 
 const Color appRejectedColor = Colors.redAccent;
 
 class AdminProsesPenarikanPage extends StatefulWidget {
@@ -32,7 +32,7 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
   File? _buktiTransferImage;
   late TextEditingController _referensiBankController;
   bool _isSubmitting = false;
-  late String _currentStatus; // Untuk menyimpan status awal
+  late String _currentStatus; 
 
   @override
   void initState() {
@@ -457,7 +457,7 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 2, // Lebar label
+            flex: 2, 
             child: Text(label,
                 style: TextStyle(
                     fontFamily: "poppins",
@@ -466,7 +466,7 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
           ),
           const SizedBox(width: 8),
           Expanded(
-            flex: 3, // Lebar nilai
+            flex: 3, 
             child: Text(
               value,
               style: TextStyle(

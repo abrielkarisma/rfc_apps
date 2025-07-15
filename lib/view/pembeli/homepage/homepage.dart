@@ -78,88 +78,89 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
         bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 20,
-                color: Colors.black.withOpacity(0.1),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: GNav(
-              rippleColor: Colors.grey[300]!,
-              hoverColor: Colors.grey[100]!,
-              gap: 6,
-              activeColor: Colors.white,
-              iconSize: 22,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              duration: Duration(milliseconds: 300),
-              tabBackgroundColor: Theme.of(context).primaryColor,
-              color: Theme.of(context).primaryColor,
-              tabs: [
-                GButton(
-                  icon: LineIcons.home,
-                  text: 'Beranda',
-                  textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GButton(
-                  icon: LineIcons.store,
-                  text: 'UMKM',
-                  textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GButton(
-                  icon: LineIcons.shoppingBasket,
-                  text: 'Produk',
-                  textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GButton(
-                  icon: LineIcons.history,
-                  text: 'Histori',
-                  textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GButton(
-                  icon: LineIcons.user,
-                  text: 'Profil',
-                  textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontFamily: "poppins",
-                    fontWeight: FontWeight.w500,
-                  ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 20,
+                  color: Colors.black.withOpacity(0.1),
                 ),
               ],
-              selectedIndex: _selectedIndex,
-              onTabChange: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
             ),
-          ),
-        ));
+            child: SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                child: GNav(
+                  rippleColor: Colors.grey[300]!,
+                  hoverColor: Colors.grey[100]!,
+                  gap: 4,
+                  activeColor: Colors.white,
+                  iconSize: 24,
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                  duration: Duration(milliseconds: 300),
+                  tabBackgroundColor: Theme.of(context).primaryColor,
+                  color: Theme.of(context).primaryColor,
+                  tabs: [
+                    GButton(
+                      icon: LineIcons.home,
+                      text: 'Beranda',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: "poppins",
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    GButton(
+                      icon: LineIcons.store,
+                      text: 'UMKM',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: "poppins",
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    GButton(
+                      icon: LineIcons.shoppingBasket,
+                      text: 'Produk',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: "poppins",
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    GButton(
+                      icon: LineIcons.history,
+                      text: 'Histori',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: "poppins",
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    GButton(
+                      icon: LineIcons.user,
+                      text: 'Profil',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: "poppins",
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  selectedIndex: _selectedIndex,
+                  onTabChange: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                ),
+              ),
+            )));
   }
 }

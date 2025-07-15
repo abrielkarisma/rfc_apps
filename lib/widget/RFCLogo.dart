@@ -7,13 +7,13 @@ class RFCLogo extends StatefulWidget {
 }
 
 class _RFCLogoState extends State<RFCLogo> {
-  bool _isHolding = false; // Untuk mengecek apakah widget sedang di-hold
-  Timer? _holdTimer; // Timer untuk menghitung durasi hold
-  bool _showAdditionalButton = false; // Untuk menampilkan tombol tambahan
+  bool _isHolding = false; 
+  Timer? _holdTimer; 
+  bool _showAdditionalButton = false; 
 
   @override
   void dispose() {
-    _holdTimer?.cancel(); // Batalkan timer saat widget di-dispose
+    _holdTimer?.cancel(); 
     super.dispose();
   }
 
@@ -21,13 +21,13 @@ class _RFCLogoState extends State<RFCLogo> {
     _holdTimer = Timer(Duration(seconds: 2), () {
       setState(() {
         _showAdditionalButton =
-            true; // Tampilkan tombol tambahan setelah 2 detik
+            true; 
       });
     });
   }
 
   void _cancelHoldTimer() {
-    _holdTimer?.cancel(); // Batalkan timer jika hold dihentikan
+    _holdTimer?.cancel(); 
     setState(() {
       _isHolding = false;
     });
@@ -43,20 +43,20 @@ class _RFCLogoState extends State<RFCLogo> {
             setState(() {
               _isHolding = true;
             });
-            _startHoldTimer(); // Mulai timer saat widget di-hold
+            _startHoldTimer(); 
           },
           onTapUp: (_) {
-            _cancelHoldTimer(); // Batalkan timer saat hold dihentikan
+            _cancelHoldTimer(); 
           },
           onTapCancel: () {
-            _cancelHoldTimer(); // Batalkan timer jika hold dibatalkan
+            _cancelHoldTimer(); 
           },
           child: AnimatedOpacity(
-            opacity: _isHolding ? 0.8 : 1.0, // Efek opacity saat di-hold
+            opacity: _isHolding ? 0.8 : 1.0, 
             duration: Duration(milliseconds: 200),
             child: Container(
               height: 100,
-              decoration: BoxDecoration(// Sesuaikan dengan kebutuhan
+              decoration: BoxDecoration(
                   ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
