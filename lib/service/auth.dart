@@ -39,6 +39,7 @@ class AuthService {
       body: jsonEncode({'email': email, 'password': password}),
     );
     final result = AuthResponse.fromJson(jsonDecode(response.body));
+    print (result);
     if (result.status == true) {
       return AuthResponse(
         status: true,
@@ -49,6 +50,7 @@ class AuthService {
           email: result.data?.email ?? '',
           phoneNumber: result.data?.phoneNumber ?? '',
           role: result.data?.role ?? '',
+          idAsli: result.data?.idAsli ?? '',
         ),
         token: result.token,
         refreshToken: result.refreshToken,

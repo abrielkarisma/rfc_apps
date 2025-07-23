@@ -1,5 +1,4 @@
 import 'package:rfc_apps/model/produk.dart' show Produk;
-import 'package:rfc_apps/view/pembeli/homepage/produk/produk.dart';
 
 class ProdukResponse {
   final String message;
@@ -19,7 +18,6 @@ class ProdukResponse {
         data: produkList,
       );
     } else if (rawData is Map<String, dynamic>) {
-      
       return ProdukResponse(
         message: json['message'],
         data: [Produk.fromJson(rawData)],

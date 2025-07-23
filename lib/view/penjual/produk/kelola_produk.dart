@@ -4,17 +4,27 @@ import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
 
 class KelolaProduk extends StatefulWidget {
-  const KelolaProduk({super.key});
+  final String idUser; 
+
+  const KelolaProduk({super.key, required this.idUser});
 
   @override
   State<KelolaProduk> createState() => _KelolaProdukState();
 }
 
 class _KelolaProdukState extends State<KelolaProduk> {
+  String $idUser = ""; 
   Key _produkListKey = UniqueKey();
+
+  @override
+  void initState() {
+    super.initState();
+    $idUser = widget.idUser;
+  }
+
   void _refreshProduk() {
     setState(() {
-      _produkListKey = UniqueKey(); 
+      _produkListKey = UniqueKey();
     });
   }
 
@@ -72,7 +82,7 @@ class _KelolaProdukState extends State<KelolaProduk> {
                   child: ProdukGrid(
                     key: _produkListKey,
                     cardType: "kelola",
-                    id: "",
+                    id: $idUser, 
                     onRefresh: _refreshProduk,
                   ),
                 ),
@@ -82,18 +92,35 @@ class _KelolaProdukState extends State<KelolaProduk> {
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final typetoko = await tokoService().getTokoByUserId();
-          if (typetoko.data[0].TypeToko == "rfc") {
-            final result = await Navigator.pushNamed(
-              context,
-              '/komoditas',
-            );
-            if (result == 'refresh') {
-              _refreshProduk();
+          try {
+            
+            final typetoko = await tokoService().getTokoByIdUser($idUser);
+
+            if (typetoko.data.isNotEmpty) {
+              if (typetoko.data[0].TypeToko == "rfc") {
+                final result = await Navigator.pushNamed(
+                  context,
+                  '/komoditas',
+                );
+                if (result == 'refresh') {
+                  _refreshProduk();
+                }
+                return;
+              }
+              if (typetoko.data[0].TypeToko == "umkm") {
+                final result = await Navigator.pushNamed(
+                  context,
+                  '/tambah_produk',
+                );
+                if (result == 'refresh') {
+                  _refreshProduk();
+                }
+                return;
+              }
             }
-            return;
-          }
-          if (typetoko.data[0].TypeToko == "umkm") {
+          } catch (e) {
+            print("Error getting toko type: $e");
+            
             final result = await Navigator.pushNamed(
               context,
               '/tambah_produk',
@@ -101,7 +128,6 @@ class _KelolaProdukState extends State<KelolaProduk> {
             if (result == 'refresh') {
               _refreshProduk();
             }
-            return;
           }
         },
         backgroundColor: Color(0XFF4CAD73),

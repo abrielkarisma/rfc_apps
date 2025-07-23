@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
-import 'package:rfc_apps/view/pjawab/penarikan/prosesPenarikan.dart';
+import 'package:rfc_apps/view/admin/penarikan/prosesPenarikan.dart';
 import 'package:shimmer/shimmer.dart';
 
-const Color appPrimaryColor = Color(0xFF4CAD73);
+const Color appPrimaryColor = Color(0xFF6BC0CA);
 const Color appPendingColor = Colors.orangeAccent;
 const Color appCompletedColor = appPrimaryColor;
 const Color appRejectedColor = Colors.redAccent;
@@ -24,6 +24,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
   final SaldoService _saldoService = SaldoService();
   final List<Map<String, dynamic>> _requests = [];
   final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
   Timer? _timer;
 
   String _selectedStatus = 'pending';
@@ -49,6 +50,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _pageController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -124,6 +126,28 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
         _selectedStatus = newStatus;
       });
       _fetchRequests(isRefresh: true);
+
+      
+      final index = _statusOptions.indexOf(newStatus);
+      if (index != -1) {
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+  }
+
+  void _onPageChanged(int index) {
+    if (index < _statusOptions.length) {
+      final newStatus = _statusOptions[index];
+      if (newStatus != _selectedStatus) {
+        setState(() {
+          _selectedStatus = newStatus;
+        });
+        _fetchRequests(isRefresh: true);
+      }
     }
   }
 
@@ -172,10 +196,17 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
       children: [
         _buildFilterChips(),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: () => _fetchRequests(isRefresh: true),
-            color: appPrimaryColor,
-            child: _buildRequestList(),
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: _statusOptions.length,
+            itemBuilder: (context, index) {
+              return RefreshIndicator(
+                onRefresh: () => _fetchRequests(isRefresh: true),
+                color: appPrimaryColor,
+                child: _buildRequestList(),
+              );
+            },
           ),
         ),
       ],
@@ -198,7 +229,9 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: isSelected ? Colors.green[100] : Colors.transparent),
+                    color: isSelected
+                        ? appPrimaryColor.withOpacity(0.1)
+                        : Colors.transparent),
                 child: Column(
                   children: [
                     Text(
@@ -207,9 +240,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
                         fontFamily: "Poppins",
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey[500],
+                        color: isSelected ? appPrimaryColor : Colors.grey[500],
                       ),
                     ),
                     const SizedBox(height: 6),

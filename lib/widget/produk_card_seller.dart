@@ -13,6 +13,7 @@ class ProdukCardSeller extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isOutOfStock = produk.stok == 0;
+    bool isDeactivated = produk.isDeleted == true;
 
     return GestureDetector(
       onTap: () async {
@@ -26,11 +27,15 @@ class ProdukCardSeller extends StatelessWidget {
         }
       },
       child: Card(
-        color: isOutOfStock ? Colors.grey[200] : Colors.white,
-        elevation: isOutOfStock ? 2 : 4,
+        color: isDeactivated
+            ? Colors.grey[300]
+            : (isOutOfStock ? Colors.grey[200] : Colors.white),
+        elevation: isDeactivated ? 1 : (isOutOfStock ? 2 : 4),
         shape: RoundedRectangleBorder(
           side: BorderSide(
-              color: isOutOfStock ? Colors.grey[400]! : Colors.grey,
+              color: isDeactivated
+                  ? Colors.grey[500]!
+                  : (isOutOfStock ? Colors.grey[400]! : Colors.grey),
               width: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -50,21 +55,54 @@ class ProdukCardSeller extends StatelessWidget {
                       width: context.getWidth(170),
                       height: context.getHeight(170),
                       child: ColorFiltered(
-                        colorFilter: isOutOfStock
+                        colorFilter: isDeactivated
                             ? ColorFilter.mode(
-                                Colors.grey.withOpacity(0.6),
+                                Colors.grey.withOpacity(0.8),
                                 BlendMode.saturation,
                               )
-                            : ColorFilter.mode(
-                                Colors.transparent,
-                                BlendMode.multiply,
-                              ),
+                            : (isOutOfStock
+                                ? ColorFilter.mode(
+                                    Colors.grey.withOpacity(0.6),
+                                    BlendMode.saturation,
+                                  )
+                                : ColorFilter.mode(
+                                    Colors.transparent,
+                                    BlendMode.multiply,
+                                  )),
                         child: ShimmerImage(
                             imageUrl: produk.gambar, fit: BoxFit.cover),
                       ),
                     ),
                   ),
-                  if (isOutOfStock)
+                  if (isDeactivated)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.black.withOpacity(0.4),
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'NONAKTIF',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "Inter",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  else if (isOutOfStock)
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -104,7 +142,9 @@ class ProdukCardSeller extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     overflow: TextOverflow.ellipsis,
                     fontFamily: "Inter",
-                    color: isOutOfStock ? Colors.grey[600] : Colors.black,
+                    color: isDeactivated
+                        ? Colors.grey[600]
+                        : (isOutOfStock ? Colors.grey[600] : Colors.black),
                   ),
                   maxLines: 1,
                   textAlign: TextAlign.start,
@@ -113,15 +153,20 @@ class ProdukCardSeller extends StatelessWidget {
               Container(
                 width: double.infinity,
                 child: Text(
-                  isOutOfStock
-                      ? 'Stok Habis'
-                      : 'Stok: ${produk.stok} ${produk.satuan}',
+                  isDeactivated
+                      ? 'Produk Dinonaktifkan'
+                      : (isOutOfStock
+                          ? 'Stok Habis'
+                          : 'Stok: ${produk.stok} ${produk.satuan}'),
                   style: TextStyle(
                     fontSize: 8,
                     fontFamily: "Inter",
-                    color: isOutOfStock ? Colors.red : Colors.grey,
-                    fontWeight:
-                        isOutOfStock ? FontWeight.bold : FontWeight.normal,
+                    color: isDeactivated
+                        ? Colors.orange
+                        : (isOutOfStock ? Colors.red : Colors.grey),
+                    fontWeight: (isDeactivated || isOutOfStock)
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                   maxLines: 1,
                   textAlign: TextAlign.start,
@@ -130,13 +175,17 @@ class ProdukCardSeller extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  isOutOfStock
-                      ? 'Tidak Tersedia'
-                      : 'Rp ${Formatter.rupiah(produk.harga)}',
+                  isDeactivated
+                      ? 'Nonaktif'
+                      : (isOutOfStock
+                          ? 'Tidak Tersedia'
+                          : 'Rp ${Formatter.rupiah(produk.harga)}'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: isOutOfStock ? Colors.red : Colors.green,
+                    color: isDeactivated
+                        ? Colors.orange
+                        : (isOutOfStock ? Colors.red : Colors.green),
                     fontFamily: "Inter",
                   ),
                 ),

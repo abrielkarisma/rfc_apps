@@ -5,7 +5,7 @@ import 'package:rfc_apps/widget/product_card_umkm.dart';
 import 'package:rfc_apps/widget/produk_card_rfc.dart';
 import 'package:rfc_apps/widget/produk_card_seller.dart';
 import 'package:rfc_apps/model/produk.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:shimmer/shimmer.dart';
 
 class ProdukCarousel extends StatefulWidget {
   const ProdukCarousel({super.key, required this.cardType, required this.id});
@@ -48,14 +48,13 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
   Future<List<Produk>> _selectedProduk() async {
     List<Produk> allProducts;
     if (index == 0) {
-      allProducts = await ProdukService().getProdukByUserId(); 
+      allProducts = await ProdukService().getProdukByUserId(widget.id);
     } else if (index == 1) {
-      allProducts = await ProdukService().getRFCProduk(); 
+      allProducts = await ProdukService().getRFCProduk();
     } else if (index == 2) {
-      allProducts = await ProdukService().getUMKMProduk(); 
+      allProducts = await ProdukService().getUMKMProduk();
     } else if (index == 3) {
-      allProducts =
-          await ProdukService().getProdukByTokoId(widget.id); 
+      allProducts = await ProdukService().getProdukByTokoId(widget.id);
     } else {
       allProducts = [];
     }
@@ -78,7 +77,6 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
     return Container();
   }
 
-  
   Widget _buildShimmerLoading(BuildContext context) {
     return SizedBox(
       height: context.getHeight(210),
@@ -86,7 +84,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.only(right: 20),
-        itemCount: 5, 
+        itemCount: 5,
         itemBuilder: (context, index) {
           return Container(
             width: 150,
@@ -158,8 +156,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
       future: _selectedProduk(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildShimmerLoading(
-              context); 
+          return _buildShimmerLoading(context);
         }
 
         if (snapshot.hasError) {

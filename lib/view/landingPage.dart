@@ -19,7 +19,7 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Future<void> _navigateUser() async {
-     _notificationService.initializeTokenManagement();
+    _notificationService.initializeTokenManagement();
     await _notificationService.requestNotificationPermission();
     final storage = FlutterSecureStorage();
     String? token = await storage.read(key: 'refreshToken');
@@ -32,6 +32,8 @@ class _LandingPageState extends State<LandingPage> {
       } else if (role == 'penjual') {
         route = '/home_seller';
       } else if (role == 'pjawab') {
+        route = '/home_seller';
+      } else if (role == 'admin') {
         route = '/pjawab_home';
       } else {
         route = '/onboarding';

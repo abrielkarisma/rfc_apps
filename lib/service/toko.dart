@@ -100,6 +100,28 @@ class tokoService {
     }
   }
 
+  Future<TokoResponse> getTokoByIdUser(String id) async {
+    final token = await tokenService().getAccessToken();
+
+    final response = await http.get(
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/toko/idUser/$id'),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getTokoByUserId();
+    }
+    if (response.statusCode == 200) {
+      return TokoResponse.fromJson(jsonDecode(response.body));
+    } else if (response.statusCode == 404) {
+      return TokoResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load toko data');
+    }
+  }
+
   Future<Map<String, dynamic>> UpdateToko(String id, String name, String phone,
       String alamat, String avatarUrl, String deskripsi) async {
     final token = await tokenService().getAccessToken();
@@ -179,7 +201,8 @@ class tokoService {
       throw Exception('Failed to delete toko data');
     }
   }
-  Future <Map<String, dynamic>>activateToko(String id) async {
+
+  Future<Map<String, dynamic>> activateToko(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.put(
       headers: {
@@ -200,7 +223,8 @@ class tokoService {
       throw Exception('Failed to delete toko data');
     }
   }
-  Future <Map<String, dynamic>>rejectToko(String id) async {
+
+  Future<Map<String, dynamic>> rejectToko(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.put(
       headers: {

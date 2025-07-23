@@ -5,6 +5,7 @@ import 'package:rfc_apps/service/rekening.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const Color primaryColor = Color(0xFF4CAD73);
 const Color primaryColorLight = Color(0xFFB3FFD2);
@@ -23,12 +24,14 @@ class TarikSaldoPage extends StatefulWidget {
 class _TarikSaldoPageState extends State<TarikSaldoPage> {
   final SaldoService _saldoService = SaldoService();
   final rekeningService _rekeningService = rekeningService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _jumlahController = TextEditingController();
 
   Map<String, dynamic>? _rekeningAktif;
   bool _isLoadingRekening = true;
   String? _rekeningErrorMessage;
+  String _userId = "";
 
   bool _isSubmitting = false;
 
@@ -50,13 +53,29 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
     super.dispose();
   }
 
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
   Future<void> _fetchRekeningAktif() async {
     setState(() {
       _isLoadingRekening = true;
       _rekeningErrorMessage = null;
     });
+    await _getUserId();
+
     try {
-      final rekening = await _rekeningService.getRekeningBytoken();
+      final rekening = _userId.isNotEmpty
+          ? await _rekeningService.getRekeningByIdUser(_userId)
+          : await _rekeningService.getRekeningBytoken();
+
       setState(() {
         _rekeningAktif = rekening;
       });
@@ -112,8 +131,10 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
         final jumlahDiminta =
             double.parse(_jumlahController.text.replaceAll('.', ''));
 
-        final result = await _saldoService.createPenarikanSaldo(
-            jumlahDiminta: jumlahDiminta);
+        await (_userId.isNotEmpty
+            ? _saldoService.createPenarikanSaldoByIdUser(_userId,
+                jumlahDiminta: jumlahDiminta)
+            : _saldoService.createPenarikanSaldo(jumlahDiminta: jumlahDiminta));
 
         ToastHelper.showSuccessToast(context,
             'Permintaan penarikan sejumlah ${formatRupiah(jumlahDiminta)} berhasil dibuat.');

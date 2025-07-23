@@ -103,6 +103,8 @@ class PesananService {
         "status": status,
       }),
     );
+    print("Response status: ${response.statusCode}");
+    print("Response body: ${response.body}");
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return putStatusPesanan(pesananId, status);

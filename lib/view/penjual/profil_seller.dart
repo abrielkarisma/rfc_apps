@@ -2,9 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/model/rekening.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/rekening.dart';
 import 'package:rfc_apps/service/toko.dart';
@@ -13,7 +11,14 @@ import 'package:rfc_apps/utils/imagePicker.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
 
 class profileSeller extends StatefulWidget {
-  const profileSeller({super.key});
+  final String idUser; 
+
+  const profileSeller({super.key, required this.idUser});
+
+  
+  static Widget fromRoute(BuildContext context, String idUser) {
+    return profileSeller(idUser: idUser);
+  }
 
   @override
   State<profileSeller> createState() => _profileSellerState();
@@ -35,8 +40,10 @@ class _profileSellerState extends State<profileSeller> {
   final _namaRekeningController = TextEditingController();
   final _jenisRekeningController = TextEditingController();
   final _noRekeningController = TextEditingController();
+  @override
   void initState() {
     super.initState();
+    $idUser = widget.idUser;
     _getTokoDatabyId();
     rekeningRegistered = false;
     _getRekeningDataById();
@@ -44,46 +51,59 @@ class _profileSellerState extends State<profileSeller> {
 
   void _getTokoDatabyId() async {
     try {
-      final toko = await tokoService().getTokoByUserId();
-      final String name = toko.data[0].nama ?? "";
-      final String tokoAvatar = toko.data[0].logoToko ?? "";
-      final String phone = toko.data[0].phone ?? "";
-      final String address = toko.data[0].alamat ?? "";
-      final String description = toko.data[0].deskripsi ?? "";
-      final String idUser = toko.data[0].userId ?? "";
+      final toko = await tokoService().getTokoByIdUser($idUser);
 
-      setState(() {
-        $name = name;
-        $phone = phone;
-        $address = address;
-        $description = description;
-        $avatarUrl = tokoAvatar;
-        $idUser = idUser;
-      });
+      if (toko.data.isNotEmpty) {
+        final String name = toko.data[0].nama;
+        final String tokoAvatar = toko.data[0].logoToko;
+        final String phone = toko.data[0].phone;
+        final String address = toko.data[0].alamat;
+        final String description = toko.data[0].deskripsi;
+
+        setState(() {
+          $name = name;
+          $phone = phone;
+          $address = address;
+          $description = description;
+          $avatarUrl = tokoAvatar;
+        });
+      }
     } catch (e) {
+      print("Error getting toko data: $e");
       setState(() {});
     }
   }
 
   void _getRekeningDataById() async {
     try {
-      final rekening = await rekeningService().getRekeningByUserId();
-      final String rekeningName = rekening.data!.namaPenerima ?? "";
-      final String bank = rekening.data!.namaBank ?? "";
-      final String noRek = rekening.data!.nomorRekening ?? "";
+      final rekening = await rekeningService().getRekeningByUserId($idUser);
       if (rekening.data == null) {
-        rekeningRegistered = false;
-      } else {
-        rekeningRegistered = true;
         setState(() {
+          rekeningRegistered = false;
+        });
+      } else {
+        final String rekeningName = rekening.data!.namaPenerima ?? "";
+        final String bank = rekening.data!.namaBank ?? "";
+        final String noRek = rekening.data!.nomorRekening ?? "";
+
+        setState(() {
+          rekeningRegistered = true;
           $rekeningName = rekeningName;
           $bank = bank;
           $noRek = noRek;
         });
       }
     } catch (e) {
-      setState(() {});
+      print("Error getting rekening data: $e");
+      setState(() {
+        rekeningRegistered = false;
+      });
     }
+  }
+
+  Future<void> _refreshProfile() async {
+    _getTokoDatabyId();
+    _getRekeningDataById();
   }
 
   void _pickImage() async {
@@ -133,102 +153,131 @@ class _profileSellerState extends State<profileSeller> {
       ),
       backgroundColor: Colors.white,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Edit Informasi Toko',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _namaTokoController,
-                decoration: InputDecoration(
-                  labelText: "Nama Toko",
-                  hintText: "Masukkan nama toko",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _noHandphoneController,
-                decoration: InputDecoration(
-                  labelText: "No Handphone",
-                  hintText: "Masukkan nomor handphone",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _alamatTokoController,
-                decoration: InputDecoration(
-                  labelText: "Alamat Toko",
-                  hintText: "Masukkan alamat toko",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _deskripsiTokoController,
-                decoration: InputDecoration(
-                  labelText: "Deskripsi Toko",
-                  hintText: "Masukkan deskripsi toko",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.text,
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    updateToko();
-                    Navigator.pop(context, "refresh");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'Simpan Perubahan',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      fontSize: 14,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  
+                  Container(
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.store_rounded,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Edit Informasi Toko',
+                          style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildModalTextField(
+                    controller: _namaTokoController,
+                    label: "Nama Toko",
+                    hint: "Masukkan nama toko",
+                    icon: Icons.store_outlined,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: _noHandphoneController,
+                    label: "No Handphone",
+                    hint: "Masukkan nomor handphone",
+                    icon: Icons.phone_outlined,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: _alamatTokoController,
+                    label: "Alamat Toko",
+                    hint: "Masukkan alamat toko",
+                    icon: Icons.location_on_outlined,
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: _deskripsiTokoController,
+                    label: "Deskripsi Toko",
+                    hint: "Masukkan deskripsi toko",
+                    icon: Icons.description_outlined,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        updateToko();
+                        Navigator.pop(context, "refresh");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 2,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save_rounded,
+                              color: Colors.white, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Simpan Perubahan',
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -271,71 +320,113 @@ class _profileSellerState extends State<profileSeller> {
       backgroundColor: Colors.white,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Edit Informasi Rekening',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildTextField(
-                controller: nameController,
-                label: 'Nama Penerima',
-                hint: 'Masukkan nama penerima',
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: bankController,
-                label: 'Nama Bank',
-                hint: 'Contoh: BCA, BRI, Mandiri',
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: noRekController,
-                label: 'Nomor Rekening',
-                hint: 'Masukkan nomor rekening',
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    updateRekening();
-                    Navigator.pop(context, "refresh");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'Simpan Perubahan',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  
+                  Container(
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.account_balance_rounded,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Edit Informasi Rekening',
+                          style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildModalTextField(
+                    controller: nameController,
+                    label: 'Nama Penerima',
+                    hint: 'Masukkan nama penerima',
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: bankController,
+                    label: 'Nama Bank',
+                    hint: 'Contoh: BCA, BRI, Mandiri',
+                    icon: Icons.account_balance_outlined,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: noRekController,
+                    label: 'Nomor Rekening',
+                    hint: 'Masukkan nomor rekening',
+                    icon: Icons.credit_card_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        updateRekening();
+                        Navigator.pop(context, "refresh");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Simpan Perubahan',
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
         );
       },
@@ -345,97 +436,126 @@ class _profileSellerState extends State<profileSeller> {
   void _showAddRekeningModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       backgroundColor: Colors.white,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Tambah Rekening Baru',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _namaRekeningController,
-                decoration: InputDecoration(
-                  labelText: "Nama Penerima",
-                  hintText: "Masukkan nama penerima rekening",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.text,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z\s]+$')),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _jenisRekeningController,
-                decoration: InputDecoration(
-                  labelText: "Nama Rekening",
-                  hintText: "Masukkan jenis rekening (ex: BCA, BRI)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.text,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z\s]+$')),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _noRekeningController,
-                decoration: InputDecoration(
-                  labelText: "Nomor Rekening",
-                  hintText: "Masukkan nomor rekening",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _addRekening();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'Simpan',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      fontSize: 14,
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  
+                  Container(
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.add_card_rounded,
+                          color: Colors.green[600],
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Tambah Rekening Baru',
+                          style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildModalTextField(
+                    controller: _namaRekeningController,
+                    label: "Nama Penerima",
+                    hint: "Masukkan nama penerima rekening",
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: _jenisRekeningController,
+                    label: "Nama Bank",
+                    hint: "Contoh: BCA, BRI, Mandiri",
+                    icon: Icons.account_balance_outlined,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModalTextField(
+                    controller: _noRekeningController,
+                    label: "Nomor Rekening",
+                    hint: "Masukkan nomor rekening",
+                    icon: Icons.credit_card_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _addRekening();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[600],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 2,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save_rounded,
+                              color: Colors.white, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Simpan Rekening',
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -492,270 +612,273 @@ class _profileSellerState extends State<profileSeller> {
           backgroundColor: Colors.transparent,
         ),
         extendBodyBehindAppBar: true,
-        body: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              child: Image.asset(
-                'assets/images/homebackground.png',
-                fit: BoxFit.fill,
+        body: RefreshIndicator(
+          onRefresh: _refreshProfile,
+          child: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: Image.asset(
+                  'assets/images/homebackground.png',
+                  fit: BoxFit.fill,
+                ),
               ),
-            ),
-            Container(
-              child: Container(
-                margin: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: context.getHeight(100),
-                    bottom: 20),
-                child: Column(children: [
-                  Row(
-                    children: [
-                      const SizedBox(width: 8),
-                      const Text(
-                        "Profil Toko",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: "Poppins",
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+              SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    margin: EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        top: context.getHeight(100),
+                        bottom: 20),
+                    child: Column(children: [
+                      Row(
+                        children: [
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Profil Toko",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: "Poppins",
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: context.getHeight(1)),
-                  Column(
-                    children: [
-                      Container(
-                        width: context.getWidth(100),
-                        height: context.getHeight(100),
-                        child: ClipOval(
-                          child: buttonSaveImage == 1
-                              ? Image(
-                                  image: FileImage(
-                                      File($avatarUrl)), 
-                                  fit: BoxFit.cover,
-                                )
-                              : ShimmerImage(
-                                  imageUrl: $avatarUrl,
-                                  width: context.getWidth(100),
-                                  height: context.getHeight(100),
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                      SizedBox(height: context.getHeight(11)),
-                      Container(
-                          child: buttonSaveImage == 1
-                              ? ElevatedButton(
-                                  onPressed: () {
-                                    _updateGambar();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Simpan Foto",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : ElevatedButton(
-                                  onPressed: () {
-                                    _pickImage();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Ubah Foto",
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )),
-                      const SizedBox(height: 24),
-                      Container(
-                        height: context.getHeight(575),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildInfoCard(
-                                title: "Informasi Toko",
-                                icon: Icons.edit,
-                                onEditTap: () {
-                                  _showEditTokoModal(context);
-                                },
-                                content: [
-                                  _InfoRow(
-                                      label: "Nama",
-                                      divider: ": ",
-                                      value: $name),
-                                  _InfoRow(
-                                      label: "No Handphone",
-                                      divider: ": ",
-                                      value: $phone),
-                                  _InfoRow(
-                                    label: "Alamat Toko",
-                                    divider: ": ",
-                                    value: $address,
-                                  ),
-                                  _InfoRow(
-                                    label: "Deskripsi Toko",
-                                    divider: ": ",
-                                    value: $description,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: context.getHeight(45)),
-                              rekeningRegistered
-                                  ? _buildInfoCard(
-                                      title: "Informasi Rekening",
-                                      icon: Icons.edit,
-                                      onEditTap: () {
-                                        _showEditRekeningModal(context);
-                                      },
-                                      content: [
-                                        _InfoRow(
-                                            label: "Nama Penerima",
-                                            divider: ": ",
-                                            value: $rekeningName),
-                                        _InfoRow(
-                                            label: "Nama Rekening",
-                                            divider: ": ",
-                                            value: $bank),
-                                        _InfoRow(
-                                            label: "Nomor Rekening",
-                                            divider: ": ",
-                                            value: $noRek),
-                                      ],
+                      SizedBox(height: context.getHeight(1)),
+                      Column(
+                        children: [
+                          Container(
+                            width: context.getWidth(100),
+                            height: context.getHeight(100),
+                            child: ClipOval(
+                              child: buttonSaveImage == 1
+                                  ? Image(
+                                      image: FileImage(File($avatarUrl)),
+                                      fit: BoxFit.cover,
                                     )
-                                  : Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 18),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey[200]!,
-                                            blurRadius: 4,
-                                            offset: const Offset(4, 4),
-                                          ),
-                                        ],
-                                        border: Border.all(
-                                            color: Colors.grey[200]!, width: 2),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            "Belum ada informasi rekening",
-                                            style: const TextStyle(
-                                              fontFamily: "Poppins",
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              _showAddRekeningModal(context);
-                                            },
-                                            icon: const Icon(Icons.add,
-                                                color: Colors.white),
-                                            label: const Text(
-                                              "Tambah Rekening",
-                                              style: TextStyle(
-                                                fontFamily: "Poppins",
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Theme.of(context)
-                                                  .primaryColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                  : ShimmerImage(
+                                      imageUrl: $avatarUrl,
+                                      width: context.getWidth(100),
+                                      height: context.getHeight(100),
+                                      fit: BoxFit.cover,
                                     ),
-                              SizedBox(height: context.getHeight(45)),
-                              Container(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _modalLogout(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red[50],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                  ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          "LOGOUT",
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                            ),
+                          ),
+                          SizedBox(height: context.getHeight(11)),
+                          Container(
+                              child: buttonSaveImage == 1
+                                  ? ElevatedButton(
+                                      onPressed: () {
+                                        _updateGambar();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                         ),
                                       ),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 16),
-                                          child: Icon(Icons.logout,
-                                              color: Colors.red),
+                                      child: Text(
+                                        "Simpan Foto",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: Colors.white,
                                         ),
+                                      ),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        _pickImage();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        "Ubah Foto",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )),
+                          const SizedBox(height: 24),
+                          Container(
+                            height: context.getHeight(575),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildInfoCard(
+                                    title: "Informasi Toko",
+                                    icon: Icons.edit_rounded,
+                                    onEditTap: () {
+                                      _showEditTokoModal(context);
+                                    },
+                                    content: [
+                                      _InfoRow(
+                                          label: "Nama Toko",
+                                          divider: ": ",
+                                          value: $name.isNotEmpty
+                                              ? $name
+                                              : "Belum diatur"),
+                                      _InfoRow(
+                                          label: "No. Handphone",
+                                          divider: ": ",
+                                          value: $phone.isNotEmpty
+                                              ? $phone
+                                              : "Belum diatur"),
+                                      _InfoRow(
+                                        label: "Alamat Toko",
+                                        divider: ": ",
+                                        value: $address.isNotEmpty
+                                            ? $address
+                                            : "Belum diatur",
+                                      ),
+                                      _InfoRow(
+                                        label: "Deskripsi",
+                                        divider: ": ",
+                                        value: $description.isNotEmpty
+                                            ? $description
+                                            : "Belum diatur",
                                       ),
                                     ],
                                   ),
-                                ),
+                                  SizedBox(height: context.getHeight(16)),
+                                  rekeningRegistered
+                                      ? _buildInfoCard(
+                                          title: "Informasi Rekening",
+                                          icon: Icons.edit_rounded,
+                                          onEditTap: () {
+                                            _showEditRekeningModal(context);
+                                          },
+                                          content: [
+                                            _InfoRow(
+                                                label: "Nama Penerima",
+                                                divider: ": ",
+                                                value: $rekeningName.isNotEmpty
+                                                    ? $rekeningName
+                                                    : "Belum diatur"),
+                                            _InfoRow(
+                                                label: "Bank",
+                                                divider: ": ",
+                                                value: $bank.isNotEmpty
+                                                    ? $bank
+                                                    : "Belum diatur"),
+                                            _InfoRow(
+                                                label: "No. Rekening",
+                                                divider: ": ",
+                                                value: $noRek.isNotEmpty
+                                                    ? $noRek
+                                                    : "Belum diatur"),
+                                          ],
+                                        )
+                                      : _buildInfoCard(
+                                          title: "Informasi Rekening",
+                                          icon: Icons.add_circle_outline,
+                                          onEditTap: () {
+                                            _showAddRekeningModal(context);
+                                          },
+                                          content: [
+                                            Container(
+                                              padding: EdgeInsets.all(20),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue[50],
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                    color: Colors.blue[100]!,
+                                                    width: 1),
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  Icon(
+                                                    Icons
+                                                        .account_balance_wallet_outlined,
+                                                    size: 40,
+                                                    color: Colors.blue[400],
+                                                  ),
+                                                  SizedBox(height: 12),
+                                                  Text(
+                                                    "Belum ada rekening terdaftar",
+                                                    style: TextStyle(
+                                                      fontFamily: "Poppins",
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 14,
+                                                      color: Colors.blue[700],
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Text(
+                                                    "Tap ikon edit untuk menambahkan rekening",
+                                                    style: TextStyle(
+                                                      fontFamily: "Poppins",
+                                                      fontSize: 12,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                  SizedBox(height: context.getHeight(24)),
+                                  Container(
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () => _modalLogout(context),
+                                      icon: Icon(Icons.logout_rounded,
+                                          color: Colors.white, size: 18),
+                                      label: Text(
+                                        'Logout',
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red[600],
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 14),
+                                        elevation: 2,
+                                        shadowColor:
+                                            Colors.red.withOpacity(0.3),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  )
-                ]),
-              ),
-            ),
-          ],
+                        ],
+                      )
+                    ]),
+                  ))
+            ],
+          ),
         ));
   }
 
@@ -767,44 +890,146 @@ class _profileSellerState extends State<profileSeller> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[200]!,
-            blurRadius: 4,
-            offset: const Offset(4, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+            spreadRadius: 0,
           ),
         ],
-        border: Border.all(color: Colors.grey[200]!, width: 2),
+        border: Border.all(color: Colors.grey[100]!, width: 1),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: Colors.green,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColor.withOpacity(0.1),
+                    Theme.of(context).primaryColor.withOpacity(0.05),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
               ),
-              const Spacer(),
-              GestureDetector(
-                onTap: onEditTap,
-                child: Icon(icon, size: 18, color: Colors.green),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      title == "Informasi Toko"
+                          ? Icons.store_rounded
+                          : Icons.account_balance_rounded,
+                      size: 20,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: GestureDetector(
+                      onTap: onEditTap,
+                      child: Icon(icon, size: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...content,
-        ],
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: content,
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildModalTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: Theme.of(context).primaryColor),
+            SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            style: TextStyle(fontFamily: "Poppins", fontSize: 14),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+              contentPadding: EdgeInsets.symmetric(
+                vertical: maxLines > 1 ? 16 : 12,
+                horizontal: 16,
+              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -838,6 +1063,102 @@ class _profileSellerState extends State<profileSeller> {
       ToastHelper.showErrorToast(context, 'Gagal memperbarui gambar!');
     }
   }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final String divider;
+
+  const _InfoRow(
+      {required this.label, required this.value, required this.divider});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 110,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          Text(
+            divider,
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+              color: Colors.grey[600],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value.isNotEmpty ? value : "Belum diatur",
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: value.isNotEmpty ? Colors.black87 : Colors.grey[500],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 void _modalLogout(BuildContext context) {
@@ -853,26 +1174,54 @@ void _modalLogout(BuildContext context) {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Apakah kamu yakin akan keluar dari akun?',
-              style: TextStyle(
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w600,
-                fontSize: 26,
-                color: Colors.black,
+            Container(
+              width: 50,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
               ),
-              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.logout_rounded,
+                    color: Colors.red[600],
+                    size: 20,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Apakah kamu yakin akan keluar dari akun?',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFEAEA),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[600],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 2,
                 ),
                 onPressed: () {
                   final tokenStorage = FlutterSecureStorage();
@@ -887,14 +1236,21 @@ void _modalLogout(BuildContext context) {
                     (Route<dynamic> route) => false,
                   );
                 },
-                child: const Text(
-                  'Ya, Logout',
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red,
-                    fontSize: 14,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout_rounded, color: Colors.white, size: 16),
+                    SizedBox(width: 8),
+                    Text(
+                      'Ya, Logout',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -915,91 +1271,5 @@ void _modalLogout(BuildContext context) {
         ),
       );
     },
-  );
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final String divider;
-
-  const _InfoRow(
-      {required this.label, required this.value, required this.divider});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 120,
-            child: Text(
-              "$label",
-              style: const TextStyle(
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-            ),
-          ),
-          Text(
-            "$divider",
-            style: const TextStyle(
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontFamily: "Poppins",
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-Widget _buildTextField({
-  required TextEditingController controller,
-  required String label,
-  String? hint,
-  TextInputType keyboardType = TextInputType.text,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontFamily: "Poppins",
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-      const SizedBox(height: 8),
-      TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          hintText: hint,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 16,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Colors.grey),
-          ),
-        ),
-      ),
-    ],
   );
 }

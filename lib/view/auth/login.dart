@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -27,7 +29,6 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _verifPhoneController = TextEditingController();
 
-  
   String? _emailError;
   String? _passwordError;
 
@@ -67,6 +68,13 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
         await tokenStorage.write(
             key: 'refreshToken', value: login.refreshToken);
         await tokenStorage.write(key: 'role', value: login.data?.role);
+        if (login.data?.role == "pjawab") {
+          await tokenStorage.write(key: "id", value: login.data?.idAsli);
+        } else {
+          await tokenStorage.write(key: "id", value: login.data?.id);
+        }
+        print("id asli : ${login.data?.id}");
+        print("id palsu : ${login.data?.idAsli}");
         final role = login.data?.role;
         if (role == 'user') {
           Navigator.pushNamedAndRemoveUntil(
@@ -80,7 +88,19 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
             '/home_seller',
             (Route<dynamic> route) => false,
           );
+        } else if (role == 'pembeli') {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home_pembeli',
+            (Route<dynamic> route) => false,
+          );
         } else if (role == 'pjawab') {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home_seller',
+            (Route<dynamic> route) => false,
+          );
+        } else if (role == 'admin') {
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/pjawab_home',
@@ -287,7 +307,7 @@ class _LoginPembeliWidgetState extends State<LoginPembeliWidget> {
                       fontWeight: FontWeight.w500,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10), 
+                      borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
                         color: Colors.grey,
                         width: 1.0,

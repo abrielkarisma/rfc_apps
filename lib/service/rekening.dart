@@ -7,17 +7,18 @@ import 'package:rfc_apps/service/token.dart';
 class rekeningService {
   final String baseUrl = '${dotenv.env["BASE_URL"]}store';
 
-  Future<RekeningResponse> getRekeningByUserId() async {
+  Future<RekeningResponse> getRekeningByUserId(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(
       headers: {
         'Authorization': 'Bearer $token',
       },
-      Uri.parse('$baseUrl/rekening/user'),
+      Uri.parse('$baseUrl/rekening/idUser/$id'),
     );
+    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
-      return getRekeningByUserId();
+      return getRekeningByUserId(id);
     }
     if (response.statusCode == 200) {
       return RekeningResponse.fromJson(jsonDecode(response.body));
@@ -25,7 +26,8 @@ class rekeningService {
       throw Exception('Failed to load Rekening data');
     }
   }
-Future<Map<String, dynamic>?> getRekeningBytoken() async {
+
+  Future<Map<String, dynamic>?> getRekeningBytoken() async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(
       headers: {
@@ -42,14 +44,44 @@ Future<Map<String, dynamic>?> getRekeningBytoken() async {
       if (responseBody['data'] != null) {
         return responseBody['data'] as Map<String, dynamic>;
       } else {
-        return null; 
+        return null;
       }
     } else if (response.statusCode == 404) {
-        return null; 
+      return null;
     } else {
-      throw Exception(responseBody['message'] ?? 'Gagal mengambil data rekening aktif');
+      throw Exception(
+          responseBody['message'] ?? 'Gagal mengambil data rekening aktif');
     }
   }
+
+  Future<Map<String, dynamic>?> getRekeningByIdUser(String id) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.get(
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      Uri.parse('$baseUrl/rekening/idUser/$id/raw'),
+    );
+    print('Response rekening by id user: ${response.body}');
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getRekeningByIdUser(id);
+    }
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      if (responseBody['data'] != null) {
+        return responseBody['data'] as Map<String, dynamic>;
+      } else {
+        return null;
+      }
+    } else if (response.statusCode == 404) {
+      return null;
+    } else {
+      throw Exception(
+          responseBody['message'] ?? 'Gagal mengambil data rekening aktif');
+    }
+  }
+
   Future<Map<String, dynamic>> CreateRekening(
       String namaPenerima, String namaBank, String nomorRekening) async {
     final token = await tokenService().getAccessToken();

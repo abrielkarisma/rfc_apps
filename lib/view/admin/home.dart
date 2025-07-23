@@ -3,8 +3,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/view/pjawab/penarikan/penarikan.dart';
-import 'package:rfc_apps/view/pjawab/user/user_list.dart';
+import 'package:rfc_apps/view/admin/penarikan/penarikan.dart';
+import 'package:rfc_apps/view/admin/user/user_list.dart';
+import 'package:rfc_apps/view/admin/manageRFC/rfcManagementTabView.dart';
 
 class PjawabHome extends StatefulWidget {
   const PjawabHome({super.key, this.initialIndex = 0});
@@ -24,7 +25,8 @@ class _PjawabHomeState extends State<PjawabHome> {
 
   late final List<Widget> _widgetOptions = <Widget>[
     UserList(),
-    AdminRequestPenarikanPage()
+    AdminRequestPenarikanPage(),
+    RFCManagementTabView(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,7 @@ class _PjawabHomeState extends State<PjawabHome> {
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
-                "Admin",
+                "",
                 style: TextStyle(
                   fontFamily: "poppins",
                   fontSize: 20,
@@ -101,7 +103,7 @@ class _PjawabHomeState extends State<PjawabHome> {
             tabs: [
               GButton(
                 icon: LineIcons.users,
-                text: 'Kelola Penjual',
+                text: 'Manajemen Penjual',
                 textStyle: TextStyle(
                   color: Colors.white,
                   fontSize: 11,
@@ -112,6 +114,16 @@ class _PjawabHomeState extends State<PjawabHome> {
               GButton(
                 icon: LineIcons.moneyBill,
                 text: 'Penarikan',
+                textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontFamily: "poppins",
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              GButton(
+                icon: LineIcons.cog,
+                text: 'Manajemen RFC',
                 textStyle: TextStyle(
                   color: Colors.white,
                   fontSize: 11,

@@ -9,7 +9,7 @@ class SaldoService {
 
   Future<Map<String, dynamic>> getMySaldo() async {
     final token = await tokenService().getAccessToken();
-    final url = Uri.parse('$baseUrl/user'); 
+    final url = Uri.parse('$baseUrl/user');
     final response = await http.get(
       url,
       headers: {
@@ -21,6 +21,35 @@ class SaldoService {
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getMySaldo();
+    }
+
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      if (responseBody['data'] != null) {
+        return responseBody['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(
+            'Data saldo tidak ditemukan di respons meskipun status 200');
+      }
+    } else {
+      throw Exception(responseBody['message'] ?? 'Gagal mengambil saldo');
+    }
+  }
+
+  Future<Map<String, dynamic>> getMySaldoByIdUser(String id) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/idUser/$id');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print('Response message: ${response.body}');
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getMySaldoByIdUser(id);
     }
 
     final responseBody = json.decode(response.body);
@@ -52,6 +81,34 @@ class SaldoService {
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getMyMutasiSaldo(page: page, limit: limit);
+    }
+
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      return responseBody as Map<String, dynamic>;
+    } else {
+      throw Exception(
+          responseBody['message'] ?? 'Gagal mengambil riwayat mutasi saldo');
+    }
+  }
+
+  Future<Map<String, dynamic>> getMyMutasiSaldoByIdUser(String id,
+      {int page = 1, int limit = 10}) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/mutasi/idUser/$id?page=$page&limit=$limit');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print('Response mutasi by id: ${response.body}');
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getMyMutasiSaldoByIdUser(id, page: page, limit: limit);
     }
 
     final responseBody = json.decode(response.body);
@@ -96,6 +153,41 @@ class SaldoService {
     }
   }
 
+  Future<Map<String, dynamic>> createPenarikanSaldoByIdUser(
+    String id, {
+    required double jumlahDiminta,
+  }) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse('$baseUrl/tarik-saldo/idUser/$id');
+
+    final Map<String, dynamic> payload = {
+      'jumlahDiminta': jumlahDiminta,
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(payload),
+    );
+
+    print('Response create penarikan by id: ${response.body}');
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return createPenarikanSaldoByIdUser(id, jumlahDiminta: jumlahDiminta);
+    }
+
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 201) {
+      return responseBody['data'] as Map<String, dynamic>;
+    } else {
+      throw Exception(responseBody['message'] ??
+          'Gagal membuat permintaan penarikan saldo');
+    }
+  }
+
   Future<Map<String, dynamic>> getMyPenarikanSaldoHistory(
       {int page = 1, int limit = 10}) async {
     final token = await tokenService().getAccessToken();
@@ -123,6 +215,35 @@ class SaldoService {
     }
   }
 
+  Future<Map<String, dynamic>> getMyPenarikanSaldoHistoryByIdUser(String id,
+      {int page = 1, int limit = 10}) async {
+    final token = await tokenService().getAccessToken();
+    final url = Uri.parse(
+        '$baseUrl/histori-penarikan/idUser/$id?page=$page&limit=$limit');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print('Response penarikan history by id: ${response.body}');
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return getMyPenarikanSaldoHistoryByIdUser(id, page: page, limit: limit);
+    }
+
+    final responseBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      return responseBody as Map<String, dynamic>;
+    } else {
+      throw Exception(
+          responseBody['message'] ?? 'Gagal mengambil riwayat penarikan saldo');
+    }
+  }
+
   Future<Map<String, dynamic>> getAllPenarikanSaldoRequests({
     String status = 'pending',
     int page = 1,
@@ -139,7 +260,6 @@ class SaldoService {
         'Authorization': 'Bearer $token',
       },
     );
-
 
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
@@ -202,6 +322,4 @@ class SaldoService {
           'Gagal memproses permintaan penarikan saldo');
     }
   }
-
-  
 }

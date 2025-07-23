@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/model/artikel.dart';
-import 'package:rfc_apps/service/artikel.dart';
-import 'package:rfc_apps/widget/carousel_artikel.dart';
 import 'package:rfc_apps/widget/produk_list.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Home extends StatefulWidget {
   final VoidCallback onSeeMoreArticles;
@@ -26,16 +21,39 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Key _produkListKey = UniqueKey();
   final SaldoService _saldoService = SaldoService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   late Future<Map<String, dynamic>> _saldoFuture;
+  String _userId = "";
 
-  void _loadSaldo() {
-    setState(() {
-      _saldoFuture = _saldoService.getMySaldo();
-    });
+  @override
+  void initState() {
+    super.initState();
+    _produkListKey = UniqueKey();
+    _loadSaldo();
+  }
+
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
+  Future<void> _loadSaldo() async {
+    await _getUserId();
+    if (_userId.isNotEmpty) {
+      setState(() {
+        _saldoFuture = _saldoService.getMySaldoByIdUser(_userId);
+      });
+    }
   }
 
   Future<void> _refreshHome() async {
-    _loadSaldo();
+    await _loadSaldo();
     setState(() {
       _produkListKey = UniqueKey();
     });
@@ -146,12 +164,6 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
-  }
-
-  void initState() {
-    super.initState();
-    _produkListKey = UniqueKey();
-    _loadSaldo();
   }
 
   @override

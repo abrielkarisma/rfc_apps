@@ -122,25 +122,25 @@ class ProdukService {
     }
   }
 
-  Future<List<Produk>> getProdukByUserId() async {
+  Future<List<Produk>> getProdukByUserId(String id) async {
     final token = await tokenService().getAccessToken();
     final response = await http.get(
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token'
       },
-      Uri.parse('$baseUrl/produk/token'),
+      Uri.parse('$baseUrl/produk/idUser/$id'),
     );
+    print(response.statusCode);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
-      return getProdukByUserId();
+      return getProdukByUserId(id);
     }
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
       final List<dynamic> data = responseData['data'];
-      final filteredData =
-          data.where((item) => item['isDeleted'] == false).toList();
-      return filteredData.map((item) => Produk.fromJson(item)).toList();
+      print(data);
+      return data.map((item) => Produk.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load produk data');
     }
@@ -155,6 +155,7 @@ class ProdukService {
       },
       Uri.parse('$baseUrl/produk/id/$id'),
     );
+    print(response.body);
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
       return getProdukById(id);
@@ -182,9 +183,8 @@ class ProdukService {
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
       final List<dynamic> data = responseData['data'];
-      final filteredData =
-          data.where((item) => item['isDeleted'] == false).toList();
-      return filteredData.map((item) => Produk.fromJson(item)).toList();
+      print(data);
+      return data.map((item) => Produk.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load produk data');
     }
@@ -201,14 +201,12 @@ class ProdukService {
     );
     if (response.statusCode == 401) {
       await tokenService().refreshToken();
-      return getRFCProduk();
+      return getUMKMProduk();
     }
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
       final List<dynamic> data = responseData['data'];
-      final filteredData =
-          data.where((item) => item['isDeleted'] == false).toList();
-      return filteredData.map((item) => Produk.fromJson(item)).toList();
+      return data.map((item) => Produk.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load produk data');
     }
@@ -252,7 +250,6 @@ class ProdukService {
       );
     }
     if (response.statusCode == 200) {
-      
       return ProdukResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to update produk data');
@@ -278,6 +275,28 @@ class ProdukService {
       return ProdukResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to delete produk dataaaaaaa');
+    }
+  }
+
+  Future<ProdukResponse> activateProduk(String id) async {
+    final token = await tokenService().getAccessToken();
+    final response = await http.put(
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      Uri.parse('$baseUrl/produk/activate/$id'),
+    );
+    if (response.statusCode == 401) {
+      await tokenService().refreshToken();
+      return activateProduk(id);
+    }
+    if (response.statusCode == 200) {
+      return ProdukResponse.fromJson(jsonDecode(response.body));
+    } else if (response.statusCode == 404) {
+      return ProdukResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to activate produk');
     }
   }
 

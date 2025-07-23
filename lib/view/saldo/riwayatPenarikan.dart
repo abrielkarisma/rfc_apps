@@ -3,6 +3,7 @@ import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const Color appPrimaryColor = Color(0xFF4CAD73);
 const Color appPrimaryColorLight = Color(0xFFE8F5E9);
@@ -20,6 +21,7 @@ class RiwayatPenarikanPage extends StatefulWidget {
 
 class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
   final SaldoService _saldoService = SaldoService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final List<Map<String, dynamic>> _penarikanList = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -28,6 +30,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   String? _errorMessage;
+  String _userId = "";
 
   @override
   void initState() {
@@ -43,6 +46,17 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     super.dispose();
   }
 
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
   Future<void> _fetchPenarikanHistory({bool isRefresh = false}) async {
     if (isRefresh) {
       _currentPage = 1;
@@ -51,6 +65,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
       setState(() {
         _isLoading = true;
       });
+      await _getUserId();
     } else {
       if (_currentPage >= _totalPages || _isLoadingMore) return;
       setState(() {
@@ -59,8 +74,11 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
     }
 
     try {
-      final response = await _saldoService.getMyPenarikanSaldoHistory(
-          page: _currentPage, limit: 10);
+      final response = _userId.isNotEmpty
+          ? await _saldoService.getMyPenarikanSaldoHistoryByIdUser(_userId,
+              page: _currentPage, limit: 10)
+          : await _saldoService.getMyPenarikanSaldoHistory(
+              page: _currentPage, limit: 10);
 
       final List<dynamic> newPenarikan =
           response['data'] as List<dynamic>? ?? [];

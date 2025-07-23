@@ -3,6 +3,7 @@ import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const Color appPrimaryColor = Color(0xFF4CAD73);
 const Color appPrimaryColorLight = Color(0xFFE8F5E9);
@@ -17,12 +18,14 @@ class RiwayatMutasiPage extends StatefulWidget {
 
 class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
   final SaldoService _saldoService = SaldoService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   List<Map<String, dynamic>> _mutasiList = [];
   int _currentPage = 1;
   int _totalPages = 1;
   bool _isLoading = false;
   bool _isFirstLoad = true;
   final ScrollController _scrollController = ScrollController();
+  String _userId = "";
 
   @override
   void initState() {
@@ -45,6 +48,17 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
     super.dispose();
   }
 
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
   Future<void> _fetchMutasi({bool isRefresh = false}) async {
     if (_isLoading) return;
 
@@ -58,11 +72,14 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
     if (isRefresh) {
       _currentPage = 1;
       _mutasiList = [];
+      await _getUserId();
     }
 
     try {
-      final responseMap =
-          await _saldoService.getMyMutasiSaldo(page: _currentPage, limit: 15);
+      final responseMap = _userId.isNotEmpty
+          ? await _saldoService.getMyMutasiSaldoByIdUser(_userId,
+              page: _currentPage, limit: 15)
+          : await _saldoService.getMyMutasiSaldo(page: _currentPage, limit: 15);
 
       final List<dynamic> newMutasiDynamic =
           responseMap['data'] as List<dynamic>? ?? [];

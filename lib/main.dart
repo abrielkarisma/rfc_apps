@@ -31,12 +31,13 @@ import 'package:rfc_apps/view/penjual/pesanan/daftar_pesanan.dart';
 import 'package:rfc_apps/view/penjual/home.dart';
 import 'package:rfc_apps/view/penjual/profil_seller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:rfc_apps/view/pjawab/home.dart';
-import 'package:rfc_apps/view/pjawab/user/user_request.dart';
+import 'package:rfc_apps/view/admin/home.dart';
+import 'package:rfc_apps/view/admin/user/user_request.dart';
 import 'package:rfc_apps/view/saldo/riwayatMutasi.dart';
 import 'package:rfc_apps/view/saldo/saldoUser.dart';
 import 'package:rfc_apps/view/saldo/tarikSaldo.dart';
 import 'package:rfc_apps/view/saldo/informasiRekening.dart';
+import 'package:rfc_apps/view/admin/manageRFC/rfcManagementTabView.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 @pragma('vm:entry-point')
@@ -49,7 +50,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       projectId: "farmcenter-61683",
     ),
   );
-
 }
 
 void main() async {
@@ -96,16 +96,22 @@ class MyApp extends StatelessWidget {
         '/tnc': (context) => termsAndConditions(),
         '/home_seller': (context) => homeSeller(),
         '/toko_register': (context) => Sellerstorereg(),
-        '/profil_seller': (context) => profileSeller(),
+        '/profil_seller': (context) {
+          final idUser = ModalRoute.of(context)!.settings.arguments as String;
+          return profileSeller(idUser: idUser);
+        },
         '/daftar_pesanan': (context) {
           final tokoId = ModalRoute.of(context)!.settings.arguments as String;
           return DaftarPesanan(tokoId: tokoId);
         },
-        '/kelola_produk': (context) => KelolaProduk(),
+        '/kelola_produk': (context) {
+          final idUser = ModalRoute.of(context)!.settings.arguments as String;
+          return KelolaProduk(idUser: idUser);
+        },
         '/tambah_produk': (context) => TambahProduk(),
         '/lupa_password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as String;
-  return LupaPasswordPage(from: args);
+          return LupaPasswordPage(from: args);
         },
         '/detail_produk_buyer': (context) {
           final idProduk = ModalRoute.of(context)!.settings.arguments as String;
@@ -113,7 +119,9 @@ class MyApp extends StatelessWidget {
         },
         '/detail_produk': (context) {
           final idProduk = ModalRoute.of(context)!.settings.arguments as String;
-          return DetailProdukPage(id_produk: idProduk);
+          return DetailProdukPage(
+            id_produk: idProduk,
+          );
         },
         '/edit_profile': (context) {
           final args =
@@ -162,6 +170,7 @@ class MyApp extends StatelessWidget {
         },
         '/mutasi_saldo': (context) => RiwayatMutasiPage(),
         '/informasi_rekening': (context) => const InformasiRekeningPage(),
+        '/manage_rfc': (context) => const RFCManagementTabView(),
       },
     );
   }

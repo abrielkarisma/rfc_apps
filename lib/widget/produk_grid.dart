@@ -6,7 +6,7 @@ import 'package:rfc_apps/widget/product_card_umkm.dart';
 import 'package:rfc_apps/widget/produk_card_rfc.dart';
 import 'package:rfc_apps/widget/produk_card_seller.dart';
 import 'package:rfc_apps/model/produk.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:shimmer/shimmer.dart';
 
 class ProdukGrid extends StatefulWidget {
   const ProdukGrid(
@@ -56,14 +56,13 @@ class _ProdukGridState extends State<ProdukGrid> {
   Future<List<Produk>> _selectedProduk() async {
     List<Produk> allProducts;
     if (index == 0) {
-      allProducts = await ProdukService().getProdukByUserId(); 
+      allProducts = await ProdukService().getProdukByUserId(widget.id);
     } else if (index == 1) {
-      allProducts = await ProdukService().getRFCProduk(); 
+      allProducts = await ProdukService().getRFCProduk();
     } else if (index == 2) {
-      allProducts = await ProdukService().getUMKMProduk(); 
+      allProducts = await ProdukService().getUMKMProduk();
     } else if (index == 3) {
-      allProducts =
-          await ProdukService().getProdukByTokoId(widget.id); 
+      allProducts = await ProdukService().getProdukByTokoId(widget.id);
     } else {
       return [];
     }
@@ -87,7 +86,6 @@ class _ProdukGridState extends State<ProdukGrid> {
     return Container();
   }
 
-  
   Widget _buildShimmerLoading() {
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
@@ -98,7 +96,7 @@ class _ProdukGridState extends State<ProdukGrid> {
         mainAxisSpacing: 30,
         childAspectRatio: 143 / 201,
       ),
-      itemCount: 6, 
+      itemCount: 6,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
@@ -166,9 +164,9 @@ class _ProdukGridState extends State<ProdukGrid> {
         future: _selectedProduk(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildShimmerLoading(); 
+            return _buildShimmerLoading();
           }
-
+          print(snapshot.error);
           if (snapshot.hasError) {
             return Center(
               child: Column(

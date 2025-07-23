@@ -4,6 +4,7 @@ import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/view/saldo/riwayatPenarikan.dart';
 import 'package:rfc_apps/view/saldo/tarikSaldo.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SaldoPage extends StatefulWidget {
   const SaldoPage({super.key});
@@ -14,7 +15,9 @@ class SaldoPage extends StatefulWidget {
 
 class _SaldoPageState extends State<SaldoPage> {
   final SaldoService _saldoService = SaldoService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   late Future<Map<String, dynamic>> _saldoFuture;
+  String _userId = "";
 
   @override
   void initState() {
@@ -22,10 +25,24 @@ class _SaldoPageState extends State<SaldoPage> {
     _loadSaldo();
   }
 
-  void _loadSaldo() {
-    setState(() {
-      _saldoFuture = _saldoService.getMySaldo();
-    });
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
+  Future<void> _loadSaldo() async {
+    await _getUserId();
+    if (_userId.isNotEmpty) {
+      setState(() {
+        _saldoFuture = _saldoService.getMySaldoByIdUser(_userId);
+      });
+    }
   }
 
   String formatRupiah(dynamic amount) {
@@ -62,7 +79,7 @@ class _SaldoPageState extends State<SaldoPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      backgroundColor: Colors.grey[100], 
+      backgroundColor: Colors.grey[100],
       body: FutureBuilder<Map<String, dynamic>>(
         future: _saldoFuture,
         builder: (context, snapshot) {
@@ -125,7 +142,7 @@ class _SaldoPageState extends State<SaldoPage> {
 
   Widget _buildLoadingShimmer() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[350]!, 
+      baseColor: Colors.grey[350]!,
       highlightColor: Colors.grey[200]!,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -134,14 +151,13 @@ class _SaldoPageState extends State<SaldoPage> {
           children: [
             Container(
               width: double.infinity,
-              height: 150.0, 
+              height: 150.0,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(16), 
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-            const SizedBox(height: 30), 
+            const SizedBox(height: 30),
             _buildShimmerActionButton(),
             _buildShimmerActionButton(),
             _buildShimmerActionButton(),
@@ -155,7 +171,7 @@ class _SaldoPageState extends State<SaldoPage> {
   Widget _buildShimmerActionButton() {
     return Container(
         width: double.infinity,
-        height: 55, 
+        height: 55,
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.only(bottom: 12));
@@ -164,16 +180,12 @@ class _SaldoPageState extends State<SaldoPage> {
   Widget _buildSaldoView(Map<String, dynamic> saldoDataMap) {
     final String saldoTersedia =
         saldoDataMap['saldoTersedia']?.toString() ?? '0.0';
-    final Map<String, dynamic>? userDataMap =
-        saldoDataMap['user'] as Map<String, dynamic>?;
-    final String userName = userDataMap?['nama'] ?? 'Pengguna';
 
     return RefreshIndicator(
-      onRefresh: () async => _loadSaldo(),
+      onRefresh: () async => await _loadSaldo(),
       color: Theme.of(context).primaryColor,
       child: SingleChildScrollView(
-        physics:
-            const AlwaysScrollableScrollPhysics(), 
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -212,7 +224,7 @@ class _SaldoPageState extends State<SaldoPage> {
                   Text(
                     formatRupiah(saldoTersedia),
                     style: const TextStyle(
-                      fontSize: 40, 
+                      fontSize: 40,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 1.1,
@@ -267,7 +279,7 @@ class _SaldoPageState extends State<SaldoPage> {
             ),
             _buildActionButton(
               context,
-              icon: Icons.history_toggle_off_rounded, 
+              icon: Icons.history_toggle_off_rounded,
               label: 'Riwayat Penarikan',
               onPressed: () {
                 Navigator.push(
@@ -316,16 +328,14 @@ class _SaldoPageState extends State<SaldoPage> {
           backgroundColor:
               isOutlined ? Colors.white : Theme.of(context).primaryColor,
           elevation: isOutlined ? 0 : 3,
-          padding: const EdgeInsets.symmetric(
-              horizontal: 20, vertical: 16), 
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(12.0), 
+            borderRadius: BorderRadius.circular(12.0),
             side: isOutlined
                 ? BorderSide(color: Theme.of(context).primaryColor, width: 1.5)
                 : BorderSide.none,
           ),
-          alignment: Alignment.centerLeft, 
+          alignment: Alignment.centerLeft,
         ).copyWith(
           overlayColor: MaterialStateProperty.all(isOutlined
               ? Theme.of(context).primaryColor.withOpacity(0.1)

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/rekening.dart';
 import 'package:rfc_apps/utils/toastHelper.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const Color _primaryColor = Color(0xFF4CAD73);
 const Color _primaryColorLight = Color(0xFFB3FFD2);
-const Color _primaryColorDark = Color(0xFF2B523B);
 
 class InformasiRekeningPage extends StatefulWidget {
   const InformasiRekeningPage({super.key});
@@ -16,9 +16,11 @@ class InformasiRekeningPage extends StatefulWidget {
 
 class _InformasiRekeningPageState extends State<InformasiRekeningPage> {
   final rekeningService _rekeningService = rekeningService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   Map<String, dynamic>? _rekening;
   bool _isLoading = true;
   String? _errorMessage;
+  String _userId = "";
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _namaController = TextEditingController();
@@ -33,13 +35,29 @@ class _InformasiRekeningPageState extends State<InformasiRekeningPage> {
     _fetchRekening();
   }
 
+  Future<void> _getUserId() async {
+    try {
+      final id = await _storage.read(key: "id");
+      setState(() {
+        _userId = id ?? "";
+      });
+    } catch (e) {
+      print("Error getting user ID: $e");
+    }
+  }
+
   Future<void> _fetchRekening() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+    await _getUserId();
+
     try {
-      final rekening = await _rekeningService.getRekeningBytoken();
+      final rekening = _userId.isNotEmpty
+          ? await _rekeningService.getRekeningByIdUser(_userId)
+          : await _rekeningService.getRekeningBytoken();
+
       setState(() {
         _rekening = rekening;
         if (rekening != null) {

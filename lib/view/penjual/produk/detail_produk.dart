@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/produk.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/penjual/produk/edit_produk.dart';
 
 class DetailProdukPage extends StatefulWidget {
@@ -19,6 +21,8 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
   String $satuan = "";
   String $deskripsi = "";
   String $id_produk = "";
+  bool $isDeleted = false;
+  String $typeToko = "";
 
   @override
   void initState() {
@@ -37,10 +41,12 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
         $deskripsi = response.data[0].deskripsi;
         $gambar = response.data[0].gambar;
         $id_produk = response.data[0].id;
+        $isDeleted = response.data[0].isDeleted;
+        $typeToko = response.data[0].TypeToko ?? "";
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengambil data produk')),
+        SnackBar(content: Text(e.toString())),
       );
     }
   }
@@ -69,7 +75,6 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
       ),
       body: Stack(
         children: [
-          
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -78,8 +83,6 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
               fit: BoxFit.fitHeight,
             ),
           ),
-
-          
           RefreshIndicator(
             onRefresh: _getDataProduk,
             child: SingleChildScrollView(
@@ -91,7 +94,6 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
                     Container(
                       padding: EdgeInsets.only(
                           left: 20,
@@ -107,11 +109,9 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                         ),
                       ),
                     ),
-
                     SizedBox(
                       height: context.getHeight(60),
                     ),
-
                     Center(
                       child: Container(
                         width: context.getWidth(320),
@@ -175,11 +175,9 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                         ),
                       ),
                     ),
-
                     SizedBox(
                       height: context.getHeight(20),
                     ),
-
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -189,10 +187,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                           _buildDetailRow("Stok Produk", $stok),
                           _buildDetailRow("Satuan Produk", $satuan),
                           _buildDetailRow("Harga Produk", $harga),
-
                           SizedBox(height: context.getHeight(40)),
-
-                          
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Row(
@@ -200,10 +195,16 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      _deleteProduk();
+                                      if ($isDeleted) {
+                                        _activateProduk();
+                                      } else {
+                                        _deactivateProduk();
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(0xFFFF4D37),
+                                      backgroundColor: $isDeleted
+                                          ? Color(0xFF4CAD73)
+                                          : Color(0xFFFF8C00),
                                       foregroundColor: Colors.white,
                                       padding:
                                           EdgeInsets.symmetric(vertical: 16),
@@ -212,7 +213,9 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                                       ),
                                     ),
                                     child: Text(
-                                      "Hapus Produk",
+                                      $isDeleted
+                                          ? "Aktifkan Produk"
+                                          : "Nonaktifkan Produk",
                                       style: TextStyle(
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.w600,
@@ -235,6 +238,8 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                                             satuan: $satuan,
                                             deskripsi: $deskripsi,
                                             gambar: $gambar,
+                                            isDeleted: $isDeleted,
+                                            typeToko: $typeToko,
                                           ),
                                         ),
                                       );
@@ -263,8 +268,6 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                               ],
                             ),
                           ),
-
-                          
                           Container(
                             width: 100,
                             height: 4,
@@ -325,20 +328,20 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
     );
   }
 
-  Future<void> _deleteProduk() async {
+  Future<void> _deactivateProduk() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            "Konfirmasi Hapus",
+            "Konfirmasi Nonaktifkan",
             style: TextStyle(
               fontFamily: "Poppins",
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            "Apakah Anda yakin ingin menghapus produk ini?",
+            "Apakah Anda yakin ingin menonaktifkan produk ini?",
             style: TextStyle(
               fontFamily: "Poppins",
             ),
@@ -359,31 +362,97 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
             ElevatedButton(
               onPressed: () async {
                 final navigator = Navigator.of(context);
-                navigator.pop(); 
+                navigator.pop();
 
                 try {
                   final response =
                       await ProdukService().deleteProduk($id_produk);
+                  print("response.message : ${response.message}");
                   if (response.message == "Successfully deleted produk data") {
-                    if (mounted) {
-                      navigator.pop('refresh');
-                    }
+                    ToastHelper.showSuccessToast(
+                        context, 'Produk berhasil dinonaktifkan');
+                    await _getDataProduk(); // Refresh data
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Gagal menghapus produk')),
-                    );
+                    ToastHelper.showErrorToast(
+                        context, 'Gagal menonaktifkan produk');
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Terjadi kesalahan: $e')),
-                  );
+                  ToastHelper.showErrorToast(context, 'Terjadi kesalahan: $e');
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFF4D37),
+                backgroundColor: Color(0xFFFF8C00),
               ),
               child: Text(
-                "Hapus",
+                "Nonaktifkan",
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _activateProduk() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Konfirmasi Aktifkan",
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            "Apakah Anda yakin ingin mengaktifkan kembali produk ini?",
+            style: TextStyle(
+              fontFamily: "Poppins",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "Batal",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontFamily: "Poppins",
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                navigator.pop();
+
+                try {
+                  final response =
+                      await ProdukService().activateProduk($id_produk);
+                  if (response.message == "Successfully activate produk data") {
+                    ToastHelper.showSuccessToast(
+                        context, 'Produk berhasil diaktifkan kembali');
+                    await _getDataProduk();
+                  } else {
+                    ToastHelper.showErrorToast(
+                        context, 'Gagal mengaktifkan produk');
+                  }
+                } catch (e) {
+                  ToastHelper.showErrorToast(context, 'Terjadi kesalahan: $e');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF4CAD73),
+              ),
+              child: Text(
+                "Aktifkan",
                 style: TextStyle(
                   fontFamily: "Poppins",
                   color: Colors.white,

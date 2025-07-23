@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/produk.dart';
@@ -17,6 +17,8 @@ class EditProduk extends StatefulWidget {
   final String satuan;
   final String deskripsi;
   final String gambar;
+  final bool isDeleted;
+  final String typeToko;
 
   const EditProduk({
     super.key,
@@ -27,6 +29,8 @@ class EditProduk extends StatefulWidget {
     required this.satuan,
     required this.deskripsi,
     required this.gambar,
+    required this.isDeleted,
+    required this.typeToko,
   });
 
   @override
@@ -39,7 +43,6 @@ class _EditProdukState extends State<EditProduk> {
       TextEditingController();
   final TextEditingController _stokProdukController = TextEditingController();
   final TextEditingController _hargaProdukController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
   bool editStokSatuan = false;
   String? _produkPhoto;
   String _produkgambar = "";
@@ -55,7 +58,7 @@ class _EditProdukState extends State<EditProduk> {
     editStokSatuan = false;
     editStatus();
     super.initState();
-    
+
     _namaProdukController.text = widget.nama;
     _deskripsiProdukController.text = widget.deskripsi;
     _stokProdukController.text = widget.stok;
@@ -86,13 +89,12 @@ class _EditProdukState extends State<EditProduk> {
   }
 
   Future<void> editStatus() async {
-    final toko = await tokoService().getTokoByUserId();
-    if (toko.data[0].TypeToko == "rfc") {
+    if (widget.typeToko == "rfc") {
       setState(() {
         editStokSatuan = true;
         _selectedSatuan = widget.satuan;
       });
-    } else if (toko.data[0].TypeToko == "umkm") {
+    } else if (widget == "umkm") {
       setState(() {
         editStokSatuan = false;
       });
@@ -146,8 +148,55 @@ class _EditProdukState extends State<EditProduk> {
         ToastHelper.showSuccessToast(context, "Produk berhasil diperbarui!");
         Navigator.pop(context, "refresh");
       } else {
-        ToastHelper.showErrorToast(
-            context, response.message ?? "Gagal memperbarui produk");
+        ToastHelper.showErrorToast(context, response.message);
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Terjadi kesalahan: ${e.toString()}");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _nonaktifkanProduk() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final produkService = ProdukService();
+      final response = await produkService.deleteProduk(widget.id);
+
+      if (response.message == "Successfully deleted produk data") {
+        ToastHelper.showSuccessToast(context, "Produk berhasil dinonaktifkan!");
+        Navigator.pop(context, "refresh");
+      } else {
+        ToastHelper.showErrorToast(context, response.message);
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Terjadi kesalahan: ${e.toString()}");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _aktivasiProduk() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final produkService = ProdukService();
+      final response = await produkService.activateProduk(widget.id);
+
+      if (response.message == "Successfully activated produk data") {
+        ToastHelper.showSuccessToast(context, "Produk berhasil diaktifkan!");
+        Navigator.pop(context, "refresh");
+      } else {
+        ToastHelper.showErrorToast(context, response.message);
       }
     } catch (e) {
       ToastHelper.showErrorToast(context, "Terjadi kesalahan: ${e.toString()}");
@@ -360,6 +409,37 @@ class _EditProdukState extends State<EditProduk> {
                             child: _isLoading
                                 ? CircularProgressIndicator(color: Colors.white)
                                 : Text("Perbarui",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: "Poppins")),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: widget.isDeleted
+                                  ? Color(0xFF4CAD73)
+                                  : Color(0xFFFF8C00),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: _isLoading
+                                ? null
+                                : (widget.isDeleted
+                                    ? _aktivasiProduk
+                                    : _nonaktifkanProduk),
+                            child: _isLoading
+                                ? CircularProgressIndicator(color: Colors.white)
+                                : Text(
+                                    widget.isDeleted
+                                        ? "Aktifkan Produk"
+                                        : "Nonaktifkan Produk",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
