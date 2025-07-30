@@ -208,8 +208,7 @@ class _ProsesPesananPageState extends State<ProsesPesananPage> {
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Gagal membuat transaksi')));
+          ToastHelper.showErrorToast(context, 'Gagal membuat transaksi');
         }
       } else {
         ToastHelper.showErrorToast(

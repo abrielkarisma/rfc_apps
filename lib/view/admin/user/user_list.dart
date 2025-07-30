@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rfc_apps/service/user.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/widget/list_penjual.dart';
 
 class UserList extends StatefulWidget {
@@ -42,9 +43,7 @@ class _UserListState extends State<UserList> {
         requestCount = inactiveCount;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data penjual')),
-      );
+      ToastHelper.showErrorToast(context, 'Gagal memuat data penjual');
     }
   }
 

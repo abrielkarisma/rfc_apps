@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -97,9 +98,7 @@ class _RiwayatPenarikanPageState extends State<RiwayatPenarikanPage> {
             : e.toString();
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage!), backgroundColor: Colors.red),
-        );
+        ToastHelper.showErrorToast(context, _errorMessage!);
       }
     } finally {
       setState(() {

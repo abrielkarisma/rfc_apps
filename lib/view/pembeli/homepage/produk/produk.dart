@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
-import 'package:rfc_apps/service/produk.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
 
 class ProdukPage extends StatefulWidget {
@@ -11,9 +10,33 @@ class ProdukPage extends StatefulWidget {
   State<ProdukPage> createState() => _ProdukPageState();
 }
 
-class _ProdukPageState extends State<ProdukPage> {
+class _ProdukPageState extends State<ProdukPage> with WidgetsBindingObserver {
   Key _produkListKey = UniqueKey();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data ketika aplikasi kembali aktif
+      setState(() {
+        _produkListKey = UniqueKey();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -93,7 +116,9 @@ class _ProdukPageState extends State<ProdukPage> {
                 key: _produkListKey,
                 cardType: "rfc",
                 id: "",
-                searchQuery: _searchQuery)),
+                searchQuery: _searchQuery,
+                showDeletedProducts:
+                    false)), // Hanya tampilkan produk yang tidak dihapus
       ]),
     );
   }

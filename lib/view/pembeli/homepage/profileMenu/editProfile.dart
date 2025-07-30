@@ -5,6 +5,7 @@ import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/cloudinary.dart';
 import 'package:rfc_apps/service/user.dart';
 import 'package:rfc_apps/utils/imagePicker.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/pembeli/homepage/profileMenu/profil.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -66,9 +67,7 @@ class _EditProfileState extends State<EditProfile> {
       );
       Navigator.pop(context, "refresh");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal update profile: $e')),
-      );
+      ToastHelper.showErrorToast(context, 'Gagal update profile: $e');
     }
   }
 
@@ -181,8 +180,7 @@ class _EditProfileState extends State<EditProfile> {
                                             fit: BoxFit.cover,
                                           )
                                     : Image(
-                                        image: FileImage(File(
-                                            _profilePhoto)), 
+                                        image: FileImage(File(_profilePhoto)),
                                         fit: BoxFit.cover,
                                       ),
                               ),

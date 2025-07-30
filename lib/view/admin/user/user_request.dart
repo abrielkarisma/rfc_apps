@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rfc_apps/service/user.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/widget/list_penjual.dart';
 
 class UserRequest extends StatefulWidget {
@@ -37,9 +38,7 @@ class _UserRequestState extends State<UserRequest> {
         _penjualList = filtered;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data penjual')),
-      );
+      ToastHelper.showErrorToast(context, 'Gagal memuat data penjual');
     }
   }
 
@@ -84,7 +83,6 @@ class _UserRequestState extends State<UserRequest> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -173,10 +171,7 @@ class _UserRequestState extends State<UserRequest> {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
-            
             _penjualList.isEmpty
                 ? Container(
                     padding: const EdgeInsets.all(40),

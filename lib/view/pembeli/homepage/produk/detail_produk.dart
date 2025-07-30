@@ -379,6 +379,8 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
                   key: _produkListKey,
                   cardType: "rfc",
                   id: "",
+                  showDeletedProducts:
+                      false, // Hanya tampilkan produk yang tidak dihapus
                 )),
               ]),
             )));
@@ -400,74 +402,69 @@ class _DetailProdukBuyerState extends State<DetailProdukBuyer> {
     }
   }
 
-Future<void> _beliSekarang() async {
-  try {
-    final stockResponse =
-        await ProdukService().getProdukStok(widget.idProduk);
-    final int stok = stockResponse['data']['stok'];
-    if (jumlahProduk > stok) {
-      ToastHelper.showErrorToast(
-          context, "Jumlah melebihi stok yang tersedia: $stok");
-      return;
-    }
-    final produkResponse =
-        await ProdukService().getProdukById(widget.idProduk);
-    if (produkResponse.message != "Successfully retrieved produk data") {
-      ToastHelper.showErrorToast(context, 'Gagal mendapatkan detail produk');
-      return;
-    }
-    final produk = produkResponse.data[0];
-    Store tokoInfo;
+  Future<void> _beliSekarang() async {
     try {
-      final tokoResponse = await tokoService().getTokoById(produk.tokoId);
-      if (tokoResponse.message == "Successfully retrieved toko data") {
-        final tokoData = tokoResponse.data[0];
-        tokoInfo = Store(
-          id: tokoData.id,
-          nama: tokoData.nama,
-          logoToko: tokoData.logoToko ?? "",
-          alamat: tokoData.alamat ?? "Alamat toko tidak tersedia",
-        );
-      } else {
-        throw Exception("Gagal mendapatkan data toko");
+      final stockResponse =
+          await ProdukService().getProdukStok(widget.idProduk);
+      final int stok = stockResponse['data']['stok'];
+      if (jumlahProduk > stok) {
+        ToastHelper.showErrorToast(
+            context, "Jumlah melebihi stok yang tersedia: $stok");
+        return;
+      }
+      final produkResponse =
+          await ProdukService().getProdukById(widget.idProduk);
+      if (produkResponse.message != "Successfully retrieved produk data") {
+        ToastHelper.showErrorToast(context, 'Gagal mendapatkan detail produk');
+        return;
+      }
+      final produk = produkResponse.data[0];
+      Store tokoInfo;
+      try {
+        final tokoResponse = await tokoService().getTokoById(produk.tokoId);
+        if (tokoResponse.message == "Successfully retrieved toko data") {
+          final tokoData = tokoResponse.data[0];
+          tokoInfo = Store(
+            id: tokoData.id,
+            nama: tokoData.nama,
+            logoToko: tokoData.logoToko ?? "",
+            alamat: tokoData.alamat ?? "Alamat toko tidak tersedia",
+          );
+        } else {
+          throw Exception("Gagal mendapatkan data toko");
+        }
+      } catch (e) {
+        ToastHelper.showErrorToast(context, 'Gagal mendapatkan informasi toko');
+        return;
+      }
+
+      final product = Product(
+        id: produk.id,
+        nama: produk.nama,
+        satuan: produk.satuan,
+        harga: produk.harga,
+        gambar: produk.gambar,
+        toko: tokoInfo,
+      );
+
+      final purchaseItem = CartItem(
+        id: "temp_${DateTime.now().millisecondsSinceEpoch}",
+        jumlah: jumlahProduk,
+        produk: product,
+      );
+
+      final callback = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProsesPesananPage(items: [purchaseItem]),
+        ),
+      );
+
+      if (callback == "refresh") {
+        _getDetailProduk();
       }
     } catch (e) {
-      
-      ToastHelper.showErrorToast(context, 'Gagal mendapatkan informasi toko');
-      return;
+      ToastHelper.showErrorToast(context, "Gagal memproses pesanan: $e");
     }
-
-    
-    final product = Product(
-      id: produk.id,
-      nama: produk.nama,
-      satuan: produk.satuan,
-      harga: produk.harga,
-      gambar: produk.gambar,
-      toko: tokoInfo,
-    );
-
-    
-    final purchaseItem = CartItem(
-      id: "temp_${DateTime.now().millisecondsSinceEpoch}", 
-      jumlah: jumlahProduk,
-      produk: product,
-    );
-
-    
-    final callback = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProsesPesananPage(items: [purchaseItem]),
-      ),
-    );
-
-    if (callback == "refresh") {
-      
-      _getDetailProduk();
-    }
-  } catch (e) {
-    ToastHelper.showErrorToast(context, "Gagal memproses pesanan: $e");
   }
 }
- }

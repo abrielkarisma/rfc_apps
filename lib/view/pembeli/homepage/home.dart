@@ -18,18 +18,55 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   Key _produkListKey = UniqueKey();
   final SaldoService _saldoService = SaldoService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  late Future<Map<String, dynamic>> _saldoFuture;
+  Future<Map<String, dynamic>>? _saldoFuture;
   String _userId = "";
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _produkListKey = UniqueKey();
-    _loadSaldo();
+    _initializeSaldo();
+  }
+
+  // Method baru untuk inisialisasi saldo yang lebih aman
+  Future<void> _initializeSaldo() async {
+    try {
+      await _getUserId();
+      if (_userId.isNotEmpty) {
+        setState(() {
+          _saldoFuture = _saldoService.getMySaldoByIdUser(_userId);
+        });
+      } else {
+        setState(() {
+          _saldoFuture = Future.value({'saldoTersedia': '0'});
+        });
+      }
+    } catch (e) {
+      print("Error initializing saldo: $e");
+      setState(() {
+        _saldoFuture = Future.value({'saldoTersedia': '0'});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data ketika aplikasi kembali aktif
+      _refreshHome();
+    }
   }
 
   Future<void> _getUserId() async {
@@ -44,16 +81,11 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _loadSaldo() async {
-    await _getUserId();
-    if (_userId.isNotEmpty) {
-      setState(() {
-        _saldoFuture = _saldoService.getMySaldoByIdUser(_userId);
-      });
-    }
+    await _initializeSaldo();
   }
 
   Future<void> _refreshHome() async {
-    await _loadSaldo();
+    await _initializeSaldo();
     setState(() {
       _produkListKey = UniqueKey();
     });
@@ -192,46 +224,58 @@ class _HomeState extends State<Home> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  FutureBuilder<Map<String, dynamic>>(
-                    future: _saldoFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container(
+                  _saldoFuture == null
+                      ? Container(
                           width: double.infinity,
                           height: context.getHeight(120),
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(16),
                           ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return GestureDetector(
-                          onTap: _loadSaldo,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              'Gagal memuat saldo',
-                              style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontFamily: 'poppins'),
-                            ),
-                          ),
-                        );
-                      } else if (snapshot.hasData && snapshot.data != null) {
-                        final saldoTersedia =
-                            snapshot.data!['saldoTersedia']?.toString() ?? '0';
+                        )
+                      : FutureBuilder<Map<String, dynamic>>(
+                          future: _saldoFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Container(
+                                width: double.infinity,
+                                height: context.getHeight(120),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              );
+                            } else if (snapshot.hasError) {
+                              return GestureDetector(
+                                onTap: _loadSaldo,
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    'Gagal memuat saldo',
+                                    style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontFamily: 'poppins'),
+                                  ),
+                                ),
+                              );
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              final saldoTersedia =
+                                  snapshot.data!['saldoTersedia']?.toString() ??
+                                      '0';
 
-                        return _buildSaldoCard(saldoTersedia);
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
-                  ),
+                              return _buildSaldoCard(saldoTersedia);
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          },
+                        ),
                   SizedBox(height: context.getHeight(20)),
                   Padding(padding: EdgeInsets.only(top: context.getHeight(26))),
                   Container(
@@ -278,6 +322,8 @@ class _HomeState extends State<Home> {
                           key: _produkListKey,
                           cardType: "rfc",
                           id: "",
+                          showDeletedProducts:
+                              false, // Hanya tampilkan produk yang tidak dihapus
                         )),
                         SizedBox(
                           height: context.getHeight(8),
@@ -323,6 +369,8 @@ class _HomeState extends State<Home> {
                           key: _produkListKey,
                           cardType: "umkm",
                           id: "",
+                          showDeletedProducts:
+                              false, // Hanya tampilkan produk yang tidak dihapus
                         )),
                       ],
                     ),

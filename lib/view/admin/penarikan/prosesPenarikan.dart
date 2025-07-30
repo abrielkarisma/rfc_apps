@@ -182,11 +182,8 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
 
       try {
         if (newStatus == 'completed' && _buktiTransferImage == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Silakan unggah bukti transfer terlebih dahulu'),
-                backgroundColor: Colors.red),
-          );
+          ToastHelper.showErrorToast(
+              context, 'Silakan unggah bukti transfer terlebih dahulu');
           setState(() {
             _isSubmitting = false;
           });
@@ -211,20 +208,11 @@ class _AdminProsesPenarikanPageState extends State<AdminProsesPenarikanPage> {
               : null,
         );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Permintaan penarikan berhasil diubah menjadi "$newStatus".'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastHelper.showSuccessToast(context,
+            'Permintaan penarikan berhasil diubah menjadi "$newStatus".');
         Navigator.pop(context, true);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Gagal memproses: ${e.toString()}'),
-              backgroundColor: Colors.red),
-        );
+        ToastHelper.showErrorToast(context, 'Gagal memproses: ${e.toString()}');
       } finally {
         if (mounted) {
           setState(() {

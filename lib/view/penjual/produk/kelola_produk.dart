@@ -4,7 +4,7 @@ import 'package:rfc_apps/service/toko.dart';
 import 'package:rfc_apps/widget/produk_grid.dart';
 
 class KelolaProduk extends StatefulWidget {
-  final String idUser; 
+  final String idUser;
 
   const KelolaProduk({super.key, required this.idUser});
 
@@ -13,7 +13,7 @@ class KelolaProduk extends StatefulWidget {
 }
 
 class _KelolaProdukState extends State<KelolaProduk> {
-  String $idUser = ""; 
+  String $idUser = "";
   Key _produkListKey = UniqueKey();
 
   @override
@@ -82,8 +82,10 @@ class _KelolaProdukState extends State<KelolaProduk> {
                   child: ProdukGrid(
                     key: _produkListKey,
                     cardType: "kelola",
-                    id: $idUser, 
+                    id: $idUser,
                     onRefresh: _refreshProduk,
+                    showDeletedProducts:
+                        true, // Tampilkan semua produk termasuk yang dihapus
                   ),
                 ),
               ),
@@ -93,7 +95,6 @@ class _KelolaProdukState extends State<KelolaProduk> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           try {
-            
             final typetoko = await tokoService().getTokoByIdUser($idUser);
 
             if (typetoko.data.isNotEmpty) {
@@ -120,7 +121,7 @@ class _KelolaProdukState extends State<KelolaProduk> {
             }
           } catch (e) {
             print("Error getting toko type: $e");
-            
+
             final result = await Navigator.pushNamed(
               context,
               '/tambah_produk',

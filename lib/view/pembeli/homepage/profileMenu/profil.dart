@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/token.dart';
 import 'package:rfc_apps/service/user.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -42,9 +43,7 @@ class _ProfilState extends State<Profil> {
         $avatarUrl = avatarUrl;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data pengguna: $e')),
-      );
+      ToastHelper.showErrorToast(context, 'Gagal memuat data pengguna: $e');
     }
   }
 

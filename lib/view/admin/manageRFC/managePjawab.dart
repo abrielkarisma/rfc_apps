@@ -415,51 +415,18 @@ class _ManagePjawabPageContentState extends State<ManagePjawabPageContent> {
                     ],
                   ),
                 ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      _showEditPjawabDialog(user);
-                    } else if (value == 'delete') {
-                      _deletePjawab(user['id'], user['name']);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, color: appPrimaryColor, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Edit',
-                            style: TextStyle(fontFamily: "Poppins"),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Hapus',
-                            style: TextStyle(fontFamily: "Poppins"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: () => _deletePjawab(user['id'], user['name']),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
-                      Icons.more_vert,
-                      color: appPrimaryColor,
+                      Icons.delete,
+                      color: Colors.red,
+                      size: 20,
                     ),
                   ),
                 ),
@@ -581,53 +548,15 @@ class _ManagePjawabPageContentState extends State<ManagePjawabPageContent> {
       ),
     );
   }
-
-  void _showEditPjawabDialog(Map<String, dynamic> user) {
-    showDialog(
-      context: context,
-      builder: (context) => PjawabFormDialog(
-        title: 'Edit User Pjawab',
-        isEdit: true,
-        initialData: {
-          'name': user['name'] ?? '',
-          'email': user['email'] ?? '',
-          'phone': user['phone'] ?? '',
-        },
-        onSubmit: (data) async {
-          final result = await _rfcService.updateUserPjawab(
-            id: user['id'],
-            name: data['name']!,
-            email: data['email']!,
-            phone: data['phone']!,
-          );
-
-          if (result['message'] != null &&
-              !result['message'].toString().toLowerCase().contains('error')) {
-            Navigator.pop(context);
-            ToastHelper.showSuccessToast(
-                context, 'User pjawab berhasil diperbarui');
-            _loadPjawabUsers();
-          } else {
-            ToastHelper.showErrorToast(
-                context, result['message'] ?? 'Gagal memperbarui user');
-          }
-        },
-      ),
-    );
-  }
 }
 
 class PjawabFormDialog extends StatefulWidget {
   final String title;
-  final bool isEdit;
-  final Map<String, String>? initialData;
   final Function(Map<String, String>) onSubmit;
 
   const PjawabFormDialog({
     super.key,
     required this.title,
-    this.isEdit = false,
-    this.initialData,
     required this.onSubmit,
   });
 
@@ -649,11 +578,6 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialData != null) {
-      _nameController.text = widget.initialData!['name'] ?? '';
-      _emailController.text = widget.initialData!['email'] ?? '';
-      _phoneController.text = widget.initialData!['phone'] ?? '';
-    }
   }
 
   @override
@@ -672,11 +596,8 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
+        'password': _passwordController.text,
       };
-
-      if (!widget.isEdit) {
-        data['password'] = _passwordController.text;
-      }
 
       widget.onSubmit(data);
     }
@@ -749,7 +670,6 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
                         hint: 'Masukkan email',
                         icon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !widget.isEdit,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email harus diisi';
@@ -768,7 +688,6 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
                         hint: 'Masukkan nomor telepon',
                         icon: Icons.phone,
                         keyboardType: TextInputType.phone,
-                        enabled: !widget.isEdit,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Nomor telepon harus diisi';
@@ -776,69 +695,67 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
                           return null;
                         },
                       ),
-                      if (!widget.isEdit) ...[
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _passwordController,
-                          label: 'Password *',
-                          hint: 'Masukkan password',
-                          icon: Icons.lock,
-                          obscureText: _obscurePassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.grey[600],
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _passwordController,
+                        label: 'Password *',
+                        hint: 'Masukkan password',
+                        icon: Icons.lock,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey[600],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password harus diisi';
-                            }
-                            if (value.length < 6) {
-                              return 'Password minimal 6 karakter';
-                            }
-                            return null;
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
                           },
                         ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _confirmPasswordController,
-                          label: 'Konfirmasi Password *',
-                          hint: 'Masukkan ulang password',
-                          icon: Icons.lock_outline,
-                          obscureText: _obscureConfirmPassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmPassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.grey[600],
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword;
-                              });
-                            },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password harus diisi';
+                          }
+                          if (value.length < 6) {
+                            return 'Password minimal 6 karakter';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Konfirmasi Password *',
+                        hint: 'Masukkan ulang password',
+                        icon: Icons.lock_outline,
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey[600],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Konfirmasi password harus diisi';
-                            }
-                            if (value != _passwordController.text) {
-                              return 'Password tidak cocok';
-                            }
-                            return null;
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
                           },
                         ),
-                      ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Konfirmasi password harus diisi';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Password tidak cocok';
+                          }
+                          return null;
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -883,7 +800,7 @@ class _PjawabFormDialogState extends State<PjawabFormDialog> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
-                        widget.isEdit ? 'Perbarui' : 'Tambah',
+                        'Tambah',
                         style: const TextStyle(
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w600,

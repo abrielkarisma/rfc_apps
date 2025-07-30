@@ -45,9 +45,7 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
         $typeToko = response.data[0].TypeToko ?? "";
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ToastHelper.showErrorToast(context, e.toString());
     }
   }
 

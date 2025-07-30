@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -95,9 +96,8 @@ class _RiwayatMutasiPageState extends State<RiwayatMutasiPage> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat riwayat: ${e.toString()}')),
-        );
+        ToastHelper.showErrorToast(
+            context, 'Gagal memuat riwayat: ${e.toString()}');
       }
     } finally {
       if (mounted) {

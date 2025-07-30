@@ -115,11 +115,8 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   Future<void> _submitPenarikan() async {
     if (_formKey.currentState!.validate()) {
       if (_rekeningAktif == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Tidak ada rekening bank tujuan yang aktif.'),
-              backgroundColor: Colors.orangeAccent),
-        );
+        ToastHelper.showErrorToast(
+            context, 'Tidak ada rekening bank tujuan yang aktif.');
         return;
       }
 
@@ -140,11 +137,8 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
             'Permintaan penarikan sejumlah ${formatRupiah(jumlahDiminta)} berhasil dibuat.');
         Navigator.pop(context, true);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Gagal membuat permintaan: ${e.toString()}'),
-              backgroundColor: Colors.red.shade600),
-        );
+        ToastHelper.showErrorToast(
+            context, 'Gagal membuat permintaan: ${e.toString()}');
       } finally {
         setState(() {
           _isSubmitting = false;

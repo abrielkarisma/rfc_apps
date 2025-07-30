@@ -11,7 +11,8 @@ class TokoInformation extends StatefulWidget {
   State<TokoInformation> createState() => _TokoInformationState();
 }
 
-class _TokoInformationState extends State<TokoInformation> {
+class _TokoInformationState extends State<TokoInformation>
+    with WidgetsBindingObserver {
   String $gambar = "";
   String $nama = "";
   String $deskripsi = "";
@@ -21,8 +22,26 @@ class _TokoInformationState extends State<TokoInformation> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _getDataToko();
     _produkListKey = UniqueKey();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data ketika aplikasi kembali aktif
+      setState(() {
+        _produkListKey = UniqueKey();
+      });
+    }
   }
 
   void _getDataToko() async {
@@ -46,7 +65,6 @@ class _TokoInformationState extends State<TokoInformation> {
       backgroundColor: Colors.grey[100],
       body: CustomScrollView(
         slivers: [
-          
           SliverAppBar(
             expandedHeight: context.getHeight(280),
             floating: false,
@@ -80,7 +98,6 @@ class _TokoInformationState extends State<TokoInformation> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(height: context.getHeight(60)),
-                    
                     Hero(
                       tag: 'store_logo_${widget.tokoId}',
                       child: Container(
@@ -116,7 +133,6 @@ class _TokoInformationState extends State<TokoInformation> {
                       ),
                     ),
                     SizedBox(height: context.getHeight(20)),
-                    
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
@@ -144,14 +160,11 @@ class _TokoInformationState extends State<TokoInformation> {
               ),
             ),
           ),
-
-          
           SliverToBoxAdapter(
             child: Container(
               color: Colors.grey[100],
               child: Column(
                 children: [
-                  
                   Container(
                     margin: EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -171,7 +184,6 @@ class _TokoInformationState extends State<TokoInformation> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          
                           if ($deskripsi.isNotEmpty) ...[
                             Text(
                               "Tentang Toko",
@@ -203,8 +215,6 @@ class _TokoInformationState extends State<TokoInformation> {
                             ),
                             SizedBox(height: 20),
                           ],
-
-                          
                           Text(
                             "Informasi Kontak",
                             style: TextStyle(
@@ -215,35 +225,25 @@ class _TokoInformationState extends State<TokoInformation> {
                             ),
                           ),
                           SizedBox(height: 12),
-
-                          
                           _buildContactCard(
                             context,
                             icon: Icons.location_on_rounded,
                             title: "Alamat",
                             content: $alamat,
-                            onTap: () {
-                              
-                            },
+                            onTap: () {},
                           ),
                           SizedBox(height: 12),
-
-                          
                           _buildContactCard(
                             context,
                             icon: Icons.phone_rounded,
                             title: "Telepon",
                             content: $noTelp,
-                            onTap: () {
-                              
-                            },
+                            onTap: () {},
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
@@ -262,7 +262,6 @@ class _TokoInformationState extends State<TokoInformation> {
                       padding: EdgeInsets.all(20),
                       child: Column(
                         children: [
-                          
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -327,18 +326,17 @@ class _TokoInformationState extends State<TokoInformation> {
                             ],
                           ),
                           SizedBox(height: 16),
-                          
                           ProdukCarousel(
                             key: _produkListKey,
                             cardType: "byToko",
                             id: widget.tokoId,
+                            showDeletedProducts:
+                                false, // Hanya tampilkan produk yang tidak dihapus
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  
                   SizedBox(height: 20),
                 ],
               ),

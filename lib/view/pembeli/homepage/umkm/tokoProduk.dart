@@ -9,7 +9,8 @@ class ProdukToko extends StatefulWidget {
   State<ProdukToko> createState() => _ProdukTokoState();
 }
 
-class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
+class _ProdukTokoState extends State<ProdukToko>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   Key _produkListKey = UniqueKey();
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -21,6 +22,7 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _produkListKey = UniqueKey();
     _animationController = AnimationController(
       duration: Duration(milliseconds: 800),
@@ -34,10 +36,20 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _searchController.dispose();
     _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data ketika aplikasi kembali aktif
+      _refreshProducts();
+    }
   }
 
   void _refreshProducts() {
@@ -65,14 +77,12 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
         child: SafeArea(
           child: Column(
             children: [
-              
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
                   padding: EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      
                       Row(
                         children: [
                           Container(
@@ -100,10 +110,7 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                           ),
                         ],
                       ),
-
                       SizedBox(height: 20),
-
-                      
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -157,7 +164,7 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                                             _searchController.clear();
                                             _searchQuery = "";
                                             _isSearching = false;
-                                            
+
                                             _produkListKey = UniqueKey();
                                           });
                                         },
@@ -168,21 +175,18 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                                 vertical: 16, horizontal: 20),
                           ),
                           onChanged: (value) {
-                            
                             setState(() {
                               _isSearching = true;
                             });
 
-                            
                             _debounceTimer?.cancel();
 
-                            
                             _debounceTimer =
                                 Timer(Duration(milliseconds: 500), () {
                               setState(() {
                                 _searchQuery = value;
                                 _isSearching = false;
-                                
+
                                 _produkListKey = UniqueKey();
                               });
                             });
@@ -193,8 +197,6 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-
-              
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -206,7 +208,6 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                   ),
                   child: Column(
                     children: [
-                      
                       Container(
                         padding: EdgeInsets.all(20),
                         child: Row(
@@ -234,8 +235,6 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-
-                      
                       Expanded(
                         child: RefreshIndicator(
                           onRefresh: () async {
@@ -249,6 +248,8 @@ class _ProdukTokoState extends State<ProdukToko> with TickerProviderStateMixin {
                               cardType: "byToko",
                               id: widget.idToko,
                               searchQuery: _searchQuery,
+                              showDeletedProducts:
+                                  false, // Hanya tampilkan produk yang tidak dihapus
                             ),
                           ),
                         ),

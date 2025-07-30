@@ -920,9 +920,7 @@ class _PenjualTableState extends State<PenjualTable> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Detail Toko tidak ditemukan')),
-      );
+      ToastHelper.showErrorToast(context, 'Detail Toko tidak ditemukan');
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/pesanan.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/pesananDetail.dart';
 import 'package:rfc_apps/widget/badge_status.dart';
 
@@ -27,12 +28,7 @@ class _HistoriState extends State<Histori> {
         _pesananList = data;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memuat riwayat pesanan: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ToastHelper.showErrorToast(context, 'Gagal memuat riwayat pesanan: $e');
     }
   }
 
@@ -60,11 +56,11 @@ class _HistoriState extends State<Histori> {
           ),
           SizedBox(height: context.getHeight(20)),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshHistori,
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
+              child: RefreshIndicator(
+            onRefresh: _refreshHistori,
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
               itemCount: _pesananList.length,
               itemBuilder: (context, index) {
                 final pesanan = _pesananList[index];
@@ -229,7 +225,7 @@ class _HistoriState extends State<Histori> {
                 );
               },
             ),
-          )
-        )]));
+          ))
+        ]));
   }
 }

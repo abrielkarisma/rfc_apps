@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:rfc_apps/extension/screen_flexible.dart';
 import 'package:rfc_apps/service/midtrans.dart';
 import 'package:rfc_apps/service/pesanan.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/midtransView.dart';
 import 'package:rfc_apps/view/pembeli/homepage/pesanan/nota.dart';
 import 'package:rfc_apps/widget/badge_status.dart';
@@ -54,16 +55,11 @@ class PesananDetailPage extends StatelessWidget {
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Gagal mendapatkan link pembayaran"),
-            ),
-          );
+          ToastHelper.showErrorToast(
+              context, "Gagal mendapatkan link pembayaran");
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        ToastHelper.showErrorToast(context, "Error: $e");
       }
     } else {
       Navigator.pop(context);
@@ -553,12 +549,8 @@ class PesananDetailPage extends StatelessWidget {
                               if (buktiPesanan.isNotEmpty) {
                                 _showBuktiPesananModal(context, buktiPesanan);
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text("Bukti pesanan tidak tersedia"),
-                                  ),
-                                );
+                                ToastHelper.showInfoToast(
+                                    context, "Bukti pesanan tidak tersedia");
                               }
                             },
                             child: Text("Lihat Bukti Pesanan Telah Diambil",

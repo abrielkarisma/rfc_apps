@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rfc_apps/service/saldo.dart';
 import 'package:rfc_apps/utils/date_formatter.dart';
 import 'package:rfc_apps/utils/currency_formatter.dart';
+import 'package:rfc_apps/utils/toastHelper.dart';
 import 'package:rfc_apps/view/admin/penarikan/prosesPenarikan.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -99,9 +100,7 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
             : e.toString();
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage!), backgroundColor: Colors.red),
-        );
+        ToastHelper.showErrorToast(context, _errorMessage!);
       }
     } finally {
       setState(() {
@@ -127,7 +126,6 @@ class _AdminRequestPenarikanPageState extends State<AdminRequestPenarikanPage> {
       });
       _fetchRequests(isRefresh: true);
 
-      
       final index = _statusOptions.indexOf(newStatus);
       if (index != -1) {
         _pageController.animateToPage(

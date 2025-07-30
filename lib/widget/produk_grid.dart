@@ -14,11 +14,13 @@ class ProdukGrid extends StatefulWidget {
       required this.cardType,
       required this.id,
       this.searchQuery = '',
-      this.onRefresh});
+      this.onRefresh,
+      this.showDeletedProducts = false});
   final String id;
   final String cardType;
   final String searchQuery;
   final VoidCallback? onRefresh;
+  final bool showDeletedProducts;
 
   @override
   State<ProdukGrid> createState() => _ProdukGridState();
@@ -65,6 +67,11 @@ class _ProdukGridState extends State<ProdukGrid> {
       allProducts = await ProdukService().getProdukByTokoId(widget.id);
     } else {
       return [];
+    }
+
+    // Filter produk berdasarkan isDeleted jika showDeletedProducts = false
+    if (!widget.showDeletedProducts) {
+      allProducts = allProducts.where((produk) => !produk.isDeleted).toList();
     }
 
     allProducts.shuffle(Random());
@@ -161,6 +168,7 @@ class _ProdukGridState extends State<ProdukGrid> {
   Widget build(BuildContext context) {
     return Container(
       child: FutureBuilder<List<Produk>>(
+        key: widget.key, // Gunakan key dari widget untuk memastikan refresh
         future: _selectedProduk(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

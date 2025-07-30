@@ -205,9 +205,8 @@ class _KeranjangState extends State<Keranjang> {
                   return;
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Gagal mendapatkan stok: $e")),
-                );
+                ToastHelper.showErrorToast(
+                    context, "Gagal mendapatkan stok: $e");
                 return;
               }
 
@@ -219,9 +218,7 @@ class _KeranjangState extends State<Keranjang> {
                   futureKeranjang = KeranjangService().getAllKeranjang();
                 });
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Gagal update jumlah: $e")),
-                );
+                ToastHelper.showErrorToast(context, "Gagal update jumlah: $e");
               }
             },
             child: Text("Simpan",
@@ -261,13 +258,9 @@ class _KeranjangState extends State<Keranjang> {
         setState(() {
           futureKeranjang = KeranjangService().getAllKeranjang();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Item berhasil dihapus")),
-        );
+        ToastHelper.showSuccessToast(context, "Item berhasil dihapus");
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Gagal hapus item: $e")),
-        );
+        ToastHelper.showErrorToast(context, "Gagal hapus item: $e");
       }
     }
   }

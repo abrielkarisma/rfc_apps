@@ -8,9 +8,14 @@ import 'package:rfc_apps/model/produk.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProdukCarousel extends StatefulWidget {
-  const ProdukCarousel({super.key, required this.cardType, required this.id});
+  const ProdukCarousel(
+      {super.key,
+      required this.cardType,
+      required this.id,
+      this.showDeletedProducts = false});
   final String id;
   final String cardType;
+  final bool showDeletedProducts;
 
   @override
   State<ProdukCarousel> createState() => _ProdukCarouselState();
@@ -57,6 +62,11 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
       allProducts = await ProdukService().getProdukByTokoId(widget.id);
     } else {
       allProducts = [];
+    }
+
+    // Filter produk berdasarkan isDeleted jika showDeletedProducts = false
+    if (!widget.showDeletedProducts) {
+      allProducts = allProducts.where((produk) => !produk.isDeleted).toList();
     }
 
     allProducts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -153,6 +163,7 @@ class _ProdukCarouselState extends State<ProdukCarousel> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Produk>>(
+      key: widget.key, // Gunakan key dari widget untuk memastikan refresh
       future: _selectedProduk(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
